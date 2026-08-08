@@ -1,0 +1,9 @@
+# ios/fastlane/Appfile
+
+# App Store Connect
+app_identifier(ENV["APP_IDENTIFIER"] || "com.shuddhaahar")
+apple_id(ENV["APPLE_ID"] || "your-apple-id@email.com")
+team_id(ENV["APPLE_TEAM_ID"] || "YOUR_TEAM_ID")
+
+# App Store Connect API (preferred over username/password)
+# Set in environment or CI secrets

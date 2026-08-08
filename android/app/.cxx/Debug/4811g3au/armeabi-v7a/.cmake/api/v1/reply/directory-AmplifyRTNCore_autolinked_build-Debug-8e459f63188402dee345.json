@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "AmplifyRTNCore_autolinked_build",
+		"source" : "/Users/trushil/Documents/ScanSmart/node_modules/@aws-amplify/react-native/android/build/generated/source/codegen/jni"
+	}
+}

@@ -1,0 +1,1 @@
+/Users/trushil/Documents/ScanSmart/android/app/build/intermediates/cxx/RelWithDebInfo/5057363v/obj/arm64-v8a

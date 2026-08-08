@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "prefabPath": "/Users/trushil/.gradle/caches/modules-2/files-2.1/com.google.prefab/cli/2.1.0/aa32fec809c44fa531f01dcfb739b5b3304d3050/cli-2.1.0-all.jar",
+  "packages": [
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native-vision-camera/android/build/intermediates/prefab_package/release/prefab",
+    "/Users/trushil/.gradle/caches/8.10.2/transforms/ac7d084a0632c39728c6765afd8fd0e4/transformed/react-android-0.76.0-release/prefab",
+    "/Users/trushil/.gradle/caches/8.10.2/transforms/5e195fd18cfade53f4b8d2b5ecf92bf0/transformed/hermes-android-0.76.0-release/prefab",
+    "/Users/trushil/.gradle/caches/8.10.2/transforms/eb4b98dea289284ca2b26e9265bd49ab/transformed/fbjni-0.6.0/prefab"
+  ]
+}

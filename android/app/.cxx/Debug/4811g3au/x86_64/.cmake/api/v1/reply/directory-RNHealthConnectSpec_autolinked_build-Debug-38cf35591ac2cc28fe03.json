@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "RNHealthConnectSpec_autolinked_build",
+		"source" : "/Users/trushil/Documents/ScanSmart/node_modules/react-native-health-connect/android/build/generated/source/codegen/jni"
+	}
+}

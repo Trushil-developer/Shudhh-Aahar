@@ -1,0 +1,328 @@
+name: Shuddhaahar CI/CD
+
+on:
+  push:
+    branches:
+      - main        # → triggers production release
+      - staging     # → triggers TestFlight / internal track
+      - develop     # → runs tests only
+  pull_request:
+    branches:
+      - main
+      - staging
+      - develop
+
+# ─────────────────────────────────────────────────────────────────
+# SHARED env vars available to all jobs
+# ─────────────────────────────────────────────────────────────────
+env:
+  NODE_VERSION: '20'
+  RUBY_VERSION: '3.2'
+
+jobs:
+
+# ══════════════════════════════════════════════════════════════
+# JOB 1: Test — runs on every push to every branch
+# ══════════════════════════════════════════════════════════════
+  test:
+    name: 🧪 Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npx tsc --noEmit --skipLibCheck
+
+      - name: Run test suite
+        run: npx jest --config jest.config.json --coverage --ci
+        env:
+          SHUDDHAAHAR_ENV: development
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+# ══════════════════════════════════════════════════════════════
+# JOB 2: Build DEV iOS (simulator)
+# Runs on push to develop branch
+# ══════════════════════════════════════════════════════════════
+  build-dev-ios:
+    name: 🍎 Build iOS (Dev)
+    runs-on: macos-14
+    needs: test
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Pods
+        run: cd ios && pod install --repo-update
+        env:
+          SHUDDHAAHAR_ENV: development
+
+      - name: Build iOS (simulator)
+        run: |
+          xcodebuild build \
+            -workspace ios/Shuddhaahar.xcworkspace \
+            -scheme ShuddhaaharDev \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
+            -derivedDataPath ios/build \
+            CODE_SIGNING_ALLOWED=NO
+        env:
+          SHUDDHAAHAR_ENV: development
+          DEV_ANTHROPIC_API_KEY: ${{ secrets.DEV_ANTHROPIC_API_KEY }}
+          DEV_COGNITO_USER_POOL_ID: ${{ secrets.DEV_COGNITO_USER_POOL_ID }}
+          DEV_COGNITO_CLIENT_ID: ${{ secrets.DEV_COGNITO_CLIENT_ID }}
+          DEV_STRIPE_PUBLISHABLE_KEY: ${{ secrets.DEV_STRIPE_PUBLISHABLE_KEY }}
+
+# ══════════════════════════════════════════════════════════════
+# JOB 3: Staging iOS → TestFlight
+# Runs on push to staging branch
+# ══════════════════════════════════════════════════════════════
+  deploy-staging-ios:
+    name: 🚀 Staging → TestFlight
+    runs-on: macos-14
+    needs: test
+    if: github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Ruby + Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Pods
+        run: cd ios && pod install --repo-update
+
+      - name: Decode signing certificate
+        run: |
+          echo "${{ secrets.IOS_DISTRIBUTION_CERT_BASE64 }}" | base64 --decode > /tmp/cert.p12
+          echo "${{ secrets.IOS_STAGING_PROVISION_BASE64 }}" | base64 --decode > /tmp/staging.mobileprovision
+
+      - name: Setup keychain
+        run: |
+          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security import /tmp/cert.p12 -k build.keychain -P "${{ secrets.IOS_CERT_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp /tmp/staging.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build & upload to TestFlight
+        run: cd ios && bundle exec fastlane staging
+        env:
+          SHUDDHAAHAR_ENV: staging
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.ASC_API_KEY_BASE64 }}
+          STAGING_ANTHROPIC_API_KEY: ${{ secrets.STAGING_ANTHROPIC_API_KEY }}
+          STAGING_COGNITO_USER_POOL_ID: ${{ secrets.STAGING_COGNITO_USER_POOL_ID }}
+          STAGING_COGNITO_CLIENT_ID: ${{ secrets.STAGING_COGNITO_CLIENT_ID }}
+          STAGING_STRIPE_PUBLISHABLE_KEY: ${{ secrets.STAGING_STRIPE_PUBLISHABLE_KEY }}
+
+# ══════════════════════════════════════════════════════════════
+# JOB 4: Staging Android → Internal Track
+# ══════════════════════════════════════════════════════════════
+  deploy-staging-android:
+    name: 🤖 Staging → Play Internal Track
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Decode keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+
+      - name: Build Release AAB
+        run: |
+          cd android
+          ./gradlew bundleRelease
+        env:
+          SHUDDHAAHAR_ENV: staging
+          ANDROID_KEYSTORE_PATH: release.keystore
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          STAGING_ANTHROPIC_API_KEY: ${{ secrets.STAGING_ANTHROPIC_API_KEY }}
+          STAGING_STRIPE_PUBLISHABLE_KEY: ${{ secrets.STAGING_STRIPE_PUBLISHABLE_KEY }}
+
+      - name: Upload to Play Internal Track
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.shuddhaahar.staging
+          releaseFiles: android/app/build/outputs/bundle/release/*.aab
+          track: internal
+
+# ══════════════════════════════════════════════════════════════
+# JOB 5: Production iOS → App Store
+# Only on push to main (after staging is approved)
+# ══════════════════════════════════════════════════════════════
+  deploy-prod-ios:
+    name: 🍎 Production → App Store
+    runs-on: macos-14
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    environment: production  # requires manual approval in GitHub
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Ruby + Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Pods
+        run: cd ios && pod install --repo-update
+
+      - name: Decode production signing certificate
+        run: |
+          echo "${{ secrets.IOS_DISTRIBUTION_CERT_BASE64 }}" | base64 --decode > /tmp/cert.p12
+          echo "${{ secrets.IOS_PROD_PROVISION_BASE64 }}" | base64 --decode > /tmp/prod.mobileprovision
+
+      - name: Setup keychain
+        run: |
+          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security import /tmp/cert.p12 -k build.keychain -P "${{ secrets.IOS_CERT_PASSWORD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp /tmp/prod.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Build & submit to App Store
+        run: cd ios && bundle exec fastlane production
+        env:
+          SHUDDHAAHAR_ENV: production
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.ASC_API_KEY_BASE64 }}
+          PROD_ANTHROPIC_API_KEY: ${{ secrets.PROD_ANTHROPIC_API_KEY }}
+          PROD_COGNITO_USER_POOL_ID: ${{ secrets.PROD_COGNITO_USER_POOL_ID }}
+          PROD_COGNITO_CLIENT_ID: ${{ secrets.PROD_COGNITO_CLIENT_ID }}
+          PROD_STRIPE_PUBLISHABLE_KEY: ${{ secrets.PROD_STRIPE_PUBLISHABLE_KEY }}
+          PROD_STRIPE_PRO_MONTHLY: ${{ secrets.PROD_STRIPE_PRO_MONTHLY }}
+          PROD_STRIPE_PRO_ANNUAL: ${{ secrets.PROD_STRIPE_PRO_ANNUAL }}
+          PROD_STRIPE_MAX_MONTHLY: ${{ secrets.PROD_STRIPE_MAX_MONTHLY }}
+          PROD_STRIPE_MAX_ANNUAL: ${{ secrets.PROD_STRIPE_MAX_ANNUAL }}
+
+# ══════════════════════════════════════════════════════════════
+# JOB 6: Production Android → Play Store
+# ══════════════════════════════════════════════════════════════
+  deploy-prod-android:
+    name: 🤖 Production → Play Store
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    environment: production  # requires manual approval in GitHub
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Decode keystore
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+
+      - name: Build Release AAB
+        run: cd android && ./gradlew bundleRelease
+        env:
+          SHUDDHAAHAR_ENV: production
+          ANDROID_KEYSTORE_PATH: release.keystore
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PROD_ANTHROPIC_API_KEY: ${{ secrets.PROD_ANTHROPIC_API_KEY }}
+          PROD_STRIPE_PUBLISHABLE_KEY: ${{ secrets.PROD_STRIPE_PUBLISHABLE_KEY }}
+
+      - name: Upload to Play Store (production)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.shuddhaahar
+          releaseFiles: android/app/build/outputs/bundle/release/*.aab
+          track: production
+          status: draft  # requires manual promotion in Play Console

@@ -1,0 +1,110 @@
+{
+  "buildFiles": [
+    "/Users/trushil/Documents/ScanSmart/node_modules/@aws-amplify/react-native/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native-document-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native-health-connect/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native-iap/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
+    "/Users/trushil/Documents/ScanSmart/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/trushil/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/trushil/Documents/ScanSmart/android/app/.cxx/Debug/4811g3au/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/trushil/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/trushil/Documents/ScanSmart/android/app/.cxx/Debug/4811g3au/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "appmodules::@6890427a1f51a3e7e1df": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "appmodules",
+      "output": "/Users/trushil/Documents/ScanSmart/android/app/build/intermediates/cxx/Debug/4811g3au/obj/arm64-v8a/libappmodules.so",
+      "runtimeFiles": [
+        "/Users/trushil/Documents/ScanSmart/android/app/build/intermediates/cxx/Debug/4811g3au/obj/arm64-v8a/libreact_codegen_safeareacontext.so",
+        "/Users/trushil/Documents/ScanSmart/android/app/build/intermediates/cxx/Debug/4811g3au/obj/arm64-v8a/libreact_codegen_rnscreens.so",
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/eb4b98dea289284ca2b26e9265bd49ab/transformed/fbjni-0.6.0/prefab/modules/fbjni/libs/android.arm64-v8a/libfbjni.so",
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/2fa3c78e855de2c4ef8aa6911c4216a0/transformed/react-android-0.76.0-debug/prefab/modules/jsi/libs/android.arm64-v8a/libjsi.so",
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/2fa3c78e855de2c4ef8aa6911c4216a0/transformed/react-android-0.76.0-debug/prefab/modules/reactnative/libs/android.arm64-v8a/libreactnative.so"
+      ]
+    },
+    "react_codegen_AmplifyRTNCore::@3e5695b3cc01876468e5": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_AmplifyRTNCore"
+    },
+    "react_codegen_RNCNetInfoSpec::@c36c96bfd5b5770618a5": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_RNCNetInfoSpec"
+    },
+    "react_codegen_RNHealthConnectSpec::@86999e20358cfe4ebb7d": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_RNHealthConnectSpec"
+    },
+    "react_codegen_RNIap::@91a736e576f79a9e87b9": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_RNIap"
+    },
+    "react_codegen_RNImagePickerSpec::@f66ee9a2efecfb28bee4": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_RNImagePickerSpec"
+    },
+    "react_codegen_rnasyncstorage::@1596841e19ec5b9eeffe": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_rnasyncstorage"
+    },
+    "react_codegen_rndocumentpicker::@1e246c1f1267e461f98b": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_rndocumentpicker"
+    },
+    "react_codegen_rnscreens::@25bcbd507e98d3a854ad": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_rnscreens",
+      "output": "/Users/trushil/Documents/ScanSmart/android/app/build/intermediates/cxx/Debug/4811g3au/obj/arm64-v8a/libreact_codegen_rnscreens.so",
+      "runtimeFiles": [
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/2fa3c78e855de2c4ef8aa6911c4216a0/transformed/react-android-0.76.0-debug/prefab/modules/reactnative/libs/android.arm64-v8a/libreactnative.so",
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/2fa3c78e855de2c4ef8aa6911c4216a0/transformed/react-android-0.76.0-debug/prefab/modules/jsi/libs/android.arm64-v8a/libjsi.so",
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/eb4b98dea289284ca2b26e9265bd49ab/transformed/fbjni-0.6.0/prefab/modules/fbjni/libs/android.arm64-v8a/libfbjni.so"
+      ]
+    },
+    "react_codegen_safeareacontext::@7984cd80db47aa7b952a": {
+      "toolchain": "toolchain",
+      "abi": "arm64-v8a",
+      "artifactName": "react_codegen_safeareacontext",
+      "output": "/Users/trushil/Documents/ScanSmart/android/app/build/intermediates/cxx/Debug/4811g3au/obj/arm64-v8a/libreact_codegen_safeareacontext.so",
+      "runtimeFiles": [
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/eb4b98dea289284ca2b26e9265bd49ab/transformed/fbjni-0.6.0/prefab/modules/fbjni/libs/android.arm64-v8a/libfbjni.so",
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/2fa3c78e855de2c4ef8aa6911c4216a0/transformed/react-android-0.76.0-debug/prefab/modules/jsi/libs/android.arm64-v8a/libjsi.so",
+        "/Users/trushil/.gradle/caches/8.10.2/transforms/2fa3c78e855de2c4ef8aa6911c4216a0/transformed/react-android-0.76.0-debug/prefab/modules/reactnative/libs/android.arm64-v8a/libreactnative.so"
+      ]
+    }
+  },
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/trushil/Library/Android/sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/trushil/Library/Android/sdk/ndk/26.1.10909125/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

@@ -1,0 +1,88 @@
+# android/fastlane/Fastfile
+# Fastlane for Shuddhaahar Android
+# Uploads AAB to Play Store internal track (staging) or production
+
+default_platform(:android)
+
+PACKAGE_NAME_STAGING    = "com.shuddhaahar.staging"
+PACKAGE_NAME_PRODUCTION = "com.shuddhaahar"
+
+platform :android do
+
+  # ════════════════════════════════════════════════════════════
+  # STAGING → Play Store Internal Track
+  # ════════════════════════════════════════════════════════════
+  lane :staging do
+    UI.message "🤖 Building Shuddhaahar Staging for Play Internal Track..."
+
+    gradle(
+      task:              "bundle",
+      build_type:        "Release",
+      project_dir:       "./",
+      flags:             "--no-daemon",
+      properties: {
+        "android.injected.signing.store.file"     => ENV["ANDROID_KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["ANDROID_STORE_PASSWORD"],
+        "android.injected.signing.key.alias"      => ENV["ANDROID_KEY_ALIAS"],
+        "android.injected.signing.key.password"   => ENV["ANDROID_KEY_PASSWORD"],
+      }
+    )
+
+    upload_to_play_store(
+      track:                   "internal",
+      package_name:            PACKAGE_NAME_STAGING,
+      json_key_data:           ENV["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"],
+      aab:                     "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_apk:         true,
+      skip_upload_metadata:    true,
+      skip_upload_changelogs:  false,
+      changes_not_sent_for_review: false,
+    )
+
+    slack(
+      message:    "✅ Shuddhaahar Android Staging uploaded to Play Internal Track",
+      channel:    "#releases",
+      webhook_url: ENV["SLACK_WEBHOOK_URL"],
+    ) if ENV["SLACK_WEBHOOK_URL"]
+  end
+
+  # ════════════════════════════════════════════════════════════
+  # PRODUCTION → Play Store Production (as draft)
+  # ════════════════════════════════════════════════════════════
+  lane :production do
+    UI.message "🤖 Building Shuddhaahar for Play Store production..."
+
+    gradle(
+      task:              "bundle",
+      build_type:        "Release",
+      project_dir:       "./",
+      properties: {
+        "android.injected.signing.store.file"     => ENV["ANDROID_KEYSTORE_PATH"],
+        "android.injected.signing.store.password" => ENV["ANDROID_STORE_PASSWORD"],
+        "android.injected.signing.key.alias"      => ENV["ANDROID_KEY_ALIAS"],
+        "android.injected.signing.key.password"   => ENV["ANDROID_KEY_PASSWORD"],
+      }
+    )
+
+    upload_to_play_store(
+      track:                   "production",
+      package_name:            PACKAGE_NAME_PRODUCTION,
+      json_key_data:           ENV["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"],
+      aab:                     "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_apk:         true,
+      skip_upload_metadata:    false,
+      skip_upload_screenshots: false,
+      rollout:                 "0.1",  # 10% staged rollout — increase manually in Play Console
+    )
+
+    slack(
+      message:    "🎉 Shuddhaahar Android submitted to Play Store (10% staged rollout)!",
+      channel:    "#releases",
+      webhook_url: ENV["SLACK_WEBHOOK_URL"],
+    ) if ENV["SLACK_WEBHOOK_URL"]
+  end
+
+  error do |lane, exception|
+    UI.error "Lane '#{lane}' failed: #{exception.message}"
+  end
+end

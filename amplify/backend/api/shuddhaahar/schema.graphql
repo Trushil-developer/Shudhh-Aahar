@@ -1,0 +1,69 @@
+# amplify/backend/api/shuddhaahar/schema.graphql
+# This file defines your DynamoDB tables via AppSync
+# Run: amplify add api → choose GraphQL → paste this schema
+
+type User @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  email: String!
+  name: String
+  profileComplete: Boolean
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+
+  # Health Profile (all optional)
+  healthProfile: HealthProfile
+}
+
+type HealthProfile {
+  # Allergies & Intolerances
+  allergies: [String]          # e.g. ["peanuts", "shellfish"]
+  intolerances: [String]       # e.g. ["lactose", "gluten"]
+  allergyNotes: String         # any extra notes
+
+  # Medical Conditions
+  conditions: [String]         # e.g. ["diabetes", "hypertension"]
+  conditionNotes: String
+
+  # Medications
+  medications: [Medication]
+
+  # Diet Preferences
+  dietType: String             # vegan, vegetarian, halal, kosher, etc.
+  dietaryRestrictions: [String]
+
+  # Lifestyle
+  smokingStatus: String
+  alcoholConsumption: String
+  exerciseLevel: String        # sedentary, light, moderate, active
+
+  # Basic Health Metrics (optional)
+  age: Int
+  gender: String
+  weightKg: Float
+  heightCm: Float
+  bmi: Float
+
+  # Goals
+  healthGoals: [String]        # e.g. ["lose weight", "reduce sugar", "avoid allergens"]
+}
+
+type Medication {
+  name: String!
+  dosage: String
+  frequency: String
+  reason: String
+}
+
+# Scan History — stored per user
+type ScanHistory @model @auth(rules: [{ allow: owner }])
+  @index(name: "byUser", queryField: "scanHistoryByUser", sortKeyFields: ["scannedAt"]) {
+  id: ID!
+  userId: String!
+  barcode: String!
+  productName: String
+  brand: String
+  scannedAt: AWSDateTime
+  warnings: [String]           # allergen warnings triggered for this user
+  cheapestPrice: Float
+  cheapestStore: String
+}

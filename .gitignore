@@ -1,0 +1,118 @@
+# Shuddhaahar .gitignore
+
+# ── Environment & Secrets (NEVER commit these) ─────────────────
+.env.*.local
+.env.local
+.env.development.local
+.env.staging.local
+.env.production.local
+secrets/
+*.p8
+*.p12
+*.mobileprovision
+google-services.json       # Android Firebase/Google config (put in CI secrets)
+GoogleService-Info.plist   # iOS Google config (put in CI secrets)
+aws-exports.local.js
+
+# ── Node ───────────────────────────────────────────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ── React Native ───────────────────────────────────────────────
+# iOS
+ios/Pods/
+ios/build/
+ios/*.xcworkspace/
+ios/DerivedData/
+*.xcuserstate
+*.pbxuser
+!default.pbxuser
+*.perspectivev3
+!default.perspectivev3
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+xcuserdata
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/google-services.json
+*.apk
+*.aab
+*.ap_
+
+# Metro bundler
+.metro-health-check*
+
+# ── TypeScript ─────────────────────────────────────────────────
+*.js.map
+tsconfig.tsbuildinfo
+
+# ── Testing ────────────────────────────────────────────────────
+coverage/
+.jest-cache/
+
+# ── OS ─────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Desktop.ini
+
+# ── IDE ────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*.suo
+.history/
+
+# ── Fastlane ───────────────────────────────────────────────────
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# ── Build outputs ──────────────────────────────────────────────
+dist/
+build/
+output/
+
+# ── Amplify ────────────────────────────────────────────────────
+amplify/.config/local-*
+amplify/#current-cloud-backend
+amplify/backend/.temp
+build/
+dist/
+node_modules/
+awsconfiguration.json
+amplifyconfiguration.json
+amplifyconfiguration.dart
+amplify-build-config.json
+amplify-gradle-config.json
+amplifytools.xcconfig
+.secret-*
+**.sample
+
+# ── Sentry / error reporting ───────────────────────────────────
+.sentryclirc
+
+# ── Logs ───────────────────────────────────────────────────────
+*.log
+logs/
+terraform/
+terraform/terraform.tfvars
+terraform/.terraform/
+terraform/*.tfstate*

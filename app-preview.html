@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shuddhaahar — App Preview & Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F5F7FA;--surface:#FFF;--surface2:#F0F4F8;--border:#DDE3ED;--border2:#B8C4D4;
+  --navy:#0B2545;--navy-mid:#1A3F6F;--navy-light:#E8EDF5;--navy-xlight:#F2F5FA;
+  --text:#0B2545;--text2:#4A5568;--muted:#8A96A8;
+  --safe:#00704A;--safe-bg:#E6F4EE;--safe-bd:#A8D8C0;
+  --warn:#B45309;--warn-bg:#FEF3CD;--warn-bd:#F6D860;
+  --danger:#C53030;--danger-bg:#FEE8E8;--danger-bd:#F5AAAA;
+  --info:#1A56A4;--info-bg:#EBF2FC;--info-bd:#B3CFF0;
+  --price:#1A6B3A;
+  --gold:#B8860B;--gold-bg:#FDF8E8;--gold-bd:#E8D080;
+  --font:'IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+body{font-family:var(--font);background:#0f1117;min-height:100vh;padding:40px 20px 80px;overflow-x:hidden;color:var(--text)}
+
+/* ── Page layout ── */
+.page-hd{text-align:center;margin-bottom:48px}
+.page-hd h1{font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px;margin-bottom:6px}
+.page-hd p{color:rgba(255,255,255,0.4);font-size:12px;font-family:var(--mono);letter-spacing:1px}
+.section-title{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.35);text-transform:uppercase;text-align:center;margin:40px 0 20px;padding:0 20px;display:flex;align-items:center;gap:16px}
+.section-title::before,.section-title::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.08)}
+.phones-row{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;max-width:1500px;margin:0 auto}
+
+/* ── Phone ── */
+.pw{display:flex;flex-direction:column;align-items:center;gap:10px}
+.pl{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:2px;text-transform:uppercase}
+.phone{
+  width:300px;height:620px;background:#0a0a12;border-radius:42px;padding:9px;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.06),0 32px 64px rgba(0,0,0,0.8),0 0 0 6px rgba(255,255,255,0.02);
+  position:relative;animation:rise 0.5s ease both
+}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.pw:nth-child(2) .phone{animation-delay:.07s}.pw:nth-child(3) .phone{animation-delay:.14s}
+.pw:nth-child(4) .phone{animation-delay:.21s}.pw:nth-child(5) .phone{animation-delay:.28s}
+.pw:nth-child(6) .phone{animation-delay:.35s}.pw:nth-child(7) .phone{animation-delay:.42s}
+.pw:nth-child(8) .phone{animation-delay:.49s}.pw:nth-child(9) .phone{animation-delay:.56s}
+.pw:nth-child(10) .phone{animation-delay:.63s}
+.notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:80px;height:22px;background:#0a0a12;border-radius:11px;z-index:100}
+.inner{width:100%;height:100%;border-radius:34px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column;position:relative}
+
+/* ── Status bar ── */
+.sb{background:var(--surface);display:flex;justify-content:space-between;align-items:center;padding:18px 18px 8px;font-size:11px;font-weight:700;color:var(--text);font-family:var(--mono)}
+.sbi{display:flex;gap:3px;align-items:center;font-size:10px}
+
+/* ── Components ── */
+.screen{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.topbar-title{font-size:15px;font-weight:800;color:var(--text)}
+.topbar-action{font-size:12px;font-weight:600;color:var(--navy-mid)}
+.scroll{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.p{padding:0 12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;margin:0 0 8px;box-shadow:0 1px 4px rgba(11,37,69,0.05)}
+.clabel{font-size:8.5px;font-weight:700;color:var(--muted);letter-spacing:1.8px;margin-bottom:9px;font-family:var(--mono)}
+.tag{display:inline-flex;align-items:center;border-radius:5px;padding:2px 7px;font-size:9px;font-weight:700;font-family:var(--mono);letter-spacing:0.3px}
+.t-safe{background:var(--safe-bg);color:var(--safe);border:1px solid var(--safe-bd)}
+.t-warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd)}
+.t-danger{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-bd)}
+.t-info{background:var(--info-bg);color:var(--info);border:1px solid var(--info-bd)}
+.t-navy{background:var(--navy-light);color:var(--navy-mid);border:1px solid var(--border)}
+.t-gold{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd)}
+.bar-track{background:var(--border);border-radius:3px;height:5px;overflow:hidden}
+.bar-fill{height:5px;border-radius:3px}
+.divider{height:1px;background:var(--border);margin:8px 0}
+.row{display:flex;align-items:center;gap:8px}
+.col{display:flex;flex-direction:column;gap:2px}
+.avatar{width:38px;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0}
+
+/* ── Tab bar ── */
+.tabs{background:var(--surface);border-top:1px solid var(--border);display:flex;padding:5px 0 3px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 0}
+.tab-ic{font-size:17px}
+.tab-lb{font-size:8.5px;font-weight:600;color:var(--muted)}
+.tab-lb.on{color:var(--navy)}
+.tab-dot{width:3px;height:3px;border-radius:50%;background:var(--navy);margin:0 auto}
+.tab-cam{width:38px;height:38px;border-radius:19px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 12px rgba(11,37,69,0.35);margin-bottom:2px}
+
+/* ── Verdict colours ── */
+.v-avoid{border-left:4px solid var(--danger)}
+.v-caution{border-left:4px solid var(--warn)}
+.v-safe{border-left:4px solid var(--safe)}
+
+/* ── Subscription colours ── */
+.plan-free{background:linear-gradient(135deg,#f8fafc,#edf2f7)}
+.plan-pro{background:linear-gradient(135deg,#0B2545,#1A3F6F)}
+.plan-max{background:linear-gradient(135deg,#78350F,#B45309)}
+</style>
+</head>
+<body>
+
+<div class="page-hd">
+  <h1>✚ Shuddhaahar</h1>
+  <p>APP PREVIEW · ALL SCREENS · MEDICAL DESIGN SYSTEM</p>
+</div>
+
+<div class="phones-row">
+
+<!-- ════════════════════════════════════ SCREEN 1: LOGIN ════ -->
+<div class="pw"><div class="pl">Sign In</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●●</span><span style="margin-left:4px">🔋</span></div></div>
+<div class="screen" style="background:var(--bg);overflow-y:hidden">
+  <div style="padding:20px 18px 0;display:flex;flex-direction:column;align-items:center">
+    <div style="width:60px;height:60px;background:var(--navy);border-radius:15px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;box-shadow:0 8px 20px rgba(11,37,69,0.35)"><span style="color:#fff;font-size:28px;font-weight:700">✚</span></div>
+    <div style="font-size:22px;font-weight:800;color:var(--text);margin-bottom:3px">Shuddhaahar</div>
+    <div style="font-size:10px;color:var(--muted);letter-spacing:0.6px;margin-bottom:12px">Clinical Nutrition Intelligence</div>
+    <div style="display:flex;gap:5px;margin-bottom:18px">
+      <span class="tag t-navy">GDPR</span><span class="tag t-navy">NHS-INFORMED</span><span class="tag t-navy">AWS</span>
+    </div>
+  </div>
+  <!-- Feature rows -->
+  <div style="margin:0 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px">
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border)"><span style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.8px;font-family:var(--mono)">WHAT YOU GET</span></div>
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px"><div style="width:28px;height:28px;background:var(--navy-light);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">▦</div><div><div style="font-size:11px;font-weight:700;color:var(--text)">Barcode Scanner</div><div style="font-size:10px;color:var(--muted)">5M+ UK products</div></div></div>
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px"><div style="width:28px;height:28px;background:#EBF2FC;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">🤖</div><div><div style="font-size:11px;font-weight:700;color:var(--text)">AI Health Analysis</div><div style="font-size:10px;color:var(--muted)">Powered by Claude AI</div></div></div>
+    <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px"><div style="width:28px;height:28px;background:var(--safe-bg);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">💷</div><div><div style="font-size:11px;font-weight:700;color:var(--text)">UK Price Comparison</div><div style="font-size:10px;color:var(--muted)">Tesco, ASDA, Sainsbury's+</div></div></div>
+    <div style="padding:8px 12px;display:flex;align-items:center;gap:9px"><div style="width:28px;height:28px;background:var(--danger-bg);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">⚠</div><div><div style="font-size:11px;font-weight:700;color:var(--text)">Allergen & Condition Alerts</div><div style="font-size:10px;color:var(--muted)">Personalised warnings</div></div></div>
+  </div>
+  <!-- Google button -->
+  <div style="margin:0 14px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:11px;padding:12px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 2px 8px rgba(11,37,69,0.07)">
+    <span style="font-size:16px;font-weight:800;color:#4285F4">G</span>
+    <span style="font-size:13px;font-weight:700;color:var(--text)">Continue with Google</span>
+  </div>
+  <div style="font-size:9px;color:var(--muted);text-align:center;padding:0 20px;line-height:14px">UK GDPR · Your health data is encrypted and never sold</div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 2: HOME ════ -->
+<div class="pw"><div class="pl">Home</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●● 🔋</span></div></div>
+<div class="screen">
+  <!-- App header -->
+  <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:10px 14px 10px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:32px;height:32px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:17px;font-weight:700">✚</span></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--text)">Shuddhaahar</div><div style="font-size:9px;color:var(--muted);letter-spacing:0.4px">Clinical Nutrition Intelligence</div></div>
+      <span class="tag t-gold">⭐ PRO</span>
+    </div>
+    <!-- Patient greeting -->
+    <div style="background:var(--navy-light);border:1px solid var(--border);border-radius:11px;padding:10px">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:1px">Good morning,</div>
+      <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:7px">Sarah</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        <span class="tag t-danger">⚠ 2 allergens</span>
+        <span class="tag t-info">🩺 T2 Diabetes</span>
+        <span class="tag t-safe">Vegan</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll" style="padding:10px 12px;gap:8px;display:flex;flex-direction:column">
+    <!-- Primary scan CTA -->
+    <div style="background:var(--navy);border-radius:14px;overflow:hidden;box-shadow:0 6px 18px rgba(11,37,69,0.28)">
+      <div style="display:flex;align-items:center;padding:14px;gap:12px">
+        <div style="width:44px;height:44px;border-radius:22px;border:2px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center"><div style="width:32px;height:32px;border-radius:16px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:16px">▦</div></div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:1px">Scan Product</div><div style="font-size:10px;color:rgba(255,255,255,0.55)">Point camera at any barcode</div></div>
+        <div style="width:26px;height:26px;border-radius:13px;background:rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px">→</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);padding:6px;display:flex;justify-content:center;gap:12px">
+        <span style="font-size:9px;color:rgba(255,255,255,0.6)">✓ Allergen check</span>
+        <span style="color:rgba(255,255,255,0.25);font-size:9px">·</span>
+        <span style="font-size:9px;color:rgba(255,255,255,0.6)">✓ AI analysis</span>
+        <span style="color:rgba(255,255,255,0.25);font-size:9px">·</span>
+        <span style="font-size:9px;color:rgba(255,255,255,0.6)">✓ UK prices</span>
+      </div>
+    </div>
+    <!-- Photo scan shortcut -->
+    <div style="display:flex;gap:8px">
+      <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">📸</span>
+        <div><div style="font-size:11px;font-weight:700;color:var(--text)">Photo Scan</div><div style="font-size:9px;color:var(--muted)">Any meal</div></div>
+      </div>
+      <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">📓</span>
+        <div><div style="font-size:11px;font-weight:700;color:var(--text)">My Diary</div><div style="font-size:9px;color:var(--muted)">1,247 kcal today</div></div>
+      </div>
+    </div>
+    <!-- Manual entry -->
+    <div>
+      <div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.8px;margin-bottom:6px;font-family:var(--mono)">MANUAL BARCODE</div>
+      <div style="display:flex;gap:7px">
+        <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-size:11px;color:var(--muted);font-family:var(--mono)">e.g. 5000112548587</div>
+        <div style="background:var(--navy-mid);border-radius:9px;padding:9px 13px;color:#fff;font-size:11px;font-weight:700">Go</div>
+      </div>
+    </div>
+    <!-- Data sources -->
+    <div>
+      <div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.8px;margin-bottom:6px;font-family:var(--mono)">VERIFIED SOURCES</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px"><div style="font-size:15px;margin-bottom:3px">🌍</div><div style="font-size:10px;font-weight:700;color:var(--text)">Open Food Facts</div><div style="font-size:9px;color:var(--safe);font-weight:600">● Live</div></div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px"><div style="font-size:15px;margin-bottom:3px">🏪</div><div style="font-size:10px;font-weight:700;color:var(--text)">Trolley.co.uk</div><div style="font-size:9px;color:var(--safe);font-weight:600">● Live</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><span class="tab-ic">🏠</span><span class="tab-lb on">Home</span><div class="tab-dot"></div></div>
+    <div class="tab"><span class="tab-ic">📓</span><span class="tab-lb">Diary</span></div>
+    <div class="tab"><div class="tab-cam">📸</div><span class="tab-lb">Photo</span></div>
+    <div class="tab"><span class="tab-ic">🛒</span><span class="tab-lb">List</span></div>
+    <div class="tab"><span class="tab-ic">👤</span><span class="tab-lb">Profile</span></div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 3: SCANNER ════ -->
+<div class="pw"><div class="pl">Scanner</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="screen" style="background:#000">
+  <!-- Camera feed simulation -->
+  <div style="flex:1;position:relative;background:linear-gradient(160deg,#101a10,#0a0a18,#181008)">
+    <!-- Shelf simulation -->
+    <div style="position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,rgba(255,255,255,0.04),transparent);border-top:1px solid rgba(255,255,255,0.07)"></div>
+    <!-- Product blobs -->
+    <div style="position:absolute;bottom:30%;left:10%;width:50px;height:70px;background:rgba(255,0,0,0.15);border-radius:4px;border:1px solid rgba(255,255,255,0.1)"></div>
+    <div style="position:absolute;bottom:30%;left:30%;width:40px;height:65px;background:rgba(0,100,200,0.15);border-radius:4px;border:1px solid rgba(255,255,255,0.1)"></div>
+    <div style="position:absolute;bottom:30%;right:15%;width:55px;height:72px;background:rgba(255,140,0,0.15);border-radius:4px;border:1px solid rgba(255,255,255,0.1)"></div>
+    <!-- Scan frame -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:210px;height:140px">
+      <div style="position:absolute;top:0;left:0;width:24px;height:24px;border-top:2.5px solid #60A5FA;border-left:2.5px solid #60A5FA;border-radius:2px"></div>
+      <div style="position:absolute;top:0;right:0;width:24px;height:24px;border-top:2.5px solid #60A5FA;border-right:2.5px solid #60A5FA;border-radius:2px"></div>
+      <div style="position:absolute;bottom:0;left:0;width:24px;height:24px;border-bottom:2.5px solid #60A5FA;border-left:2.5px solid #60A5FA;border-radius:2px"></div>
+      <div style="position:absolute;bottom:0;right:0;width:24px;height:24px;border-bottom:2.5px solid #60A5FA;border-right:2.5px solid #60A5FA;border-radius:2px"></div>
+      <!-- Scan line -->
+      <div style="position:absolute;top:45%;left:8px;right:8px;height:2px;background:linear-gradient(to right,transparent,#60A5FA 30%,#60A5FA 70%,transparent);box-shadow:0 0 8px #60A5FA"></div>
+      <!-- Barcode sim -->
+      <div style="position:absolute;bottom:18px;left:18px;right:18px;height:42px;display:flex;gap:1.5px;align-items:flex-end;opacity:0.7">
+        <div style="width:2px;height:38px;background:#fff"></div><div style="width:1px;height:28px;background:#fff"></div><div style="width:3px;height:38px;background:#fff"></div><div style="width:1px;height:20px;background:#fff"></div><div style="width:2px;height:35px;background:#fff"></div><div style="width:1px;height:42px;background:#fff"></div><div style="width:2px;height:30px;background:#fff"></div><div style="width:3px;height:38px;background:#fff"></div><div style="width:1px;height:25px;background:#fff"></div><div style="width:2px;height:42px;background:#fff"></div><div style="width:1px;height:32px;background:#fff"></div><div style="width:3px;height:38px;background:#fff"></div><div style="width:1px;height:42px;background:#fff"></div><div style="width:2px;height:28px;background:#fff"></div><div style="width:1px;height:38px;background:#fff"></div><div style="width:3px;height:42px;background:#fff"></div><div style="width:1px;height:30px;background:#fff"></div><div style="width:2px;height:38px;background:#fff"></div>
+      </div>
+    </div>
+  </div>
+  <!-- HUD -->
+  <div style="position:absolute;top:18px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center">
+    <div style="width:34px;height:34px;border-radius:17px;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px">✕</div>
+    <div style="font-size:13px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,0.6)">Scan Barcode</div>
+    <div style="width:34px;height:34px;border-radius:17px;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;font-size:15px">🔦</div>
+  </div>
+  <div style="position:absolute;bottom:32px;left:0;right:0;text-align:center">
+    <div style="font-size:12px;font-weight:600;color:#fff;margin-bottom:2px;text-shadow:0 1px 4px rgba(0,0,0,0.5)">Align barcode within frame</div>
+    <div style="font-size:9px;color:rgba(255,255,255,0.45)">EAN-13 · UPC-A · EAN-8 · Code 128</div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 4: PRODUCT — AI ════ -->
+<div class="pw"><div class="pl">AI Assessment</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●● 🔋</span></div></div>
+<div class="screen">
+  <div class="topbar"><span class="topbar-action">← Back</span><span class="topbar-title">Product Report</span><span class="topbar-action">New Scan</span></div>
+  <div class="scroll" style="padding:8px 12px;display:flex;flex-direction:column;gap:7px">
+    <!-- Product ID -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="background:var(--navy);padding:7px 12px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:8px;font-weight:700;color:rgba(255,255,255,0.55);font-family:var(--mono);letter-spacing:1.5px">PRODUCT IDENTIFICATION</span>
+        <span style="font-size:9px;color:rgba(255,255,255,0.45);font-family:var(--mono)">7622210100153</span>
+      </div>
+      <div style="display:flex;gap:10px;padding:10px">
+        <div style="width:66px;height:66px;border-radius:9px;background:#fff8f0;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0">🍫</div>
+        <div style="flex:1">
+          <div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1.5px;margin-bottom:2px;font-family:var(--mono)">CADBURY</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.3">Dairy Milk Chocolate</div>
+          <div style="font-size:9px;color:var(--muted);margin-bottom:6px">Net weight: 110g</div>
+          <span style="background:#E63312;color:#fff;border-radius:5px;padding:2px 7px;font-size:8px;font-weight:700;font-family:var(--mono)">NUTRI-SCORE E</span>
+        </div>
+      </div>
+    </div>
+    <!-- AI Verdict -->
+    <div style="background:var(--surface);border:1px solid var(--danger-bd);border-radius:12px;padding:11px;border-left:4px solid var(--danger)">
+      <div class="clabel">AI HEALTH ASSESSMENT</div>
+      <!-- Verdict header -->
+      <div style="background:var(--danger-bg);border:1px solid var(--danger-bd);border-radius:9px;padding:9px;display:flex;align-items:center;gap:9px;margin-bottom:9px">
+        <div style="width:34px;height:34px;border-radius:17px;background:var(--danger);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:800;flex-shrink:0">✕</div>
+        <div style="flex:1">
+          <div style="font-size:11px;font-weight:800;color:var(--danger);letter-spacing:0.3px;margin-bottom:1px">NOT RECOMMENDED</div>
+          <div style="font-size:9px;color:var(--text2);line-height:13px">Not suitable for your health profile</div>
+        </div>
+        <div style="text-align:right"><div style="font-size:23px;font-weight:800;color:var(--danger);line-height:1">0</div><div style="font-size:9px;color:var(--muted)">/10</div></div>
+      </div>
+      <!-- Score bar -->
+      <div class="bar-track" style="margin-bottom:9px"><div class="bar-fill" style="width:0%;background:var(--danger)"></div></div>
+      <div style="font-size:11px;color:var(--text2);line-height:17px;margin-bottom:9px">Contains your confirmed milk allergen. 56.5g sugar per 100g — extremely high for Type 2 Diabetes. Not vegan-suitable.</div>
+      <!-- Warnings -->
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;gap:7px;background:var(--danger-bg);border:1px solid var(--danger-bd);border-radius:7px;padding:7px;border-left:3px solid var(--danger)">
+          <span style="font-size:13px">🚨</span>
+          <div><div style="font-size:8px;font-weight:800;color:var(--danger);letter-spacing:0.8px">HIGH PRIORITY</div><div style="font-size:10px;color:var(--text2)">Milk allergen — avoid completely</div></div>
+        </div>
+        <div style="display:flex;gap:7px;background:var(--danger-bg);border:1px solid var(--danger-bd);border-radius:7px;padding:7px;border-left:3px solid var(--danger)">
+          <span style="font-size:13px">🩸</span>
+          <div><div style="font-size:8px;font-weight:800;color:var(--danger);letter-spacing:0.8px">HIGH PRIORITY</div><div style="font-size:10px;color:var(--text2)">56.5g sugar — dangerous for diabetes</div></div>
+        </div>
+        <div style="display:flex;gap:7px;background:var(--warn-bg);border:1px solid var(--warn-bd);border-radius:7px;padding:7px;border-left:3px solid var(--warn)">
+          <span style="font-size:13px">💊</span>
+          <div><div style="font-size:8px;font-weight:800;color:var(--warn);letter-spacing:0.8px">MEDIUM PRIORITY</div><div style="font-size:10px;color:var(--text2)">May reduce Metformin effectiveness</div></div>
+        </div>
+      </div>
+      <div style="margin-top:9px;padding-top:7px;border-top:1px solid var(--border);text-align:center">
+        <span style="font-size:10px;color:var(--navy-mid);font-weight:600">▼ View full clinical details</span>
+      </div>
+    </div>
+    <!-- Action buttons -->
+    <div style="display:flex;gap:7px">
+      <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px;display:flex;align-items:center;justify-content:center;gap:6px">
+        <span style="font-size:14px">🛒</span><span style="font-size:11px;font-weight:700;color:var(--navy-mid)">Add to List</span>
+      </div>
+      <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px;display:flex;align-items:center;justify-content:center;gap:6px">
+        <span style="font-size:14px">📓</span><span style="font-size:11px;font-weight:700;color:var(--navy-mid)">Log to Diary</span>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><span class="tab-ic">🏠</span><span class="tab-lb on">Home</span><div class="tab-dot"></div></div>
+    <div class="tab"><span class="tab-ic">📓</span><span class="tab-lb">Diary</span></div>
+    <div class="tab"><div class="tab-cam">📸</div><span class="tab-lb">Photo</span></div>
+    <div class="tab"><span class="tab-ic">🛒</span><span class="tab-lb">List</span></div>
+    <div class="tab"><span class="tab-ic">👤</span><span class="tab-lb">Profile</span></div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 5: PRICES + ALT ════ -->
+<div class="pw"><div class="pl">Prices & Alternatives</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●● 🔋</span></div></div>
+<div class="screen">
+  <div class="topbar"><span class="topbar-action">← Back</span><span class="topbar-title">Product Report</span><span class="topbar-action">New Scan</span></div>
+  <div class="scroll" style="padding:8px 12px;display:flex;flex-direction:column;gap:7px">
+    <!-- UPF card -->
+    <div style="background:var(--surface);border:1px solid var(--danger-bd);border-radius:12px;padding:11px;border-left:4px solid var(--danger)">
+      <div class="clabel">PROCESSING & ADDITIVES</div>
+      <div style="display:flex;align-items:center;gap:9px;background:var(--danger-bg);border:1px solid var(--danger-bd);border-radius:9px;padding:8px">
+        <div style="width:36px;height:36px;border-radius:18px;background:var(--danger);display:flex;align-items:center;justify-content:center;color:#fff;font-size:17px;font-weight:800;flex-shrink:0">4</div>
+        <div style="flex:1"><div style="display:flex;align-items:center;gap:5px;margin-bottom:2px"><span style="font-size:10px;font-weight:800;color:var(--danger)">NOVA 4 — ULTRA-PROCESSED</span><span class="tag t-danger" style="font-size:7px">UPF</span></div><div style="font-size:9px;color:var(--text2)">Industrial formulation with additives not used in home cooking</div></div>
+      </div>
+      <div style="margin-top:8px"><div style="font-size:8px;font-weight:700;color:var(--danger);letter-spacing:1px;margin-bottom:5px">⚠ HIGH RISK ADDITIVES (2)</div><div style="display:flex;gap:5px"><span class="tag t-danger">E476</span><span class="tag t-warn">E471</span><span class="tag t-navy">E150d</span></div></div>
+    </div>
+    <!-- Price card -->
+    <div class="card" style="margin:0">
+      <div class="clabel">UK PRICE COMPARISON</div>
+      <div style="background:var(--safe-bg);border:1px solid var(--safe-bd);border-radius:9px;padding:9px;display:flex;justify-content:space-between;margin-bottom:9px">
+        <div><div style="font-size:8px;font-weight:700;color:var(--price);letter-spacing:1px">LOWEST PRICE</div><div style="font-size:23px;font-weight:800;color:var(--price)">£1.00</div><div style="font-size:9px;color:var(--text2)">at ASDA</div></div>
+        <div style="text-align:right"><div style="font-size:8px;font-weight:700;color:var(--price);letter-spacing:1px">SAVE UP TO</div><div style="font-size:18px;font-weight:800;color:var(--price)">£0.35</div><div style="font-size:9px;color:var(--muted)">vs Waitrose</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:7px;padding:5px;background:var(--safe-bg);border-radius:7px"><div style="width:7px;height:7px;border-radius:50%;background:#78BE20;flex-shrink:0"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--price)">ASDA</span><span style="font-size:12px;font-weight:700;color:var(--price)">£1.00</span></div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:74%;background:var(--price)"></div></div><div style="font-size:8px;color:var(--warn);margin-top:1px">Rollback</div></div><div style="background:var(--price);border-radius:4px;padding:1px 5px;flex-shrink:0"><span style="font-size:7px;font-weight:800;color:#fff">BEST</span></div></div>
+        <div style="display:flex;align-items:center;gap:7px;padding:5px"><div style="width:7px;height:7px;border-radius:50%;background:#EE1C2E;flex-shrink:0"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--text)">Tesco</span><span style="font-size:12px;font-weight:600;color:var(--text)">£1.09</span></div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:81%;background:#EE1C2E"></div></div><div style="font-size:8px;color:var(--muted);margin-top:1px">Clubcard: £0.89</div></div></div>
+        <div style="display:flex;align-items:center;gap:7px;padding:5px"><div style="width:7px;height:7px;border-radius:50%;background:#FF7B00;flex-shrink:0"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--text)">Sainsbury's</span><span style="font-size:12px;font-weight:600;color:var(--text)">£1.15</span></div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:85%;background:#FF7B00"></div></div></div></div>
+        <div style="display:flex;align-items:center;gap:7px;padding:5px"><div style="width:7px;height:7px;border-radius:50%;background:#73AA2D;flex-shrink:0"></div><div style="flex:1"><div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--text)">Waitrose</span><span style="font-size:12px;font-weight:600;color:var(--text)">£1.35</span></div><div class="bar-track" style="margin-top:3px"><div class="bar-fill" style="width:100%;background:#73AA2D"></div></div></div></div>
+      </div>
+    </div>
+    <!-- Alternative -->
+    <div style="background:var(--surface);border:1px solid var(--safe-bd);border-radius:12px;overflow:hidden">
+      <div style="background:var(--safe);padding:5px 11px;display:flex;justify-content:space-between"><span style="font-size:8px;font-weight:700;color:#fff;letter-spacing:1px">✓ HEALTHIER ALTERNATIVE</span><span style="font-size:9px;color:rgba(255,255,255,0.85)">7/10 for you</span></div>
+      <div style="display:flex;gap:9px;padding:9px">
+        <div style="width:50px;height:50px;border-radius:8px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🍫</div>
+        <div style="flex:1"><div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px;margin-bottom:1px">PLAMIL</div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px;line-height:1.3">Dairy Free Dark Chocolate</div><div style="display:flex;gap:8px;margin-bottom:5px"><div style="text-align:center"><div style="font-size:11px;font-weight:700;color:var(--text)">30g</div><div style="font-size:8px;color:var(--muted)">Sugar</div></div><div style="text-align:center"><div style="font-size:11px;font-weight:700;color:var(--text)">530</div><div style="font-size:8px;color:var(--muted)">Cal</div></div><div style="text-align:center"><div style="font-size:11px;font-weight:700;color:var(--text)">Nutri-C</div><div style="font-size:8px;color:var(--muted)">Score</div></div></div><div style="background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px"><div style="font-size:7px;font-weight:700;color:var(--safe);letter-spacing:1px;margin-bottom:2px">WHY BETTER FOR YOU</div><div style="font-size:9px;color:var(--text2);line-height:13px">Dairy-free, vegan. No milk allergens. Lower sugar for your diabetes.</div></div></div>
+      </div>
+      <div style="padding:5px 11px;border-top:1px solid var(--border);text-align:right"><span style="font-size:10px;color:var(--navy-mid);font-weight:600">Tap to see prices & full report →</span></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><span class="tab-ic">🏠</span><span class="tab-lb on">Home</span><div class="tab-dot"></div></div>
+    <div class="tab"><span class="tab-ic">📓</span><span class="tab-lb">Diary</span></div>
+    <div class="tab"><div class="tab-cam">📸</div><span class="tab-lb">Photo</span></div>
+    <div class="tab"><span class="tab-ic">🛒</span><span class="tab-lb">List</span></div>
+    <div class="tab"><span class="tab-ic">👤</span><span class="tab-lb">Profile</span></div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 6: DIARY ════ -->
+<div class="pw"><div class="pl">Food Diary</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●● 🔋</span></div></div>
+<div class="screen">
+  <div class="topbar"><span class="topbar-title">Food Diary</span><span style="font-size:11px;color:var(--muted)">Mon 8 Jun</span></div>
+  <div class="scroll" style="padding:8px 12px;display:flex;flex-direction:column;gap:7px">
+    <!-- Activity from HealthKit -->
+    <div style="background:var(--navy-light);border:1px solid var(--border);border-radius:11px;padding:10px">
+      <div style="display:flex;justify-content:space-around;margin-bottom:5px">
+        <div style="text-align:center"><div style="font-size:15px">👟</div><div style="font-size:12px;font-weight:800;color:var(--text)">6,842</div><div style="font-size:8px;color:var(--muted)">Steps</div></div>
+        <div style="text-align:center"><div style="font-size:15px">🔥</div><div style="font-size:12px;font-weight:800;color:var(--text)">287</div><div style="font-size:8px;color:var(--muted)">Active Cal</div></div>
+        <div style="text-align:center"><div style="font-size:15px">❤️</div><div style="font-size:12px;font-weight:800;color:var(--text)">68</div><div style="font-size:8px;color:var(--muted)">BPM</div></div>
+        <div style="text-align:center"><div style="font-size:15px">😴</div><div style="font-size:12px;font-weight:800;color:var(--text)">7.2h</div><div style="font-size:8px;color:var(--muted)">Sleep</div></div>
+      </div>
+      <div style="font-size:9px;color:var(--navy-mid);font-weight:600;text-align:center">Lightly active · +143 cal added to your goal</div>
+    </div>
+    <!-- Calories -->
+    <div class="card" style="margin:0">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span class="clabel" style="margin-bottom:0">DAILY CALORIES</span><span style="font-size:9px;color:var(--muted)">Goal: 1,943 kcal</span></div>
+      <div style="display:flex;align-items:baseline;gap:5px;margin-bottom:7px"><span style="font-size:32px;font-weight:800;color:var(--text)">1,247</span><span style="font-size:12px;color:var(--muted)">kcal consumed</span></div>
+      <div class="bar-track" style="height:7px;margin-bottom:5px"><div class="bar-fill" style="width:64%;background:var(--safe);height:7px"></div></div>
+      <div style="font-size:10px;color:var(--muted);text-align:center">696 kcal remaining</div>
+    </div>
+    <!-- Macros -->
+    <div class="card" style="margin:0">
+      <div class="clabel">MACRONUTRIENTS</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--text)">Carbohydrates</span><span style="font-size:10px;color:var(--muted)">142g / 243g</span></div><div class="bar-track"><div class="bar-fill" style="width:58%;background:var(--info)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--text)">Protein</span><span style="font-size:10px;color:var(--muted)">62g / 56g</span></div><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--safe)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--text)">Sugar</span><span style="font-size:10px;color:var(--muted)">18g / NHS max 30g</span></div><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--warn)"></div></div></div>
+        <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;color:var(--text)">Salt</span><span style="font-size:10px;color:var(--muted)">2.4g / NHS max 6g</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:#8B5CF6"></div></div></div>
+      </div>
+    </div>
+    <!-- Breakfast meal -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden">
+      <div style="background:var(--navy-light);padding:8px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)"><span style="font-size:12px;font-weight:700;color:var(--text)">🌅 Breakfast</span><span style="font-size:11px;color:var(--navy-mid);font-weight:600">342 kcal</span></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border)">
+        <div style="width:36px;height:36px;border-radius:6px;background:#f5f0e8;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🥣</div>
+        <div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--text)">Quaker Oats</div><div style="font-size:9px;color:var(--muted)">80g · P:9g C:44g F:6g</div></div>
+        <div style="text-align:right"><span style="font-size:12px;font-weight:700;color:var(--text)">342</span><span style="font-size:9px;color:var(--muted)"> kcal</span></div>
+      </div>
+      <div style="padding:7px;text-align:center"><span style="font-size:10px;color:var(--navy-mid);font-weight:600">+ Add more to breakfast</span></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><span class="tab-ic">🏠</span><span class="tab-lb">Home</span></div>
+    <div class="tab"><span class="tab-ic">📓</span><span class="tab-lb on">Diary</span><div class="tab-dot"></div></div>
+    <div class="tab"><div class="tab-cam">📸</div><span class="tab-lb">Photo</span></div>
+    <div class="tab"><span class="tab-ic">🛒</span><span class="tab-lb">List</span></div>
+    <div class="tab"><span class="tab-ic">👤</span><span class="tab-lb">Profile</span></div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 7: SHOPPING LIST ════ -->
+<div class="pw"><div class="pl">Shopping List</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●● 🔋</span></div></div>
+<div class="screen">
+  <div class="topbar"><span class="topbar-title">Safe Shopping List</span><span style="font-size:11px;color:var(--danger);font-weight:600">Clear checked</span></div>
+  <div class="scroll" style="padding:8px 12px;display:flex;flex-direction:column;gap:6px">
+    <div style="background:var(--navy-light);border:1px solid var(--border);border-radius:8px;padding:7px;text-align:center"><span style="font-size:10px;color:var(--navy-mid);font-weight:600;font-family:var(--mono)">3 remaining · 1 in basket</span></div>
+    <!-- Items -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px;display:flex;align-items:center;gap:9px">
+      <div style="width:22px;height:22px;border-radius:11px;border:2px solid var(--border);flex-shrink:0"></div>
+      <div style="width:44px;height:44px;border-radius:7px;background:#f5f0e8;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🥣</div>
+      <div style="flex:1"><div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px">QUAKER</div><div style="font-size:12px;font-weight:700;color:var(--text)">Quaker Oats</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="font-size:11px;font-weight:700;color:var(--price)">£1.89</span><span style="font-size:9px;color:var(--muted)">· Tesco</span><span class="tag t-safe" style="font-size:8px">8/10</span></div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px;display:flex;align-items:center;gap:9px">
+      <div style="width:22px;height:22px;border-radius:11px;border:2px solid var(--border);flex-shrink:0"></div>
+      <div style="width:44px;height:44px;border-radius:7px;background:#e8f5f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🥛</div>
+      <div style="flex:1"><div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px">ALPRO</div><div style="font-size:12px;font-weight:700;color:var(--text)">Oat Milk Original</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="font-size:11px;font-weight:700;color:var(--price)">£1.50</span><span style="font-size:9px;color:var(--muted)">· Waitrose</span><span class="tag t-safe" style="font-size:8px">9/10</span></div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px;display:flex;align-items:center;gap:9px">
+      <div style="width:22px;height:22px;border-radius:11px;border:2px solid var(--border);flex-shrink:0"></div>
+      <div style="width:44px;height:44px;border-radius:7px;background:#EBF2FC;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🍞</div>
+      <div style="flex:1"><div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px">HOVIS</div><div style="font-size:12px;font-weight:700;color:var(--text)">Seeded Wholemeal</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px"><span style="font-size:11px;font-weight:700;color:var(--price)">£1.25</span><span style="font-size:9px;color:var(--muted)">· ASDA</span><span class="tag t-safe" style="font-size:8px">8/10</span></div></div>
+    </div>
+    <!-- Checked item -->
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:10px;display:flex;align-items:center;gap:9px;opacity:0.5">
+      <div style="width:22px;height:22px;border-radius:11px;background:var(--safe);border:2px solid var(--safe);display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="color:#fff;font-size:12px;font-weight:800">✓</span></div>
+      <div style="width:44px;height:44px;border-radius:7px;background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🍫</div>
+      <div style="flex:1"><div style="font-size:8px;font-weight:700;color:var(--muted);letter-spacing:1px">PLAMIL</div><div style="font-size:12px;font-weight:700;color:var(--text);text-decoration:line-through">Dairy Free Dark Choc</div></div>
+    </div>
+    <!-- Total -->
+    <div style="background:var(--safe-bg);border:1px solid var(--safe-bd);border-radius:10px;padding:10px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:9px;font-weight:700;color:var(--price);letter-spacing:1px">ESTIMATED TOTAL</div><div style="font-size:10px;color:var(--text2);margin-top:2px">Based on cheapest stores</div></div>
+      <div style="font-size:22px;font-weight:800;color:var(--price)">£6.13</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><span class="tab-ic">🏠</span><span class="tab-lb">Home</span></div>
+    <div class="tab"><span class="tab-ic">📓</span><span class="tab-lb">Diary</span></div>
+    <div class="tab"><div class="tab-cam">📸</div><span class="tab-lb">Photo</span></div>
+    <div class="tab"><span class="tab-ic">🛒</span><span class="tab-lb on">List</span><div class="tab-dot"></div></div>
+    <div class="tab"><span class="tab-ic">👤</span><span class="tab-lb">Profile</span></div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 8: PROFILE ════ -->
+<div class="pw"><div class="pl">Health Profile</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●● 🔋</span></div></div>
+<div class="screen">
+  <div class="topbar"><span class="topbar-title">Health Profile</span><span style="background:var(--navy-light);border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--navy-mid)">Edit</span></div>
+  <div class="scroll" style="padding:8px 12px;display:flex;flex-direction:column;gap:7px">
+    <!-- Patient card -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+      <div style="background:var(--navy);padding:7px 12px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:8px;font-weight:700;color:rgba(255,255,255,0.55);font-family:var(--mono);letter-spacing:1.5px">PATIENT RECORD</span>
+        <span style="background:var(--safe-bg);border-radius:4px;padding:2px 7px;font-size:8px;font-weight:800;color:var(--safe)">● COMPLETE</span>
+      </div>
+      <div style="display:flex;gap:10px;padding:10px;align-items:center">
+        <div class="avatar" style="background:var(--navy-mid);width:46px;height:46px;border-radius:23px;font-size:19px;border:2px solid var(--border)">S</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--text)">Sarah Johnson</div><div style="font-size:10px;color:var(--muted)">sarah.j@gmail.com</div></div>
+        <span class="tag t-gold">⭐ PRO</span>
+      </div>
+      <div style="display:flex;border-top:1px solid var(--border)">
+        <div style="flex:1;text-align:center;padding:8px;border-right:1px solid var(--border)"><div style="font-size:14px;font-weight:800;color:var(--text)">34<span style="font-size:9px;color:var(--muted)">yrs</span></div><div style="font-size:8px;color:var(--muted);letter-spacing:0.5px">AGE</div></div>
+        <div style="flex:1;text-align:center;padding:8px;border-right:1px solid var(--border)"><div style="font-size:14px;font-weight:800;color:var(--text)">68<span style="font-size:9px;color:var(--muted)">kg</span></div><div style="font-size:8px;color:var(--muted);letter-spacing:0.5px">WEIGHT</div></div>
+        <div style="flex:1;text-align:center;padding:8px;border-right:1px solid var(--border)"><div style="font-size:14px;font-weight:800;color:var(--text)">165<span style="font-size:9px;color:var(--muted)">cm</span></div><div style="font-size:8px;color:var(--muted);letter-spacing:0.5px">HEIGHT</div></div>
+        <div style="flex:1;text-align:center;padding:8px"><div style="font-size:14px;font-weight:800;color:var(--text)">24.9</div><div style="font-size:8px;color:var(--muted);letter-spacing:0.5px">BMI</div></div>
+      </div>
+    </div>
+    <!-- Conditions + Meds compact -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+      <div class="card" style="margin:0"><div class="clabel">ALLERGIES</div><div style="display:flex;flex-direction:column;gap:3px"><span class="tag t-danger">Milk</span><span class="tag t-danger" style="margin-top:3px">Tree Nuts</span></div></div>
+      <div class="card" style="margin:0"><div class="clabel">CONDITIONS</div><div style="display:flex;flex-direction:column;gap:3px"><span class="tag t-info">T2 Diabetes</span><span class="tag t-info" style="margin-top:3px">Hypertension</span></div></div>
+    </div>
+    <!-- Medications -->
+    <div class="card" style="margin:0">
+      <div class="clabel">MEDICATIONS</div>
+      <div style="padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:var(--text)">Metformin 500mg</div><div style="font-size:9px;color:var(--muted)">Twice daily · Type 2 Diabetes</div></div>
+      <div><div style="font-size:12px;font-weight:700;color:var(--text)">Lisinopril 10mg</div><div style="font-size:9px;color:var(--muted)">Once daily · Hypertension</div></div>
+    </div>
+    <!-- Goals -->
+    <div class="card" style="margin:0">
+      <div class="clabel">HEALTH GOALS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag t-safe">Manage blood sugar</span><span class="tag t-safe">Avoid allergens</span><span class="tag t-safe">Reduce sugar</span></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><span class="tab-ic">🏠</span><span class="tab-lb">Home</span></div>
+    <div class="tab"><span class="tab-ic">📓</span><span class="tab-lb">Diary</span></div>
+    <div class="tab"><div class="tab-cam">📸</div><span class="tab-lb">Photo</span></div>
+    <div class="tab"><span class="tab-ic">🛒</span><span class="tab-lb">List</span></div>
+    <div class="tab"><span class="tab-ic">👤</span><span class="tab-lb on">Profile</span><div class="tab-dot"></div></div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 9: SUBSCRIPTION ════ -->
+<div class="pw"><div class="pl">Subscription Plans</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>●●● 🔋</span></div></div>
+<div class="screen">
+  <div class="topbar"><span class="topbar-action">✕ Close</span><span class="topbar-title">Choose Your Plan</span><div style="width:50px"></div></div>
+  <div class="scroll" style="padding:8px 12px;display:flex;flex-direction:column;gap:8px">
+    <div style="text-align:center;margin-bottom:2px">
+      <div style="font-size:12px;color:var(--text2);line-height:18px">Unlock the full power of Shuddhaahar for your health journey</div>
+    </div>
+    <!-- FREE plan -->
+    <div style="background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+        <div><div style="font-size:13px;font-weight:800;color:var(--text)">Free</div><div style="font-size:10px;color:var(--muted)">Get started</div></div>
+        <div style="text-align:right"><div style="font-size:20px;font-weight:800;color:var(--text)">£0</div><div style="font-size:9px;color:var(--muted)">/month</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:9px">
+        <div style="font-size:10px;color:var(--text2)">✓ 10 scans per day</div>
+        <div style="font-size:10px;color:var(--text2)">✓ Ingredients & allergens</div>
+        <div style="font-size:10px;color:var(--text2)">✓ Basic nutrition facts</div>
+        <div style="font-size:10px;color:var(--muted)">✕ AI health analysis</div>
+        <div style="font-size:10px;color:var(--muted)">✕ Price comparison</div>
+        <div style="font-size:10px;color:var(--muted)">✕ Food diary</div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px;text-align:center"><span style="font-size:11px;font-weight:700;color:var(--muted)">Current Plan</span></div>
+    </div>
+    <!-- PRO plan -->
+    <div style="background:var(--navy);border:2px solid var(--navy-mid);border-radius:14px;padding:12px;position:relative">
+      <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#F59E0B;border-radius:20px;padding:2px 12px"><span style="font-size:8px;font-weight:800;color:#fff;letter-spacing:1px">MOST POPULAR</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+        <div><div style="font-size:13px;font-weight:800;color:#fff">Pro</div><div style="font-size:10px;color:rgba(255,255,255,0.5)">Full clinical suite</div></div>
+        <div style="text-align:right"><div style="font-size:20px;font-weight:800;color:#fff">£4.99</div><div style="font-size:9px;color:rgba(255,255,255,0.5)">/month</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:9px">
+        <div style="font-size:10px;color:rgba(255,255,255,0.85)">✓ Unlimited scans</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.85)">✓ AI health analysis (Claude)</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.85)">✓ UK price comparison</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.85)">✓ Food diary + macro tracking</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.85)">✓ Safe shopping list</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.85)">✓ Photo meal scan</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.85)">✓ Apple Health / Google Fit</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.2)"><span style="font-size:12px;font-weight:700;color:#fff">Start 7-Day Free Trial →</span></div>
+      <div style="text-align:center;margin-top:5px"><span style="font-size:9px;color:rgba(255,255,255,0.4)">Then £4.99/month · Cancel anytime</span></div>
+    </div>
+    <!-- MAX plan -->
+    <div style="background:linear-gradient(135deg,#78350F,#92400E);border:2px solid #B45309;border-radius:14px;padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+        <div><div style="font-size:13px;font-weight:800;color:#FDE68A">Max</div><div style="font-size:10px;color:rgba(253,230,138,0.6)">Family · Power users</div></div>
+        <div style="text-align:right"><div style="font-size:20px;font-weight:800;color:#FDE68A">£9.99</div><div style="font-size:9px;color:rgba(253,230,138,0.5)">/month</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:9px">
+        <div style="font-size:10px;color:rgba(253,230,138,0.9)">✓ Everything in Pro</div>
+        <div style="font-size:10px;color:rgba(253,230,138,0.9)">✓ Up to 5 family profiles</div>
+        <div style="font-size:10px;color:rgba(253,230,138,0.9)">✓ Medical document upload (AI)</div>
+        <div style="font-size:10px;color:rgba(253,230,138,0.9)">✓ Weekly AI health report</div>
+        <div style="font-size:10px;color:rgba(253,230,138,0.9)">✓ Priority support</div>
+      </div>
+      <div style="background:rgba(253,230,138,0.15);border-radius:8px;padding:9px;text-align:center;border:1px solid rgba(253,230,138,0.25)"><span style="font-size:11px;font-weight:700;color:#FDE68A">Get Max →</span></div>
+    </div>
+    <div style="text-align:center"><span style="font-size:9px;color:var(--muted)">🔒 Secure payment via Stripe · Subscriptions managed in App Store / Google Play</span></div>
+  </div>
+</div>
+</div></div></div>
+
+<!-- ════════════════════════════════════ SCREEN 10: PAYMENT ════ -->
+<div class="pw"><div class="pl">Payment</div><div class="phone"><div class="notch"></div><div class="inner">
+<div class="sb"><span>9:41</span><div class="sbi"><span>🔒 ●●● 🔋</span></div></div>
+<div class="screen">
+  <div class="topbar"><span class="topbar-action">← Back</span><span class="topbar-title">Subscribe to Pro</span><div style="width:50px"></div></div>
+  <div class="scroll" style="padding:10px 14px;display:flex;flex-direction:column;gap:10px">
+    <!-- Plan summary -->
+    <div style="background:var(--navy);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:14px;font-weight:800;color:#fff">Shuddhaahar Pro</div><div style="font-size:10px;color:rgba(255,255,255,0.55);margin-top:2px">7-day free trial, then</div></div>
+      <div style="text-align:right"><div style="font-size:22px;font-weight:800;color:#fff">£4.99</div><div style="font-size:9px;color:rgba(255,255,255,0.5)">/month</div></div>
+    </div>
+    <!-- What's included -->
+    <div class="card" style="margin:0">
+      <div class="clabel">INCLUDED IN PRO</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;border-radius:9px;background:var(--safe);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:10px;font-weight:800">✓</span></div><span style="font-size:11px;color:var(--text)">Unlimited barcode scans</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;border-radius:9px;background:var(--safe);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:10px;font-weight:800">✓</span></div><span style="font-size:11px;color:var(--text)">Claude AI health analysis</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;border-radius:9px;background:var(--safe);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:10px;font-weight:800">✓</span></div><span style="font-size:11px;color:var(--text)">UK supermarket prices</span></div>
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:18px;height:18px;border-radius:9px;background:var(--safe);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:10px;font-weight:800">✓</span></div><span style="font-size:11px;color:var(--text)">Food diary & macro tracking</span></div>
+      </div>
+    </div>
+    <!-- Native pay buttons -->
+    <div style="background:#000;border-radius:11px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15)">
+      <span style="font-size:16px;color:#fff"></span>
+      <span style="font-size:13px;font-weight:700;color:#fff">Pay with Apple Pay</span>
+    </div>
+    <div style="background:#4285F4;border-radius:11px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px">
+      <span style="font-size:16px;color:#fff">G</span>
+      <span style="font-size:13px;font-weight:700;color:#fff">Pay with Google Pay</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px"><div style="flex:1;height:1px;background:var(--border)"></div><span style="font-size:10px;color:var(--muted)">or</span><div style="flex:1;height:1px;background:var(--border)"></div></div>
+    <!-- Card payment (Stripe) -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px">
+      <div class="clabel">PAY BY CARD</div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;margin-bottom:8px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;align-items:center"><span>Card number</span><div style="display:flex;gap:4px"><span style="font-size:16px">💳</span></div></div>
+      <div style="display:flex;gap:7px;margin-bottom:8px">
+        <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:11px;color:var(--muted)">MM / YY</div>
+        <div style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:11px;color:var(--muted)">CVC</div>
+      </div>
+      <div style="background:var(--navy-mid);border-radius:9px;padding:12px;text-align:center"><span style="font-size:12px;font-weight:700;color:#fff">🔒 Start Free Trial — £0 today</span></div>
+    </div>
+    <!-- Trust signals -->
+    <div style="display:flex;justify-content:center;gap:12px">
+      <div style="text-align:center"><div style="font-size:16px">🔒</div><div style="font-size:9px;color:var(--muted)">256-bit SSL</div></div>
+      <div style="text-align:center"><div style="font-size:16px">⚡</div><div style="font-size:9px;color:var(--muted)">Powered by Stripe</div></div>
+      <div style="text-align:center"><div style="font-size:16px">↩</div><div style="font-size:9px;color:var(--muted)">Cancel anytime</div></div>
+    </div>
+    <div style="text-align:center"><span style="font-size:9px;color:var(--muted);line-height:14px">By subscribing you agree to our Terms. Free trial lasts 7 days. You will be charged £4.99/month after the trial unless you cancel.</span></div>
+  </div>
+</div>
+</div></div></div>
+
+</div><!-- end phones-row -->
+
+<!-- ── Design tokens legend ── -->
+<div style="max-width:1000px;margin:48px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 16px">
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px"><div style="font-size:20px;margin-bottom:7px">✚</div><div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:4px">Medical Design</div><div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:16px">Clinical white + navy. WCAG AAA contrast. IBM Plex fonts.</div></div>
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px"><div style="font-size:20px;margin-bottom:7px">🤖</div><div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:4px">Claude AI Core</div><div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:16px">Every scan analysed by Claude Haiku. Personalised 0–10 score.</div></div>
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px"><div style="font-size:20px;margin-bottom:7px">💳</div><div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:4px">Stripe Payments</div><div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:16px">Free · Pro £4.99/mo · Max £9.99/mo. Apple Pay + Google Pay.</div></div>
+  <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:14px"><div style="font-size:20px;margin-bottom:7px">🔒</div><div style="font-size:12px;font-weight:700;color:#fff;margin-bottom:4px">GDPR Compliant</div><div style="font-size:10px;color:rgba(255,255,255,0.4);line-height:16px">AWS eu-west-2. DynamoDB encrypted at rest. Right to erasure.</div></div>
+</div>
+
+</body>
+</html>

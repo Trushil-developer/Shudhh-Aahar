@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(adb -s 41091JEHN23886 install -r /Users/trushil/Documents/Shuddhaahar/android/app/build/outputs/apk/debug/app-debug.apk)",
+      "Bash(adb -s 41091JEHN23886 install -r /Users/trushil/Documents/Shuddhaahar/android/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk)",
+      "Bash(adb -s 41091JEHN23886 install -r /Users/trushil/Documents/Shuddhaahar/android/app/build/outputs/apk/release/app-arm64-v8a-release.apk)",
+      "Bash(aws --version)",
+      "Bash(amplify --version)",
+      "Bash(aws cloudformation *)",
+      "Bash(terraform -chdir=/Users/trushil/Documents/Shuddhaahar/terraform state list)"
+    ]
+  }
+}

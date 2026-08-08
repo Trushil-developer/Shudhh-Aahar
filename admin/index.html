@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Shuddhaahar Admin</title>
+<link rel="icon" type="image/png" href="/favicon-32.png"/>
+<link rel="apple-touch-icon" href="/favicon-180.png"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Mirrors the mobile app's "Health-Market Hybrid" palette (src/theme/medical.ts) —
+     NHS blue for brand/chrome, grocery green for success, same status colors. */
+  --bg:#F3F6F9;--surface:#FFFFFF;--surface2:#F0F4F8;--border:#E1E8F0;--border2:#C7D2E0;
+  --navy:#003D78;--accent:#005EB8;--accent2:#003D78;--accent-glow:rgba(0,94,184,0.12);
+  --text:#141C24;--text2:#4C5B6B;--muted:#7C8A99;
+  --green:#00843D;--green-bg:rgba(0,132,61,0.1);
+  --orange:#B45309;--orange-bg:rgba(180,83,9,0.1);
+  --red:#C53030;--red-bg:rgba(197,48,48,0.1);
+  --cyan:#41B6E6;--cyan-bg:rgba(65,182,230,0.12);
+  --purple:#003D78;--purple-bg:rgba(0,61,120,0.08);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── Login overlay ── */
+#login-overlay{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn 0.3s ease
+}
+.login-card{
+  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
+  padding:40px;width:380px;
+  box-shadow:0 24px 48px rgba(20,28,36,0.12),0 0 0 1px rgba(20,28,36,0.04)
+}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.login-logo-mark{
+  width:44px;height:44px;border-radius:12px;
+  display:block;object-fit:cover;
+  box-shadow:0 4px 16px rgba(0,94,184,0.22)
+}
+.login-logo-name{font-size:18px;font-weight:800;color:var(--text)}
+.login-logo-sub{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:1px}
+.login-title{font-size:22px;font-weight:800;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.2px;font-family:var(--mono);display:block;margin-bottom:7px}
+.form-input{
+  width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;
+  padding:12px 14px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;
+  transition:border-color 0.15s
+}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.form-input::placeholder{color:var(--muted)}
+.login-btn{
+  width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:13px;font-size:14px;font-weight:700;font-family:var(--font);
+  cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-top:8px
+}
+.login-btn:hover{opacity:0.88}
+.login-btn:active{transform:scale(0.98)}
+.login-btn:disabled{opacity:0.6;cursor:not-allowed}
+.login-error{color:var(--red);font-size:12px;margin-top:10px;display:none}
+.security-badges{display:flex;gap:8px;margin-top:16px;justify-content:center}
+.sec-badge{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:9px;font-family:var(--mono);color:var(--muted);letter-spacing:0.8px}
+
+/* ── Layout ── */
+#app{display:none;height:100vh;overflow:hidden}
+.layout{display:flex;height:100vh}
+
+/* ── Sidebar ── */
+.sidebar{
+  width:220px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto
+}
+.sidebar-logo{padding:20px 18px;border-bottom:1px solid var(--border)}
+.sidebar-logo-mark{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.logo-icon{width:30px;height:30px;border-radius:8px;display:block;object-fit:cover;box-shadow:0 2px 10px rgba(0,94,184,0.2)}
+.logo-name{font-size:16px;font-weight:800}
+.logo-sub{font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:1.5px}
+.nav{padding:12px 10px;flex:1}
+.nav-section-label{font-size:9px;font-family:var(--mono);color:var(--muted);letter-spacing:2px;padding:10px 8px 5px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.15s;border:none;background:none;width:100%;text-align:left;position:relative}
+.nav-item:hover{background:var(--border);color:var(--text)}
+.nav-item.active{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(0,94,184,0.2)}
+.nav-icon{font-size:15px;width:18px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:99px;padding:1px 6px;font-family:var(--mono)}
+.sidebar-footer{padding:14px;border-top:1px solid var(--border)}
+.admin-pill{display:flex;align-items:center;gap:9px;background:var(--surface2);border-radius:10px;padding:9px 11px}
+.admin-avatar{width:28px;height:28px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.admin-info .name{font-size:12px;font-weight:600}
+.admin-info .role{font-size:9px;color:var(--muted);font-family:var(--mono)}
+.logout-btn{margin-top:8px;width:100%;background:none;border:1px solid var(--border2);border-radius:8px;padding:7px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font);transition:all 0.15s}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg);
+  flex-shrink:0
+}
+.topbar-left h1{font-size:19px;font-weight:700;font-family:var(--font)}
+.topbar-left p{font-size:11px;color:var(--muted);margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.clock{font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:5px 10px}
+.refresh-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:opacity 0.15s}
+.refresh-btn:hover{opacity:0.85}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+.page{display:none}.page.active{display:block}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;font-family:var(--mono);display:flex;align-items:center;justify-content:space-between}
+.card-badge{font-size:9px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:2px 7px;letter-spacing:0.5px;text-transform:none;font-weight:400;color:var(--text2)}
+
+/* ── Stat cards ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:border-color 0.2s}
+.stat-card:hover{border-color:var(--border2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.blue::before{background:var(--accent)}
+.stat-card.green::before{background:var(--green)}
+.stat-card.orange::before{background:var(--orange)}
+.stat-card.cyan::before{background:var(--cyan)}
+.stat-card.purple::before{background:var(--purple)}
+.stat-card.red::before{background:var(--red)}
+.stat-label{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.stat-value{font-size:30px;font-weight:800;line-height:1;margin-bottom:6px}
+.stat-change{font-size:11px;font-family:var(--mono);display:flex;align-items:center;gap:5px}
+.stat-change.up{color:var(--green)}.stat-change.down{color:var(--red)}.stat-change.neutral{color:var(--muted)}
+.stat-icon{position:absolute;top:18px;right:18px;font-size:26px;opacity:0.12}
+
+/* ── Grid layouts ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.grid-60-40{display:grid;grid-template-columns:60fr 40fr;gap:14px;margin-bottom:20px}
+
+/* ── Charts ── */
+.chart-wrap{position:relative;height:200px}
+.chart-wrap-lg{position:relative;height:240px}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{border-bottom:1px solid var(--border2)}
+th{text-align:left;padding:9px 12px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+td{padding:11px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(20,28,36,0.025)}
+.td-mono{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;border-radius:5px;padding:2px 9px;font-size:10px;font-weight:600;font-family:var(--mono)}
+.badge-green{background:var(--green-bg);color:var(--green);border:1px solid rgba(0,132,61,0.25)}
+.badge-red{background:var(--red-bg);color:var(--red);border:1px solid rgba(197,48,48,0.25)}
+.badge-orange{background:var(--orange-bg);color:var(--orange);border:1px solid rgba(180,83,9,0.25)}
+.badge-blue{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(0,94,184,0.25)}
+.badge-cyan{background:var(--cyan-bg);color:var(--cyan);border:1px solid rgba(65,182,230,0.25)}
+.badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(0,61,120,0.25)}
+.badge-muted{background:var(--surface2);color:var(--muted);border:1px solid var(--border2)}
+
+/* ── Progress bars ── */
+.progress{background:var(--border);border-radius:99px;height:5px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;transition:width 1s ease}
+
+/* ── Filter bar ── */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 13px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;width:240px;transition:border-color 0.15s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--muted)}
+.filter-select{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 12px;color:var(--text);font-size:12px;font-family:var(--font);outline:none;cursor:pointer}
+
+/* ── Buttons ── */
+.btn{border:none;border-radius:7px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);transition:opacity 0.15s}
+.btn:hover{opacity:0.8}
+.btn-danger{background:rgba(197,48,48,0.12);color:var(--red);border:1px solid rgba(197,48,48,0.2)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:var(--surface2);color:var(--muted);border:1px solid var(--border2)}
+.btn-green{background:var(--green-bg);color:var(--green);border:1px solid rgba(0,132,61,0.2)}
+
+/* ── Toggle switch ── */
+.switch{position:relative;display:inline-block;width:38px;height:22px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch-slider{position:absolute;cursor:pointer;inset:0;background:var(--border2);border-radius:99px;transition:background 0.15s}
+.switch-slider::before{content:'';position:absolute;height:16px;width:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform 0.15s}
+.switch input:checked + .switch-slider{background:var(--green)}
+.switch input:checked + .switch-slider::before{transform:translateX(16px)}
+
+/* ── Health bars ── */
+.health-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.health-row:last-child{border-bottom:none}
+.health-label{font-size:12px;color:var(--text);min-width:160px}
+.health-count{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:44px;text-align:right}
+
+/* ── Cost rows ── */
+.cost-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+.cost-row:last-child{border-bottom:none}
+.cost-name{font-size:12px;color:var(--text);display:flex;align-items:center;gap:9px}
+.cost-detail{font-size:10px;color:var(--muted);margin-top:2px}
+.cost-amount{font-family:var(--mono);font-size:14px;font-weight:500}
+
+/* ── Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,28,36,0.45);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:24px;width:520px;max-height:80vh;overflow-y:auto;position:relative;animation:slideUp 0.2s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:none;border-radius:7px;width:28px;height:28px;cursor:pointer;color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:16px}
+.modal-section{margin-bottom:14px}
+.modal-section-title{font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.modal-chips{display:flex;flex-wrap:wrap;gap:5px}
+.modal-chip{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 9px;font-size:11px;color:var(--text)}
+.modal-actions{display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+
+/* ── Audit log ── */
+.audit-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.audit-row:last-child{border-bottom:none}
+.audit-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.audit-msg{font-size:12px;color:var(--text);flex:1}
+.audit-time{font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+/* ── Misc ── */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:99px}
+@media(max-width:1100px){.stats-grid{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ═══════════════════════════════════════════════════ -->
+<div id="login-overlay">
+  <div class="login-card">
+    <div class="login-logo">
+      <img class="login-logo-mark" src="/favicon-180.png" alt="Shuddhaahar"/>
+      <div>
+        <div class="login-logo-name">Shuddhaahar</div>
+        <div style="font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:1px">ADMIN CONSOLE</div>
+      </div>
+    </div>
+    <div class="login-title">Secure Sign In</div>
+    <div class="login-sub">Admin access only. All sessions are logged and audited.</div>
+
+    <div class="form-group">
+      <label class="form-label">USERNAME</label>
+      <input class="form-input" type="text" id="login-username" placeholder="username" autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">PASSWORD</label>
+      <div style="position:relative">
+        <input class="form-input" type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password" style="padding-right:40px"/>
+        <button type="button" onclick="togglePw()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px" id="pw-toggle">👁</button>
+      </div>
+    </div>
+
+    <div class="login-error" id="login-error"></div>
+
+    <button class="login-btn" onclick="attemptLogin()" id="login-btn">Sign In →</button>
+
+    <div class="security-badges">
+      <span class="sec-badge">🔒 TLS 1.3</span>
+      <span class="sec-badge">🔑 Password protected</span>
+      <span class="sec-badge">📋 AUDIT LOGGED</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN APP ════════════════════════════════════════════════ -->
+<div id="app">
+<div class="layout">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">
+      <img class="logo-icon" src="/favicon-180.png" alt="Shuddhaahar"/>
+      <div class="logo-name">Shuddhaahar</div>
+    </div>
+    <div class="logo-sub">Admin Console · v1.0</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section-label">Overview</div>
+    <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span>Dashboard</button>
+    <button class="nav-item" onclick="showPage('users',this)"><span class="nav-icon">👥</span>Users<span class="nav-badge" id="new-badge">3</span></button>
+
+    <div class="nav-section-label">Analytics</div>
+    <button class="nav-item" onclick="showPage('scans',this)"><span class="nav-icon">▦</span>Scan Activity</button>
+    <button class="nav-item" onclick="showPage('health',this)"><span class="nav-icon">🩺</span>Health Overview</button>
+    <button class="nav-item" onclick="showPage('revenue',this)"><span class="nav-icon">💰</span>Revenue</button>
+    <button class="nav-item" onclick="showPage('membership',this)"><span class="nav-icon">💳</span>Membership</button>
+    <button class="nav-item" onclick="showPage('costs',this)"><span class="nav-icon">⚡</span>API Costs</button>
+
+    <div class="nav-section-label">System</div>
+    <button class="nav-item" onclick="showPage('cms',this)"><span class="nav-icon">📝</span>CMS Pages</button>
+    <button class="nav-item" onclick="showPage('tc',this)"><span class="nav-icon">📜</span>Terms & Conditions<span class="nav-badge" id="tc-badge" style="display:none">!</span></button>
+    <button class="nav-item" onclick="showPage('audit',this)"><span class="nav-icon">📋</span>Audit Log</button>
+    <button class="nav-item" onclick="showPage('system',this)"><span class="nav-icon">🖥</span>System Health</button>
+    <button class="nav-item" onclick="showPage('appconfig',this)"><span class="nav-icon">⚙️</span>App Config</button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="admin-pill">
+      <div class="admin-avatar">A</div>
+      <div class="admin-info"><div class="name">Admin</div><div class="role">super_admin</div></div>
+    </div>
+    <button class="logout-btn" onclick="logout()">← Sign Out</button>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1 id="page-title">Dashboard</h1>
+      <p id="page-sub">Platform overview · Real-time data</p>
+    </div>
+    <div class="topbar-right">
+      <div style="display:flex;align-items:center;gap:6px"><div class="status-dot"></div><span style="font-size:11px;color:var(--green)">All systems operational</span></div>
+      <div class="clock" id="clock">--:--:--</div>
+      <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══════════════════════ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-label">Total Users</div><div class="stat-value" id="s-users">—</div></div>
+        <div class="stat-card green"><div class="stat-icon">▦</div><div class="stat-label">Total Scans</div><div class="stat-value" id="s-scans">—</div></div>
+        <div class="stat-card orange"><div class="stat-icon">💷</div><div class="stat-label">MRR (estimated)</div><div class="stat-value" id="s-mrr">—</div><div class="stat-change neutral">Derived from synced plan data — not verified billing</div></div>
+        <div class="stat-card cyan"><div class="stat-icon">🔁</div><div class="stat-label">Avg Scans / User</div><div class="stat-value" id="s-avg-scans">—</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card"><div class="card-title">User Growth <span class="card-badge">Cumulative</span></div><div class="chart-wrap"><canvas id="growthChart"></canvas></div></div>
+        <div class="card"><div class="card-title">Daily Scans <span class="card-badge">Last 30 days</span></div><div class="chart-wrap"><canvas id="dailyScansChart"></canvas></div></div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card"><div class="card-title">Verdicts Today</div><div class="chart-wrap" style="height:170px"><canvas id="verdictChart"></canvas></div></div>
+        <div class="card"><div class="card-title">Subscription Mix</div><div class="chart-wrap" style="height:170px"><canvas id="planChart"></canvas></div></div>
+        <div class="card">
+          <div class="card-title">Top Products Scanned</div>
+          <table>
+            <thead><tr><th>#</th><th>Product</th><th>Scans</th></tr></thead>
+            <tbody id="top-products-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ USERS ══════════════════════════ -->
+    <div class="page" id="page-users">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Total Users</div><div class="stat-value" id="us-total">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Profile Complete</div><div class="stat-value" id="us-complete">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Member Plan</div><div class="stat-value" id="us-essential">—</div></div>
+        <div class="stat-card red"><div class="stat-label">Banned</div><div class="stat-value" id="us-banned">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">All Users <span class="card-badge" id="user-count-label">— total</span></div>
+        <div class="filter-bar">
+          <input class="search-input" type="text" placeholder="🔍  Search name or email…" oninput="filterUsers(this.value)"/>
+          <select class="filter-select" onchange="filterByStatus(this.value)"><option value="all">All Status</option><option value="active">Active</option><option value="banned">Banned</option></select>
+          <select class="filter-select" onchange="filterByPlan(this.value)"><option value="all">All Plans</option><option value="free">Free</option><option value="member">Member</option></select>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>User</th><th>Plan</th><th>Scans</th><th>Joined</th><th>Last Active</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="users-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══ SCAN ACTIVITY ══════════════════ -->
+    <div class="page" id="page-scans">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Scans Today</div><div class="stat-value" id="sc-today">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Avg/User/Day (30d)</div><div class="stat-value" id="sc-avg-day">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">⚠ Caution</div><div class="stat-value" id="sc-caution">—</div><div class="stat-change neutral" id="sc-caution-pct"></div></div>
+        <div class="stat-card red"><div class="stat-label">🚫 Avoid</div><div class="stat-value" id="sc-avoid">—</div><div class="stat-change neutral" id="sc-avoid-pct"></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-title">Hourly Scans <span class="card-badge">Today</span></div><div class="chart-wrap"><canvas id="hourlyChart"></canvas></div></div>
+        <div class="card"><div class="card-title">Weekly Scan Trend</div><div class="chart-wrap"><canvas id="weeklyChart"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Warning Types <span class="card-badge">All time</span></div>
+        <table><thead><tr><th>Warning</th><th>Count</th><th>% of Scans</th></tr></thead>
+        <tbody id="warning-types-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ══ HEALTH OVERVIEW ════════════════ -->
+    <div class="page" id="page-health">
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">Top Allergies</div>
+          <div id="allergies-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Medical Conditions</div>
+          <div id="conditions-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Diet Types</div>
+          <div class="chart-wrap" style="height:200px"><canvas id="dietChart"></canvas></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-title">Age Distribution</div><div class="chart-wrap"><canvas id="ageChart"></canvas></div></div>
+        <div class="card"><div class="card-title">Health Goals</div><div id="goals-list"></div></div>
+      </div>
+      <div class="card" style="background:rgba(180,83,9,0.05);border-color:rgba(180,83,9,0.2)">
+        <div class="card-title" style="color:var(--orange)">⚕ Health Data Privacy Notice <span class="badge badge-orange">GDPR</span></div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.8">This section shows <strong style="color:var(--text)">aggregated anonymised statistics only</strong>. No individual health data is accessible from this panel. All personal health records are encrypted in AWS DynamoDB with Cognito owner-level permissions — inaccessible even to admin. For GDPR erasure requests, use User Management to trigger the deletion flow by user ID only.</p>
+      </div>
+    </div>
+
+    <!-- ══ REVENUE ════════════════════════ -->
+    <div class="page" id="page-revenue">
+      <div class="stats-grid">
+        <div class="stat-card green"><div class="stat-label">MRR (estimated)</div><div class="stat-value" id="rev-mrr">—</div><div class="stat-change neutral">Not verified billing</div></div>
+        <div class="stat-card blue"><div class="stat-label">ARR (estimated)</div><div class="stat-value" id="rev-arr">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Paying Users</div><div class="stat-value" id="rev-paying">—</div><div class="stat-change neutral" id="rev-conversion"></div></div>
+        <div class="stat-card cyan"><div class="stat-label">Avg Revenue/User</div><div class="stat-value" id="rev-arpu">—</div><div class="stat-change neutral">MRR ÷ total users</div></div>
+      </div>
+      <div class="grid-60-40">
+        <div class="card">
+          <div class="card-title">Monthly Revenue Trend <span class="card-badge">Unavailable</span></div>
+          <div style="padding:32px 16px;text-align:center;color:var(--muted);font-size:12px;line-height:1.8">
+            No historical revenue time-series is stored yet — the backend only keeps each user's <em>current</em> plan, not a month-by-month history.<br/>A trend will build up here once that's tracked over time.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Revenue Breakdown <span class="card-badge">Current snapshot</span></div>
+          <div style="margin-bottom:16px"><div class="chart-wrap" style="height:140px"><canvas id="revenueBreakChart"></canvas></div></div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="revenue-breakdown-rows"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Subscription Projections <span class="card-badge">Illustrative — based on real observed conversion</span></div>
+        <table><thead><tr><th>Users</th><th id="proj-essential-header">Member</th><th>MRR</th><th>ARR</th></tr></thead>
+        <tbody id="projections-tbody"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ══ MEMBERSHIP ═════════════════════ -->
+    <div class="page" id="page-membership">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Active Members</div><div class="stat-value" id="mem-active">—</div></div>
+        <div class="stat-card green"><div class="stat-label">MRR (estimated)</div><div class="stat-value" id="mem-mrr">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Cancelled (this month)</div><div class="stat-value" id="mem-cancelled">—</div></div>
+        <div class="stat-card red"><div class="stat-label">Refunded (this month)</div><div class="stat-value" id="mem-refunded">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Membership Transactions <span class="card-badge">Every purchase, renewal &amp; admin action — most recent first</span></div>
+        <div class="filter-bar">
+          <input class="search-input" type="text" placeholder="🔍  Search by name or email…" oninput="filterMembershipEvents(this.value)"/>
+          <select class="filter-select" onchange="filterMembershipEventsByType(this.value)">
+            <option value="all">All Types</option>
+            <option value="purchase">Purchase</option>
+            <option value="admin_grant">Admin Grant</option>
+            <option value="admin_cancel">Admin Cancel</option>
+            <option value="refund">Refund</option>
+          </select>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Date</th><th>User</th><th>Type</th><th>Plan</th><th>Billing</th><th>Amount</th><th>Platform</th><th>Admin</th><th>Note</th></tr></thead>
+          <tbody id="membership-events-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══ API COSTS ══════════════════════ -->
+    <div class="page" id="page-costs">
+      <div class="stats-grid">
+        <div class="stat-card orange"><div class="stat-label">Total Cost MTD</div><div class="stat-value">£4.21</div><div class="stat-change up">▲ £0.80 vs last month</div></div>
+        <div class="stat-card green"><div class="stat-label">Cost Per Scan</div><div class="stat-value">$0.001</div><div class="stat-change neutral">Stable</div></div>
+        <div class="stat-card blue"><div class="stat-label">Claude API MTD</div><div class="stat-value">£3.84</div><div class="stat-change neutral">91% of total</div></div>
+        <div class="stat-card cyan"><div class="stat-label">AWS MTD</div><div class="stat-value">£0.37</div><div class="stat-change up">Free tier mostly</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-title">Daily API Spend <span class="card-badge">Last 30 days</span></div><div class="chart-wrap"><canvas id="costChart"></canvas></div></div>
+        <div class="card">
+          <div class="card-title">Cost Breakdown</div>
+          <div class="cost-row"><div class="cost-name"><span>🤖</span><div><div>Claude Haiku 4.5</div><div class="cost-detail">38,104 analyses × $0.0001</div></div></div><div class="cost-amount">£3.84</div></div>
+          <div class="cost-row"><div class="cost-name"><span>☁️</span><div><div>AWS DynamoDB</div><div class="cost-detail">Free tier — 200M req/month</div></div></div><div class="cost-amount" style="color:var(--green)">£0.00</div></div>
+          <div class="cost-row"><div class="cost-name"><span>🔐</span><div><div>AWS Cognito</div><div class="cost-detail">2,847 MAU (free tier)</div></div></div><div class="cost-amount" style="color:var(--green)">£0.00</div></div>
+          <div class="cost-row"><div class="cost-name"><span>🔗</span><div><div>AWS AppSync</div><div class="cost-detail">182,000 queries</div></div></div><div class="cost-amount">£0.37</div></div>
+          <div class="cost-row" style="border-top:1px solid var(--border2);margin-top:6px;padding-top:12px"><div class="cost-name" style="font-weight:700;color:var(--text)">Total MTD</div><div class="cost-amount" style="font-size:18px;color:var(--accent2)">£4.21</div></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ CMS PAGES ════════════════════════ -->
+    <div class="page" id="page-cms">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Total Pages</div><div class="stat-value">8</div><div class="stat-change neutral">Fixed set of app pages</div></div>
+        <div class="stat-card green"><div class="stat-label">Customised in Admin</div><div class="stat-value" id="cms-customised-count">—</div><div class="stat-change neutral">Rest show built-in defaults</div></div>
+        <div class="stat-card orange"><div class="stat-label">Contact Submissions</div><div class="stat-value" id="cms-contact-total">—</div></div>
+        <div class="stat-card cyan"><div class="stat-label">New / Unread</div><div class="stat-value" id="cms-contact-new">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">CMS Pages <span class="card-badge">Manage all app content</span></div>
+        <table><thead><tr><th>Page</th><th>Slug</th><th>Last Updated</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="cms-table-body"></tbody></table>
+      </div>
+      <div class="card" id="cms-editor" style="display:none">
+        <div class="card-title" id="cms-editor-title">Edit Page</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px">This edits a single content block for the page. Richer multi-section layouts (FAQ lists, feature grids, etc.) aren't editable from here yet — saving replaces the page with this text as its content.</p>
+        <div style="margin-bottom:12px">
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">PAGE TITLE</label>
+          <input class="search-input" id="cms-edit-title" style="width:100%;margin-bottom:10px" placeholder="Page title"/>
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">SUBTITLE</label>
+          <input class="search-input" id="cms-edit-subtitle" style="width:100%;margin-bottom:10px" placeholder="Page subtitle"/>
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">CONTENT</label>
+          <textarea id="cms-edit-body" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:12px;color:var(--text);font-size:12px;font-family:var(--font);min-height:200px;resize:vertical;outline:none"></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="saveCMSPage()" id="cms-save-btn">Save & Publish</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('cms-editor').style.display='none'">Cancel</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Contact Submissions <span class="card-badge">Most recent first</span></div>
+        <table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="contact-table-body"></tbody></table>
+      </div>
+    </div>
+
+
+    <!-- ══ TERMS & CONDITIONS ═════════════════ -->
+    <div class="page" id="page-tc">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Current Version</div><div class="stat-value" id="tc-current-ver">—</div><div class="stat-change neutral" id="tc-current-status"></div></div>
+        <div class="stat-card green"><div class="stat-label">Accepted Current Version</div><div class="stat-value" id="tc-accepted-count">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Total Acceptances Logged</div><div class="stat-value" id="tc-total-log">—</div><div class="stat-change neutral">All versions</div></div>
+        <div class="stat-card purple"><div class="stat-label">Last Published</div><div class="stat-value" style="font-size:18px" id="tc-last-updated">—</div></div>
+      </div>
+
+      <!-- Version history table -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Version History <span class="card-badge">All published versions</span></div>
+        <table><thead><tr><th>Version</th><th>Published</th><th>Summary</th><th>Requires Re-Acceptance</th><th>Accepted By</th><th>Status</th></tr></thead>
+        <tbody id="tc-version-table"></tbody></table>
+      </div>
+
+      <!-- Publish new version -->
+      <div class="card" style="border:2px solid rgba(180,83,9,0.3);background:rgba(180,83,9,0.03)">
+        <div class="card-title" style="color:var(--orange)">📜 Publish New T&C Version <span class="badge badge-orange">All users must re-accept</span></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">NEW VERSION NUMBER</label>
+            <input class="search-input" id="tc-new-version" style="width:100%" placeholder="e.g. 1.1.0 or 2.0.0" value="1.1.0"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">REQUIRE RE-ACCEPTANCE?</label>
+            <select class="filter-select" id="tc-requires-acceptance" style="width:100%">
+              <option value="true">Yes — show modal to all users</option>
+              <option value="false">No — silent update (typos/formatting only)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">ONE-LINE SUMMARY (shown to users)</label>
+          <input class="search-input" id="tc-summary" style="width:100%" placeholder="e.g. Updated cancellation policy and added new data retention terms"/>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">WHAT CHANGED (bullet points — shown to returning users)</label>
+          <textarea id="tc-changes" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:12px;color:var(--text);font-size:12px;font-family:var(--font);min-height:80px;resize:vertical;outline:none" placeholder="One change per line, e.g:&#10;Updated cancellation policy (Section 4)&#10;Clarified data retention period (Section 7)&#10;Added family profile terms (Section 2)"></textarea>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">FULL TERMS TEXT</label>
+          <textarea id="tc-full-text" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:9px;padding:12px;color:var(--text);font-size:12px;font-family:var(--font);min-height:280px;resize:vertical;outline:none;font-family:var(--mono)" placeholder="Paste the complete Terms of Service text here..."></textarea>
+        </div>
+
+        <div style="background:var(--orange-bg);border:1px solid rgba(180,83,9,0.25);border-radius:10px;padding:12px;margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--orange);margin-bottom:5px">⚠ What happens when you publish:</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.8">
+            1. New version is immediately pushed to all app clients<br/>
+            2. Next time each user opens the app, they will see the T&C modal<br/>
+            3. They MUST scroll to the bottom and tap "I Accept" before using the app<br/>
+            4. If they decline, the app closes — they cannot use Shuddhaahar until they accept<br/>
+            5. All acceptances are timestamped and logged for legal compliance
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" style="background:var(--orange)" onclick="publishTCVersion()">📜 Publish New Version</button>
+          <button class="btn btn-ghost" onclick="previewTC()">👁 Preview Modal</button>
+        </div>
+      </div>
+
+      <!-- Acceptance log -->
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">Acceptance Log <span class="card-badge">Legal audit trail</span></div>
+        <div class="filter-bar">
+          <input class="search-input" placeholder="🔍 Search by user email..."/>
+          <select class="filter-select"><option>All Versions</option><option>v1.0.0</option><option>v1.1.0</option></select>
+        </div>
+        <table><thead><tr><th>User</th><th>Email</th><th>Version</th><th>Accepted At</th><th>Device</th></tr></thead>
+        <tbody id="tc-acceptance-log"></tbody></table>
+      </div>
+    </div>
+
+    <!-- ══ AUDIT LOG ══════════════════════ -->
+    <div class="page" id="page-audit">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Events Today</div><div class="stat-value" id="audit-today">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Admin Actions</div><div class="stat-value" id="audit-actions">—</div><div class="stat-change neutral">user/data/gdpr</div></div>
+        <div class="stat-card red"><div class="stat-label">Security Events</div><div class="stat-value" id="audit-security">—</div><div class="stat-change neutral">Failed logins</div></div>
+        <div class="stat-card green"><div class="stat-label">GDPR Requests</div><div class="stat-value" id="audit-gdpr">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Audit Trail <span class="card-badge">Most recent first</span></div>
+        <div id="audit-log"></div>
+      </div>
+    </div>
+
+    <!-- ══ SYSTEM HEALTH ══════════════════ -->
+    <div class="page" id="page-system">
+      <div class="card">
+        <div class="card-title">
+          Live Dependency Check
+          <button class="btn btn-primary" onclick="runHealthCheck()" id="health-check-btn">🔄 Run Health Check</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
+          No historical uptime/latency monitoring pipeline exists yet — these are real, live checks run from your browser at the moment you click, not a tracked history.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px" id="svc-list">
+          <div style="color:var(--muted);font-size:12px">Click "Run Health Check" to test the app's dependencies live.</div>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:14px;font-family:var(--mono)" id="health-check-time"></div>
+      </div>
+    </div>
+
+    <!-- ══ APP CONFIG ══════════════════════ -->
+    <div class="page" id="page-appconfig">
+      <div class="card">
+        <div class="card-title">App Configuration <span class="card-badge">Live remote config — read directly by the app</span></div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px">There is no draft/preview here — Save Changes publishes immediately and the app picks it up on its next config check.</p>
+
+        <div style="border:1px solid rgba(197,48,48,0.3);background:var(--red-bg);border-radius:12px;padding:14px;margin-bottom:20px">
+          <div style="font-size:13px;font-weight:800;color:var(--red);margin-bottom:6px">⚠ Payments Kill Switch</div>
+          <p style="font-size:12px;color:var(--text);margin-bottom:12px;line-height:1.5">
+            Turn this <b>off</b> to immediately give every user full member-level access for free, everywhere in the
+            app — no purchase required, no paywall shown. Use this if something is wrong with the payment system (a
+            bad release, a broken verification path, an App Store/Play Store outage) and you'd rather everyone use
+            the app free than be blocked. Turn it back <b>on</b> to return to normal, real membership gating.
+          </p>
+          <div style="display:flex;align-items:center;gap:12px">
+            <label class="switch"><input type="checkbox" id="ac-paymentsEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:13px;font-weight:700">Payments enabled</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">MINIMUM IOS VERSION</label>
+            <input class="search-input" id="ac-minVersionIOS" style="width:100%" placeholder="e.g. 1.2.0"/>
+          </div>
+          <div>
+            <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">MINIMUM ANDROID VERSION</label>
+            <input class="search-input" id="ac-minVersionAndroid" style="width:100%" placeholder="e.g. 1.2.0"/>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;max-width:260px">
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">DAILY FREE SCAN LIMIT</label>
+          <input class="search-input" type="number" min="0" id="ac-dailyScanLimit" style="width:100%" placeholder="e.g. 5"/>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="ac-priceComparisonEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:12px;font-weight:600">Price Comparison</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="ac-aiAnalysisEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:12px;font-weight:600">AI Health Analysis</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="ac-photoScanEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:12px;font-weight:600">Photo Meal Scan</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="ac-documentUploadEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:12px;font-weight:600">Document Upload</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="ac-foodDiaryEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:12px;font-weight:600">Food Diary</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="ac-wishlistEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:12px;font-weight:600">Wishlist</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveAppConfig()" id="appconfig-save-btn">Save Changes</button>
+      </div>
+    </div>
+
+  </div><!-- content -->
+</main>
+</div>
+</div><!-- app -->
+
+<!-- User modal -->
+<div class="modal-overlay" id="user-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('user-modal').classList.remove('open')">✕</button>
+    <div class="modal-title" id="modal-name">User Details</div>
+    <div class="modal-section">
+      <div class="modal-section-title">Account</div>
+      <table style="width:100%;font-size:12px">
+        <tr><td style="color:var(--muted);padding:3px 0;width:100px">Email</td><td id="m-email" style="font-family:var(--mono);font-size:11px"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">User ID</td><td id="m-id" style="font-family:var(--mono);font-size:10px;color:var(--muted)"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Plan</td><td id="m-plan"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Joined</td><td id="m-joined"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Scans</td><td id="m-scans"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Status</td><td id="m-status"></td></tr>
+      </table>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Membership</div>
+      <table style="width:100%;font-size:12px;margin-bottom:12px">
+        <tr><td style="color:var(--muted);padding:3px 0;width:100px">Sub. Status</td><td id="m-sub-status"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Billing</td><td id="m-billing" class="td-mono"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Renews/Expires</td><td id="m-period-end" class="td-mono"></td></tr>
+      </table>
+      <div style="display:flex;align-items:center;gap:10px">
+        <label class="switch"><input type="checkbox" id="m-membership-switch" onchange="onMembershipSwitchToggle(this)"/><span class="switch-slider"></span></label>
+        <span style="font-size:12px;font-weight:600">Membership active</span>
+        <select class="filter-select" id="m-grant-billing-period" style="margin-left:auto">
+          <option value="monthly">Monthly (£5)</option>
+          <option value="yearly">Yearly (£50)</option>
+        </select>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">Switching on manually grants membership for the picked period (no charge is taken). Switching off cancels immediately.</div>
+      <button class="btn btn-danger" id="m-refund-btn" style="display:none;margin-top:10px" onclick="refundMembership()">💸 Refund (revoke &amp; log)</button>
+      <div id="m-refund-note" style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6;display:none">Revokes access immediately and logs the record here. This does <strong style="color:var(--text)">not</strong> move any money — you must still process the real refund in App Store Connect / Google Play Console.</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Health Profile Tags (anonymised)</div>
+      <div class="modal-chips" id="m-health"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger" onclick="banUser()">🚫 Ban / Unban</button>
+      <button class="btn btn-danger" onclick="deleteUser()">🗑 Delete Account</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('user-modal').classList.remove('open')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ AUTH ═══════════════════════════════════════════
+// Username/password sign-in, verified by the admin login endpoint (a Lambda
+// Function URL) — see terraform/lambda/google-auth-authorizer.js's
+// handleLogin(). The token it returns is a signed admin session token (not a
+// Google ID token — regular app users still use Google Sign-In, this is a
+// separate credential system just for this panel), sent as the same
+// `Authorization` header AppSync expects.
+const ADMIN_CONFIG = {
+  // `terraform output appsync_endpoint` — re-run that and update this if the
+  // stack is ever torn down and re-applied (the endpoint changes on re-apply).
+  appsyncEndpoint: 'https://mt6klwidgjfqbkn3pun4bu4lv4.appsync-api.eu-west-2.amazonaws.com/graphql',
+  // `terraform output admin_login_url` — same caveat as above.
+  loginUrl: 'https://usmrq30qkc.execute-api.eu-west-2.amazonaws.com/',
+};
+let adminIdToken = null;
+
+async function adminGraphqlRequest(query, variables) {
+  const res = await fetch(ADMIN_CONFIG.appsyncEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: adminIdToken },
+    body: JSON.stringify({ query, variables }),
+  });
+  const json = await res.json();
+  if (json.errors && json.errors.length) {
+    throw Object.assign(new Error(json.errors[0].message), { errors: json.errors });
+  }
+  return json.data;
+}
+
+function togglePw() {
+  const inp = document.getElementById('login-password');
+  const btn = document.getElementById('pw-toggle');
+  const showing = inp.type === 'text';
+  inp.type = showing ? 'password' : 'text';
+  btn.textContent = showing ? '👁' : '🙈';
+}
+
+async function attemptLogin() {
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  err.style.display = 'none';
+
+  if (!username || !password) {
+    err.textContent = '❌ Enter both username and password.';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  try {
+    const res = await fetch(ADMIN_CONFIG.loginUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json().catch(() => ({}));
+    // 401 from the login Lambda itself means "wrong username/password" —
+    // anything else (network failure, 403 from the Function URL's own edge
+    // authorization, 500, etc.) is an infrastructure problem, not a typo, so
+    // don't conflate the two behind the same generic message.
+    if (res.status === 401) {
+      // Can't persist this to the backend (no valid token yet) — local-only
+      // for this session, matches logAudit()'s adminIdToken guard below.
+      logAudit('security', `Failed login attempt for username "${username}"`, 'red', '🔐');
+      throw new Error(data.error || 'Invalid username or password.');
+    }
+    if (!res.ok || !data.token) {
+      throw new Error(`Login service error (HTTP ${res.status}): ${data.error || data.Message || 'unknown error'}`);
+    }
+    adminIdToken = data.token;
+    await loadAndRenderUsers();
+  } catch (e) {
+    err.textContent = '❌ ' + e.message;
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Sign In →';
+    return;
+  }
+
+  logAudit('auth', 'Admin signed in successfully', 'green', '✓');
+  document.getElementById('login-overlay').style.opacity = '0';
+  document.getElementById('login-overlay').style.transition = 'opacity 0.3s';
+  setTimeout(() => {
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    renderDashboard(); // default landing page — also kicks off the background scans fetch
+  }, 300);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+
+function logout() {
+  logAudit('auth','Admin signed out','orange','←');
+  location.reload();
+}
+
+// ═══════════════ NAVIGATION ═════════════════════════════════════
+const PAGE_META = {
+  dashboard:{ title:'Dashboard', sub:'Platform overview · Real-time data' },
+  users:    { title:'User Management', sub:'View, search and manage all users' },
+  scans:    { title:'Scan Activity', sub:'Real-time scan feed and analytics' },
+  health:   { title:'Health Overview', sub:'Aggregated anonymised health statistics' },
+  revenue:  { title:'Revenue & Subscriptions', sub:'MRR, ARR, conversion and projections' },
+  membership: { title:'Membership', sub:'Every purchase, renewal, grant, cancel and refund' },
+  costs:    { title:'API Costs', sub:'Claude AI and AWS spend tracking' },
+  cms:    { title:'CMS Pages', sub:'Manage all content shown in the app' },
+  tc:     { title:'Terms & Conditions', sub:'Manage T&C versions — users must accept before using the app' },
+  audit:    { title:'Audit Log', sub:'All admin actions and security events' },
+  system:   { title:'System Health', sub:'Uptime, latency, errors and cache performance' },
+  appconfig: { title:'App Config', sub:'Control app version requirements and feature availability' },
+};
+
+// Pages fetch/compute their own data lazily, the first time you navigate to
+// them (CMS/T&C/Audit do a fresh backend fetch every visit; Dashboard/Scans/
+// Health/Revenue just re-aggregate over the already-fetched USERS/ALL_SCANS
+// in memory, which is cheap). Users has its own eager load at login instead.
+const PAGE_LOADERS = {
+  dashboard: renderDashboard,
+  scans: renderScanActivity,
+  health: renderHealthOverview,
+  revenue: renderRevenuePage,
+  membership: loadAndRenderMembershipEvents,
+  cms: loadAndRenderCMS,
+  tc: loadAndRenderTC,
+  audit: loadAndRenderAuditLog,
+  costs: renderCostsChart,
+  appconfig: loadAppConfig,
+};
+
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  btn.classList.add('active');
+  const m = PAGE_META[page];
+  document.getElementById('page-title').textContent = m.title;
+  document.getElementById('page-sub').textContent = m.sub;
+  document.getElementById('new-badge').style.display = page === 'users' ? 'none' : '';
+  if (PAGE_LOADERS[page]) PAGE_LOADERS[page]();
+}
+
+// ═══════════════ CLOCK ══════════════════════════════════════════
+function updateClock() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-GB'); }
+setInterval(updateClock, 1000); updateClock();
+function refreshData() {
+  const b = document.querySelector('.refresh-btn');
+  b.textContent = '↻ Refreshing…';
+  const activePage = document.querySelector('.page.active');
+  const pageId = activePage ? activePage.id.replace('page-', '') : 'dashboard';
+
+  Promise.all([loadAndRenderUsers(), ensureScansLoaded(true)])
+    .then(() => { if (pageId !== 'users' && PAGE_LOADERS[pageId]) PAGE_LOADERS[pageId](); })
+    .catch(err => console.error('Refresh failed:', err))
+    .finally(() => setTimeout(() => b.textContent = '↻ Refresh', 600));
+}
+
+// ═══════════════ DATA ═══════════════════════════════════════════
+// Real users + scans, loaded from AppSync. USERS loads eagerly at login
+// (see loadAndRenderUsers below); ALL_SCANS loads lazily/memoized via
+// ensureScansLoaded() the first time any scan-dependent widget needs it.
+let USERS = [];
+let ALL_SCANS = [];
+let currentUsers = [...USERS];
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+function isSameDay(iso, date) {
+  if (!iso) return false;
+  const d = new Date(iso);
+  return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate();
+}
+
+// Mirrors HistoryScreen.tsx's getVerdict() classification exactly — keep in sync.
+function classifyVerdict(warnings) {
+  if (!warnings || !warnings.length) return 'safe';
+  const hasHigh = warnings.some(w => w.toLowerCase().includes('allergic') || w.toLowerCase().includes('avoid'));
+  return hasHigh ? 'avoid' : 'caution';
+}
+
+const LIST_ALL_SCANS_QUERY = `
+  query ListAllScans($limit: Int, $nextToken: String) {
+    listScanHistories(limit: $limit, nextToken: $nextToken) {
+      items { id barcode productName scannedAt warnings }
+      nextToken
+    }
+  }`;
+
+let scansLoadPromise = null;
+async function ensureScansLoaded(force) {
+  if (force) scansLoadPromise = null;
+  if (!scansLoadPromise) {
+    scansLoadPromise = (async () => {
+      let items = [];
+      let nextToken = null;
+      do {
+        const data = await adminGraphqlRequest(LIST_ALL_SCANS_QUERY, { limit: 500, nextToken });
+        items = items.concat(data.listScanHistories.items || []);
+        nextToken = data.listScanHistories.nextToken;
+      } while (nextToken);
+      ALL_SCANS = items;
+      return ALL_SCANS;
+    })();
+  }
+  return scansLoadPromise;
+}
+
+// ─── Revenue estimate (shared by Dashboard + Revenue page) ───────
+// £5/month, £50/year — keep in sync with src/services/subscriptionService.ts
+// PLANS.member.pricing. Yearly members contribute price/12 to MRR, not the
+// flat monthly price — a member on the yearly plan isn't paying £50/month.
+const MEMBER_PRICING = { monthly: 5, yearly: 50 };
+function computeRevenueEstimate(users) {
+  const members = users.filter(u => u.plan === 'member');
+  const mrr = members.reduce((sum, u) => sum + (u.billingPeriod === 'yearly' ? MEMBER_PRICING.yearly / 12 : MEMBER_PRICING.monthly), 0);
+  return { essentialCount: members.length, mrr, arr: mrr * 12, totalUsers: users.length, arpu: users.length ? mrr / users.length : 0 };
+}
+
+// ═══════════════ TERMS & CONDITIONS (real data) ══════════════════
+const LIST_TC_VERSIONS_QUERY = `query { listTCVersions { items { version publishedAt summary requiresReAcceptance } } }`;
+const GET_CURRENT_TC_VERSION_QUERY = `query { getCurrentTCVersion { version publishedAt summary requiresReAcceptance } }`;
+const LIST_TC_ACCEPTANCE_LOG_QUERY = `query { listTCAcceptanceLog(limit: 200) { items { userId version acceptedAt deviceInfo } } }`;
+const ADMIN_PUBLISH_TC_MUTATION = `
+  mutation AdminPublishTC($version: String!, $summary: String!, $changes: [String], $requiresReAcceptance: Boolean!, $fullText: String!) {
+    adminPublishTCVersion(version: $version, summary: $summary, changes: $changes, requiresReAcceptance: $requiresReAcceptance, fullText: $fullText) { version }
+  }`;
+
+let TC_VERSIONS = [];
+let TC_CURRENT = null;
+let TC_ACCEPTANCE_LOG = [];
+
+async function loadAndRenderTC() {
+  try {
+    const [versionsData, currentData, logData] = await Promise.all([
+      adminGraphqlRequest(LIST_TC_VERSIONS_QUERY, {}),
+      adminGraphqlRequest(GET_CURRENT_TC_VERSION_QUERY, {}),
+      adminGraphqlRequest(LIST_TC_ACCEPTANCE_LOG_QUERY, {}),
+    ]);
+    TC_VERSIONS = (versionsData.listTCVersions.items || []).sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+    TC_CURRENT = currentData.getCurrentTCVersion;
+    TC_ACCEPTANCE_LOG = logData.listTCAcceptanceLog.items || [];
+  } catch (err) {
+    console.error('Failed to load T&C data:', err);
+  }
+  renderTC();
+}
+
+function renderTC() {
+  document.getElementById('tc-current-ver').textContent = TC_CURRENT ? TC_CURRENT.version : 'None published';
+  document.getElementById('tc-current-status').textContent = TC_CURRENT ? (TC_CURRENT.requiresReAcceptance ? 'Requires acceptance' : 'Silent update') : 'Add one below';
+  document.getElementById('tc-last-updated').textContent = TC_CURRENT && TC_CURRENT.publishedAt
+    ? new Date(TC_CURRENT.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+
+  const acceptedCurrent = TC_CURRENT ? TC_ACCEPTANCE_LOG.filter(a => a.version === TC_CURRENT.version).length : 0;
+  document.getElementById('tc-accepted-count').textContent = acceptedCurrent.toLocaleString();
+  document.getElementById('tc-total-log').textContent = TC_ACCEPTANCE_LOG.length.toLocaleString();
+
+  document.getElementById('tc-version-table').innerHTML = TC_VERSIONS.length ? TC_VERSIONS.map(v => {
+    const acceptedForThis = TC_ACCEPTANCE_LOG.filter(a => a.version === v.version).length;
+    const isCurrent = TC_CURRENT && v.version === TC_CURRENT.version;
+    return `<tr>
+      <td><span class="badge badge-blue">v${escapeHtml(v.version)}</span></td>
+      <td class="td-mono">${v.publishedAt ? new Date(v.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+      <td>${escapeHtml(v.summary)}</td>
+      <td><span class="badge ${v.requiresReAcceptance ? 'badge-orange' : 'badge-muted'}">${v.requiresReAcceptance ? '● Required' : 'Silent'}</span></td>
+      <td><span class="badge badge-green">${acceptedForThis.toLocaleString()}</span></td>
+      <td><span class="badge ${isCurrent ? 'badge-green' : 'badge-muted'}">${isCurrent ? '● Active' : 'Archived'}</span></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="6" style="color:var(--muted)">No versions published yet</td></tr>';
+
+  document.getElementById('tc-acceptance-log').innerHTML = TC_ACCEPTANCE_LOG.length
+    ? TC_ACCEPTANCE_LOG.slice().sort((a, b) => new Date(b.acceptedAt) - new Date(a.acceptedAt)).slice(0, 50).map(a => {
+        const u = USERS.find(x => x.id === a.userId);
+        return `<tr>
+          <td style="font-weight:600">${escapeHtml(u ? u.name : a.userId)}</td>
+          <td class="td-mono">${escapeHtml(u ? u.email : '—')}</td>
+          <td><span class="badge badge-blue">v${escapeHtml(a.version)}</span></td>
+          <td class="td-mono">${a.acceptedAt ? new Date(a.acceptedAt).toLocaleString('en-GB') : '—'}</td>
+          <td style="font-size:11px;color:var(--muted)">${escapeHtml(a.deviceInfo || '—')}</td>
+        </tr>`;
+      }).join('')
+    : '<tr><td colspan="5" style="color:var(--muted)">No acceptances logged yet</td></tr>';
+}
+
+async function publishTCVersion() {
+  const version = document.getElementById('tc-new-version').value.trim();
+  const summary = document.getElementById('tc-summary').value.trim();
+  const changesRaw = document.getElementById('tc-changes').value.trim();
+  const fullText = document.getElementById('tc-full-text').value.trim();
+  const requiresAcceptance = document.getElementById('tc-requires-acceptance').value === 'true';
+
+  if (!version) { alert('Please enter a version number (e.g. 1.1.0)'); return; }
+  if (!summary) { alert('Please enter a one-line summary of what changed'); return; }
+  if (requiresAcceptance && !fullText) { alert('Please paste the full T&C text'); return; }
+  if (!/^\d+\.\d+\.\d+$/.test(version)) { alert('Version must be in format X.Y.Z (e.g. 1.1.0 or 2.0.0)'); return; }
+
+  if (TC_CURRENT) {
+    const isNewer = version.localeCompare(TC_CURRENT.version, undefined, { numeric: true }) > 0;
+    if (!isNewer) {
+      alert(`Version ${version} is not newer than current version ${TC_CURRENT.version}. Please use a higher version number.`);
+      return;
+    }
+  }
+
+  const confirmMsg = requiresAcceptance
+    ? `Publish T&C version ${version}?\n\nAll ${USERS.length.toLocaleString()} users will see the acceptance modal next time they open the app. They CANNOT use the app until they accept.\n\nThis cannot be undone.`
+    : `Publish T&C version ${version} as a silent update?\n\nUsers will NOT see the modal. Only use this for minor corrections (typos, formatting).`;
+  if (!confirm(confirmMsg)) return;
+
+  const changes = changesRaw ? changesRaw.split('\n').map(s => s.trim()).filter(Boolean) : [];
+
+  try {
+    await adminGraphqlRequest(ADMIN_PUBLISH_TC_MUTATION, { version, summary, changes, requiresReAcceptance: requiresAcceptance, fullText });
+    if (requiresAcceptance) document.getElementById('tc-badge').style.display = '';
+    logAudit('data', `T&C version ${version} published — ${requiresAcceptance ? 'all users must re-accept' : 'silent update'}`, requiresAcceptance ? 'orange' : 'blue', '📜');
+    await loadAndRenderTC();
+    alert(`✓ T&C version ${version} published successfully!\n\n${requiresAcceptance ? 'All users will see the acceptance modal on their next app open.\n\nThey cannot use Shuddhaahar until they accept.' : 'This was a silent update — users will not be prompted.'}`);
+    document.getElementById('tc-new-version').value = '';
+    document.getElementById('tc-summary').value = '';
+    document.getElementById('tc-changes').value = '';
+    document.getElementById('tc-full-text').value = '';
+  } catch (err) {
+    alert('Failed to publish T&C version: ' + err.message);
+  }
+}
+
+function previewTC() {
+  const version = document.getElementById('tc-new-version').value || '1.1.0';
+  const summary = document.getElementById('tc-summary').value || 'Updated Terms of Service';
+  alert(`T&C Modal Preview — v${version}\n\n"${summary}"\n\n[Modal would show full T&C text with scroll-to-bottom requirement and Accept/Decline buttons in the mobile app]`);
+}
+
+// ═══════════════ CMS (real data) ══════════════════════════════════
+// The 8 slugs are fixed (matches PageSlug in src/services/cmsService.ts) —
+// this registry supplies a display title for any slug the admin hasn't
+// customised yet (getCMSPage returns null for those, and the app itself
+// falls back to its own built-in DEFAULT_PAGES in that case).
+const CMS_PAGE_REGISTRY = [
+  { slug: 'how-it-works', title: 'How Shuddhaahar Works' },
+  { slug: 'faq', title: 'FAQ' },
+  { slug: 'privacy-policy', title: 'Privacy Policy' },
+  { slug: 'terms-of-service', title: 'Terms of Service' },
+  { slug: 'about', title: 'About Shuddhaahar' },
+  { slug: 'contact', title: 'Contact Us' },
+  { slug: 'allergen-guide', title: 'UK Allergen Guide' },
+  { slug: 'subscription-info', title: 'Subscription Plans' },
+];
+
+const LIST_CMS_PAGES_QUERY = `query { listCMSPages { items { slug title subtitle sections lastUpdated } } }`;
+const ADMIN_UPDATE_CMS_PAGE_MUTATION = `
+  mutation AdminUpdateCMSPage($input: AdminUpdateCMSPageInput!) {
+    adminUpdateCMSPage(input: $input) { slug }
+  }`;
+const LIST_CONTACT_SUBMISSIONS_QUERY = `query { listContactSubmissions(limit: 200) { items { id name email subject status createdAt } } }`;
+const ADMIN_REPLY_CONTACT_MUTATION = `
+  mutation AdminReplyContact($id: ID!, $status: String!) {
+    adminReplyContactSubmission(id: $id, status: $status) { id status }
+  }`;
+
+let CMS_PAGES_DATA = {}; // slug -> real row, only present once admin has customised it
+let CONTACT_SUBMISSIONS = [];
+let editingSlug = null;
+
+async function loadAndRenderCMS() {
+  try {
+    const data = await adminGraphqlRequest(LIST_CMS_PAGES_QUERY, {});
+    CMS_PAGES_DATA = {};
+    (data.listCMSPages.items || []).forEach(p => { CMS_PAGES_DATA[p.slug] = p; });
+  } catch (err) {
+    console.error('Failed to load CMS pages:', err);
+  }
+  renderCMSTable();
+  await loadAndRenderContactSubmissions();
+}
+
+function renderCMSTable() {
+  document.getElementById('cms-customised-count').textContent = Object.keys(CMS_PAGES_DATA).length;
+
+  document.getElementById('cms-table-body').innerHTML = CMS_PAGE_REGISTRY.map(p => {
+    const real = CMS_PAGES_DATA[p.slug];
+    const title = real ? real.title : p.title;
+    const updated = real && real.lastUpdated ? new Date(real.lastUpdated).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    return `<tr>
+      <td style="font-weight:600">${escapeHtml(title)}</td>
+      <td class="td-mono">${p.slug}</td>
+      <td class="td-mono">${updated}</td>
+      <td><span class="badge ${real ? 'badge-green' : 'badge-muted'}">● ${real ? 'Customised' : 'Default'}</span></td>
+      <td><button class="btn btn-ghost" onclick="editCMSPage('${p.slug}')">Edit</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function editCMSPage(slug) {
+  editingSlug = slug;
+  const registryEntry = CMS_PAGE_REGISTRY.find(p => p.slug === slug);
+  const real = CMS_PAGES_DATA[slug];
+  document.getElementById('cms-editor').style.display = 'block';
+  document.getElementById('cms-editor-title').textContent = `Edit: ${registryEntry.title}`;
+  document.getElementById('cms-edit-title').value = real ? real.title : registryEntry.title;
+  document.getElementById('cms-edit-subtitle').value = real ? (real.subtitle || '') : '';
+  // sections comes back already parsed (a real array) per the AWSJSON contract
+  // in schema.graphql — this simple editor just shows the first section's body.
+  const firstBody = real && real.sections && real.sections[0] && real.sections[0].body;
+  document.getElementById('cms-edit-body').value = firstBody || '';
+  document.getElementById('cms-editor').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function saveCMSPage() {
+  const title = document.getElementById('cms-edit-title').value.trim();
+  const subtitle = document.getElementById('cms-edit-subtitle').value.trim();
+  const body = document.getElementById('cms-edit-body').value;
+  if (!title) { alert('Please enter a page title.'); return; }
+
+  const btn = document.getElementById('cms-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  const sections = [{ id: '1', type: 'body', body }];
+  try {
+    await adminGraphqlRequest(ADMIN_UPDATE_CMS_PAGE_MUTATION, {
+      input: { slug: editingSlug, title, subtitle, sections: JSON.stringify(sections) },
+    });
+    document.getElementById('cms-editor').style.display = 'none';
+    logAudit('data', `CMS page updated: ${editingSlug}`, 'blue', '📝');
+    await loadAndRenderCMS();
+    alert('Page saved and published to the app ✓');
+  } catch (err) {
+    alert('Failed to save page: ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = 'Save & Publish';
+}
+
+async function loadAndRenderContactSubmissions() {
+  try {
+    const data = await adminGraphqlRequest(LIST_CONTACT_SUBMISSIONS_QUERY, {});
+    CONTACT_SUBMISSIONS = (data.listContactSubmissions.items || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } catch (err) {
+    console.error('Failed to load contact submissions:', err);
+    CONTACT_SUBMISSIONS = [];
+  }
+  document.getElementById('cms-contact-total').textContent = CONTACT_SUBMISSIONS.length;
+  document.getElementById('cms-contact-new').textContent = CONTACT_SUBMISSIONS.filter(c => c.status === 'new').length;
+
+  // name/email/subject are attacker-reachable — any signed-in app user can
+  // submit these, so they're escaped before going into this admin view.
+  document.getElementById('contact-table-body').innerHTML = CONTACT_SUBMISSIONS.length ? CONTACT_SUBMISSIONS.map(c => `
+    <tr>
+      <td class="td-mono">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</td>
+      <td style="font-weight:600">${escapeHtml(c.name)}</td>
+      <td class="td-mono">${escapeHtml(c.email)}</td>
+      <td>${escapeHtml(c.subject || '—')}</td>
+      <td><span class="badge ${c.status === 'new' ? 'badge-orange' : c.status === 'replied' ? 'badge-green' : 'badge-cyan'}">${c.status}</span></td>
+      <td><button class="btn btn-ghost" onclick="replyContact('${c.id}', '${escapeHtml(c.email)}')">Reply</button></td>
+    </tr>`).join('') : '<tr><td colspan="6" style="color:var(--muted)">No submissions yet</td></tr>';
+}
+
+async function replyContact(id, email) {
+  try {
+    await adminGraphqlRequest(ADMIN_REPLY_CONTACT_MUTATION, { id, status: 'replied' });
+    logAudit('data', `Contact reply sent to ${email}`, 'green', '📧');
+    window.location.href = `mailto:${email}`;
+    await loadAndRenderContactSubmissions();
+  } catch (err) {
+    alert('Failed to update submission: ' + err.message);
+  }
+}
+
+// ═══════════════ USERS (real data) ═══════════════════════════════
+
+const LIST_USERS_QUERY = `
+  query ListUsers($limit: Int, $nextToken: String) {
+    listUsers(limit: $limit, nextToken: $nextToken) {
+      items { id email name planId subscriptionStatus billingPeriod subscriptionPeriodEnd banned profileComplete createdAt updatedAt
+               healthProfile { allergies conditions dietType age healthGoals } }
+      nextToken
+    }
+  }`;
+
+const LIST_SCANS_FOR_USER_QUERY = `
+  query ListScansForUser($userId: String!) {
+    listScanHistories(filter: { userId: { eq: $userId } }, limit: 200) {
+      items { id barcode productName scannedAt }
+    }
+  }`;
+
+const ADMIN_SET_BANNED_MUTATION = `
+  mutation AdminSetBanned($userId: ID!, $banned: Boolean!) {
+    adminSetUserBanned(userId: $userId, banned: $banned) { id banned }
+  }`;
+
+const ADMIN_DELETE_USER_MUTATION = `
+  mutation AdminDeleteUser($userId: ID!) {
+    adminDeleteUser(userId: $userId)
+  }`;
+
+const ADMIN_SET_MEMBERSHIP_MUTATION = `
+  mutation AdminSetMembership($userId: ID!, $billingPeriod: String!, $subscriptionPeriodEnd: AWSDateTime!) {
+    adminSetMembership(userId: $userId, billingPeriod: $billingPeriod, subscriptionPeriodEnd: $subscriptionPeriodEnd) { id planId subscriptionStatus billingPeriod subscriptionPeriodEnd }
+  }`;
+
+const ADMIN_CANCEL_MEMBERSHIP_MUTATION = `
+  mutation AdminCancelMembership($userId: ID!) {
+    adminCancelMembership(userId: $userId) { id planId subscriptionStatus subscriptionPeriodEnd }
+  }`;
+
+const ADMIN_RECORD_MEMBERSHIP_EVENT_MUTATION = `
+  mutation AdminRecordMembershipEvent($userId: ID!, $type: String!, $planId: String, $billingPeriod: String, $amount: Float, $currency: String, $periodEnd: AWSDateTime, $note: String) {
+    adminRecordMembershipEvent(userId: $userId, type: $type, planId: $planId, billingPeriod: $billingPeriod, amount: $amount, currency: $currency, periodEnd: $periodEnd, note: $note) { id }
+  }`;
+
+const LIST_MEMBERSHIP_EVENTS_QUERY = `
+  query ListMembershipEvents($limit: Int, $nextToken: String) {
+    listMembershipEvents(limit: $limit, nextToken: $nextToken) {
+      items { id userId type planId billingPeriod amount currency platform productId periodEnd note adminUsername createdAt }
+      nextToken
+    }
+  }`;
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+// Maps a raw `User` GraphQL record onto the row shape renderUsers()/openModal()
+// expect. `scans` isn't in listUsers (would mean one listScanHistories call per
+// row) — it's fetched lazily per-user when the detail modal opens instead.
+function mapUser(u) {
+  const hp = u.healthProfile || {};
+  return {
+    id: u.id,
+    name: u.name || '(no name)',
+    email: u.email,
+    plan: u.planId || 'free',
+    scans: '—',
+    createdAt: u.createdAt,
+    joined: u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—',
+    active: u.updatedAt ? `Profile updated ${timeAgo(u.updatedAt)}` : '—',
+    status: u.banned ? 'banned' : 'active',
+    health: [...(hp.allergies || []), ...(hp.conditions || [])],
+    allergies: hp.allergies || [],
+    conditions: hp.conditions || [],
+    dietType: hp.dietType,
+    age: hp.age,
+    healthGoals: hp.healthGoals || [],
+    banned: !!u.banned,
+    profileComplete: !!u.profileComplete,
+    subscriptionStatus: u.subscriptionStatus || null,
+    billingPeriod: u.billingPeriod || null,
+    subscriptionPeriodEnd: u.subscriptionPeriodEnd || null,
+  };
+}
+
+// Fully paginates via nextToken — the earlier version silently truncated at
+// 200 users, which would also have quietly undercounted every aggregate
+// stat built on top of USERS (Dashboard/Health/Revenue).
+async function loadAndRenderUsers() {
+  let items = [];
+  let nextToken = null;
+  do {
+    const data = await adminGraphqlRequest(LIST_USERS_QUERY, { limit: 200, nextToken });
+    items = items.concat(data.listUsers.items || []);
+    nextToken = data.listUsers.nextToken;
+  } while (nextToken);
+  USERS = items.map(mapUser);
+  currentUsers = [...USERS];
+  renderUsers(currentUsers);
+  renderUserStats(USERS);
+  return USERS;
+}
+
+function renderUserStats(users) {
+  document.getElementById('us-total').textContent = users.length;
+  document.getElementById('us-complete').textContent = users.filter(u => u.profileComplete).length;
+  document.getElementById('us-essential').textContent = users.filter(u => u.plan === 'member').length;
+  document.getElementById('us-banned').textContent = users.filter(u => u.banned).length;
+}
+
+function statusBadge(s) {
+  const m = {active:'badge-green',banned:'badge-red'};
+  return `<span class="badge ${m[s]||'badge-muted'}">${s}</span>`;
+}
+function planBadge(p) {
+  const m = {free:'badge-muted',member:'badge-blue'};
+  const icons = {free:'',member:'⭐'};
+  return `<span class="badge ${m[p]||'badge-muted'}">${icons[p]||''} ${p}</span>`;
+}
+function subStatusBadge(s) {
+  if (!s) return '<span style="color:var(--muted);font-size:12px">—</span>';
+  const m = {active:'badge-green',trialing:'badge-blue',past_due:'badge-orange',canceled:'badge-muted'};
+  return `<span class="badge ${m[s]||'badge-muted'}">${s}</span>`;
+}
+function isActiveMember(u) {
+  return u.plan === 'member' && (u.subscriptionStatus === 'active' || u.subscriptionStatus === 'trialing');
+}
+function membershipEventTypeBadge(t) {
+  const m = {purchase:'badge-green',admin_grant:'badge-blue',admin_cancel:'badge-orange',refund:'badge-red'};
+  const labels = {purchase:'Purchase',admin_grant:'Admin Grant',admin_cancel:'Admin Cancel',refund:'Refund'};
+  return `<span class="badge ${m[t]||'badge-muted'}">${labels[t]||t}</span>`;
+}
+
+function renderUsers(users) {
+  document.getElementById('user-count-label').textContent = `${users.length} total`;
+  document.getElementById('users-tbody').innerHTML = users.map(u => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:9px">
+        <div style="width:30px;height:30px;border-radius:8px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;flex-shrink:0">${u.name[0]}</div>
+        <div><div style="font-weight:600">${u.name}</div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${u.email}</div></div>
+      </div></td>
+      <td>${planBadge(u.plan)}</td>
+      <td><span class="badge badge-blue">${u.scans}</span></td>
+      <td class="td-mono">${u.joined}</td>
+      <td class="td-mono">${u.active}</td>
+      <td>${statusBadge(u.status)}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-ghost" onclick="openModal('${u.id}')">View</button>
+        <button class="btn ${u.status==='banned'?'btn-green':'btn-danger'}" onclick="toggleBan('${u.id}')">${u.status==='banned'?'Unban':'Ban'}</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterUsers(q) { currentUsers = USERS.filter(u => u.name.toLowerCase().includes(q.toLowerCase()) || u.email.toLowerCase().includes(q.toLowerCase())); renderUsers(currentUsers); }
+function filterByStatus(s) { currentUsers = s==='all' ? [...USERS] : USERS.filter(u=>u.status===s); renderUsers(currentUsers); }
+function filterByPlan(p) { currentUsers = p==='all' ? [...USERS] : USERS.filter(u=>u.plan===p); renderUsers(currentUsers); }
+
+let modalUserId = null;
+async function openModal(id) {
+  const u = USERS.find(x=>x.id===id); if(!u)return;
+  modalUserId = id;
+  document.getElementById('modal-name').textContent = u.name;
+  document.getElementById('m-email').textContent = u.email;
+  document.getElementById('m-id').textContent = u.id;
+  document.getElementById('m-plan').innerHTML = planBadge(u.plan);
+  document.getElementById('m-joined').textContent = u.joined;
+  document.getElementById('m-scans').textContent = 'Loading…';
+  document.getElementById('m-status').innerHTML = statusBadge(u.status);
+  document.getElementById('m-health').innerHTML = u.health.length
+    ? u.health.map(h=>`<span class="modal-chip">${h}</span>`).join('')
+    : '<span style="color:var(--muted);font-size:12px">No health profile</span>';
+  renderMembershipModalSection(u);
+  document.getElementById('user-modal').classList.add('open');
+
+  try {
+    const data = await adminGraphqlRequest(LIST_SCANS_FOR_USER_QUERY, { userId: id });
+    const scans = (data.listScanHistories && data.listScanHistories.items) || [];
+    u.scans = scans.length;
+    if (modalUserId === id) document.getElementById('m-scans').textContent = `${scans.length} scan${scans.length===1?'':'s'}`;
+    renderUsers(currentUsers);
+  } catch (err) {
+    if (modalUserId === id) document.getElementById('m-scans').textContent = 'Failed to load';
+    console.error('Failed to load scan history:', err);
+  }
+}
+function closeModal(e) { if(e.target.id==='user-modal') document.getElementById('user-modal').classList.remove('open'); }
+
+// ═══════════════ MEMBERSHIP (manual grant / cancel / refund) ═════
+function renderMembershipModalSection(u) {
+  const active = isActiveMember(u);
+  document.getElementById('m-sub-status').innerHTML = subStatusBadge(u.subscriptionStatus);
+  document.getElementById('m-billing').textContent = u.billingPeriod || '—';
+  document.getElementById('m-period-end').textContent = u.subscriptionPeriodEnd
+    ? new Date(u.subscriptionPeriodEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+  document.getElementById('m-membership-switch').checked = active;
+  document.getElementById('m-grant-billing-period').value = u.billingPeriod || 'monthly';
+  document.getElementById('m-refund-btn').style.display = active ? '' : 'none';
+  document.getElementById('m-refund-note').style.display = active ? '' : 'none';
+}
+
+function onMembershipSwitchToggle(checkbox) {
+  if (checkbox.checked) {
+    grantMembership(document.getElementById('m-grant-billing-period').value);
+  } else {
+    cancelMembership();
+  }
+}
+
+async function grantMembership(billingPeriod) {
+  if (!modalUserId) return;
+  const u = USERS.find(x => x.id === modalUserId);
+  if (!u) return;
+  const days = billingPeriod === 'yearly' ? 365 : 30;
+  const periodEnd = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+  const periodEndLabel = new Date(periodEnd).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (!confirm(`Manually grant ${u.name} a ${billingPeriod} membership, expiring ${periodEndLabel}? No charge is taken — this is a free comp/override.`)) {
+    document.getElementById('m-membership-switch').checked = false;
+    return;
+  }
+  try {
+    await adminGraphqlRequest(ADMIN_SET_MEMBERSHIP_MUTATION, { userId: modalUserId, billingPeriod, subscriptionPeriodEnd: periodEnd });
+    adminGraphqlRequest(ADMIN_RECORD_MEMBERSHIP_EVENT_MUTATION, {
+      userId: modalUserId, type: 'admin_grant', planId: 'member', billingPeriod, amount: 0, currency: 'GBP', periodEnd, note: 'Manually granted by admin',
+    }).catch(err => console.error('Failed to log membership event:', err));
+    u.plan = 'member'; u.subscriptionStatus = 'active'; u.billingPeriod = billingPeriod; u.subscriptionPeriodEnd = periodEnd;
+    renderUsers(currentUsers);
+    renderUserStats(USERS);
+    renderMembershipModalSection(u);
+    logAudit('user', `Membership manually granted to ${u.name} (${billingPeriod})`, 'green', '💳');
+  } catch (err) {
+    alert(`Failed to grant membership: ${err.message}`);
+    document.getElementById('m-membership-switch').checked = false;
+  }
+}
+
+async function cancelMembership() {
+  if (!modalUserId) return;
+  const u = USERS.find(x => x.id === modalUserId);
+  if (!u) return;
+  if (!confirm(`Cancel membership for ${u.name}? This revokes their access immediately.`)) {
+    document.getElementById('m-membership-switch').checked = true;
+    return;
+  }
+  try {
+    await adminGraphqlRequest(ADMIN_CANCEL_MEMBERSHIP_MUTATION, { userId: modalUserId });
+    adminGraphqlRequest(ADMIN_RECORD_MEMBERSHIP_EVENT_MUTATION, {
+      userId: modalUserId, type: 'admin_cancel', planId: 'free', note: 'Cancelled by admin',
+    }).catch(err => console.error('Failed to log membership event:', err));
+    u.plan = 'free'; u.subscriptionStatus = 'canceled'; u.subscriptionPeriodEnd = new Date().toISOString();
+    renderUsers(currentUsers);
+    renderUserStats(USERS);
+    renderMembershipModalSection(u);
+    logAudit('user', `Membership cancelled for ${u.name}`, 'orange', '💳');
+  } catch (err) {
+    alert(`Failed to cancel membership: ${err.message}`);
+    document.getElementById('m-membership-switch').checked = true;
+  }
+}
+
+// Revokes access immediately and logs a 'refund' event — this never touches
+// any payment API (there isn't one to call). The admin must still process
+// the real refund in App Store Connect / Google Play Console; this button
+// only keeps the dashboard's records honest about what happened and when.
+async function refundMembership() {
+  if (!modalUserId) return;
+  const u = USERS.find(x => x.id === modalUserId);
+  if (!u) return;
+  const note = prompt(
+    `Refund note for ${u.name} — e.g. "Refunded via App Store Connect, ref #123".\n\n` +
+    `This revokes membership immediately and logs the record here. It does NOT move any money — ` +
+    `you must still process the real refund in App Store Connect / Google Play Console.`,
+    '',
+  );
+  if (note === null) return; // admin cancelled the prompt
+  try {
+    await adminGraphqlRequest(ADMIN_CANCEL_MEMBERSHIP_MUTATION, { userId: modalUserId });
+    adminGraphqlRequest(ADMIN_RECORD_MEMBERSHIP_EVENT_MUTATION, {
+      userId: modalUserId, type: 'refund', planId: 'free', note: note || 'Refunded by admin',
+    }).catch(err => console.error('Failed to log membership event:', err));
+    u.plan = 'free'; u.subscriptionStatus = 'canceled'; u.subscriptionPeriodEnd = new Date().toISOString();
+    renderUsers(currentUsers);
+    renderUserStats(USERS);
+    renderMembershipModalSection(u);
+    logAudit('gdpr', `Membership refunded for ${u.name}${note ? ': ' + note : ''}`, 'red', '💸');
+  } catch (err) {
+    alert(`Failed to process refund: ${err.message}`);
+  }
+}
+
+async function banUser() {
+  if (!modalUserId) return;
+  const u = USERS.find(x=>x.id===modalUserId);
+  if (!u) return;
+  const nextBanned = !u.banned;
+  try {
+    await adminGraphqlRequest(ADMIN_SET_BANNED_MUTATION, { userId: modalUserId, banned: nextBanned });
+    u.banned = nextBanned;
+    u.status = nextBanned ? 'banned' : 'active';
+    renderUsers(currentUsers);
+    renderUserStats(USERS);
+    logAudit('user', `User ${u.name} ${nextBanned ? 'banned' : 'unbanned'}`, nextBanned ? 'red' : 'green', '🚫');
+  } catch (err) {
+    alert(`Failed to update ban status: ${err.message}`);
+  }
+  document.getElementById('user-modal').classList.remove('open');
+}
+function toggleBan(id) { modalUserId=id; banUser(); }
+
+async function deleteUser() {
+  if (!modalUserId) return;
+  const u = USERS.find(x=>x.id===modalUserId);
+  if (!u) return;
+  if (!confirm(`Permanently delete the account for ${u.name} (${u.email})? This cannot be undone.`)) return;
+  try {
+    await adminGraphqlRequest(ADMIN_DELETE_USER_MUTATION, { userId: modalUserId });
+    USERS = USERS.filter(x => x.id !== modalUserId);
+    currentUsers = currentUsers.filter(x => x.id !== modalUserId);
+    renderUsers(currentUsers);
+    renderUserStats(USERS);
+    logAudit('gdpr', `Account deleted: ${u.name}`, 'orange', '🗑');
+  } catch (err) {
+    alert(`Failed to delete user: ${err.message}`);
+  }
+  document.getElementById('user-modal').classList.remove('open');
+}
+
+// ═══════════════ AUDIT LOG (real, client-reported) ═══════════════
+// Persisted server-side via adminLogAction, but the write is best-effort and
+// fire-and-forget from here — not a server-enforced guarantee (nothing else
+// in this backend uses pipeline resolvers, which is what true server-side
+// enforcement on every admin mutation would require). Good enough for an
+// internal audit trail; not tamper-proof against a client that skips it.
+const LIST_AUDIT_LOG_QUERY = `query { listAuditLog(limit: 200) { items { id type message color icon adminUsername createdAt } } }`;
+const ADMIN_LOG_ACTION_MUTATION = `
+  mutation AdminLogAction($type: String!, $message: String!, $color: String, $icon: String) {
+    adminLogAction(type: $type, message: $message, color: $color, icon: $icon) { id }
+  }`;
+
+let AUDIT_EVENTS = [];
+
+async function loadAndRenderAuditLog() {
+  try {
+    const data = await adminGraphqlRequest(LIST_AUDIT_LOG_QUERY, {});
+    AUDIT_EVENTS = (data.listAuditLog.items || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } catch (err) {
+    console.error('Failed to load audit log:', err);
+  }
+  renderAuditLog();
+}
+
+function renderAuditLog() {
+  const el = document.getElementById('audit-log');
+  if (!el) return; // page not visited yet this session
+
+  el.innerHTML = AUDIT_EVENTS.length ? AUDIT_EVENTS.map(e => `
+    <div class="audit-row">
+      <div class="audit-icon" style="background:${e.color==='green'?'var(--green-bg)':e.color==='red'?'var(--red-bg)':e.color==='orange'?'var(--orange-bg)':'var(--accent-glow)'}">${e.icon||'•'}</div>
+      <div class="audit-msg">${escapeHtml(e.message)}${e.adminUsername ? ` <span style="color:var(--muted)">— ${escapeHtml(e.adminUsername)}</span>` : ''}</div>
+      <div class="audit-time">${e.createdAt ? new Date(e.createdAt).toLocaleString('en-GB') : 'just now'}</div>
+    </div>
+  `).join('') : '<div style="color:var(--muted);font-size:12px;padding:12px 0">No audit events yet</div>';
+
+  if (!document.getElementById('audit-today')) return;
+  const today = new Date();
+  document.getElementById('audit-today').textContent = AUDIT_EVENTS.filter(e => e.createdAt && isSameDay(e.createdAt, today)).length;
+  document.getElementById('audit-actions').textContent = AUDIT_EVENTS.filter(e => ['user', 'data', 'gdpr'].includes(e.type)).length;
+  document.getElementById('audit-security').textContent = AUDIT_EVENTS.filter(e => e.type === 'security').length;
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+  document.getElementById('audit-gdpr').textContent = AUDIT_EVENTS.filter(e => e.type === 'gdpr' && e.createdAt && new Date(e.createdAt) >= monthStart).length;
+}
+
+function logAudit(type, msg, color, icon) {
+  AUDIT_EVENTS.unshift({ type, message: msg, color, icon, createdAt: new Date().toISOString() });
+  if (AUDIT_EVENTS.length > 200) AUDIT_EVENTS.pop();
+  renderAuditLog();
+  // Can't persist a pre-login failed attempt (no valid token to authenticate
+  // the write with) — that case stays local-only for this session.
+  if (adminIdToken) {
+    adminGraphqlRequest(ADMIN_LOG_ACTION_MUTATION, { type, message: msg, color, icon }).catch(err => {
+      console.error('Failed to persist audit log entry:', err);
+    });
+  }
+}
+
+// ═══════════════ HEALTH OVERVIEW (real data) ═════════════════════
+function renderHealthOverview() {
+  const allergyCounts = {}, conditionCounts = {}, goalCounts = {}, dietCounts = {};
+  const ageBands = { '13-17': 0, '18-24': 0, '25-34': 0, '35-44': 0, '45-54': 0, '55-64': 0, '65+': 0 };
+
+  USERS.forEach(u => {
+    u.allergies.forEach(a => { allergyCounts[a] = (allergyCounts[a] || 0) + 1; });
+    u.conditions.forEach(c => { conditionCounts[c] = (conditionCounts[c] || 0) + 1; });
+    u.healthGoals.forEach(g => { goalCounts[g] = (goalCounts[g] || 0) + 1; });
+    const diet = u.dietType || 'Not set';
+    dietCounts[diet] = (dietCounts[diet] || 0) + 1;
+    if (u.age) {
+      const a = u.age;
+      const band = a <= 17 ? '13-17' : a <= 24 ? '18-24' : a <= 34 ? '25-34' : a <= 44 ? '35-44' : a <= 54 ? '45-54' : a <= 64 ? '55-64' : '65+';
+      ageBands[band]++;
+    }
+  });
+
+  const top = (obj) => Object.entries(obj).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const renderList = (id, entries, color) => {
+    const max = entries[0] ? entries[0][1] : 1;
+    document.getElementById(id).innerHTML = entries.length ? entries.map(([l, c]) => `
+      <div class="health-row">
+        <div class="health-label">${escapeHtml(l)}</div>
+        <div style="flex:1"><div class="progress"><div class="progress-fill" style="width:${Math.round(c/max*100)}%;background:${color}"></div></div></div>
+        <div class="health-count">${c.toLocaleString()}</div>
+      </div>`).join('') : '<div style="color:var(--muted);font-size:12px">No data yet</div>';
+  };
+
+  renderList('allergies-list', top(allergyCounts), 'var(--red)');
+  renderList('conditions-list', top(conditionCounts), 'var(--accent)');
+  renderList('goals-list', top(goalCounts), 'var(--green)');
+
+  const dietEntries = Object.entries(dietCounts);
+  const dietPalette = ['rgba(124,138,153,0.3)', 'rgba(0,132,61,0.3)', 'rgba(65,182,230,0.3)', 'rgba(0,94,184,0.3)', 'rgba(180,83,9,0.3)', 'rgba(0,61,120,0.3)', 'rgba(197,48,48,0.3)'];
+  const dietBorders = ['#7C8A99', '#00843D', '#41B6E6', '#005EB8', '#B45309', '#003D78', '#C53030'];
+  renderChart('dietChart', {
+    type: 'doughnut',
+    data: { labels: dietEntries.map(e => e[0]), datasets: [{ data: dietEntries.map(e => e[1]), backgroundColor: dietPalette, borderColor: dietBorders, borderWidth: 1.5 }] },
+    options: { maintainAspectRatio: false, cutout: '50%', plugins: { legend: { position: 'bottom', labels: { font: { size: 9 }, padding: 6, boxWidth: 8 } } } },
+  });
+
+  renderChart('ageChart', {
+    type: 'bar',
+    data: { labels: Object.keys(ageBands), datasets: [{ data: Object.values(ageBands), backgroundColor: 'rgba(0,94,184,0.25)', borderColor: '#005EB8', borderWidth: 1, borderRadius: 5 }] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: GRID }, y: { grid: GRID } } },
+  });
+}
+
+// ═══════════════ DASHBOARD (real data) ════════════════════════════
+function computeUserGrowth(users, days) {
+  const dayList = [];
+  for (let i = days - 1; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); d.setHours(23, 59, 59, 999); dayList.push(d); }
+  const labels = dayList.map(d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }));
+  const counts = dayList.map(d => users.filter(u => u.createdAt && new Date(u.createdAt) <= d).length);
+  return { labels, counts };
+}
+
+function renderDashboard() {
+  document.getElementById('s-users').textContent = USERS.length.toLocaleString();
+  const est = computeRevenueEstimate(USERS);
+  document.getElementById('s-mrr').textContent = '£' + est.mrr.toLocaleString();
+
+  const growth = computeUserGrowth(USERS, 30);
+  renderChart('growthChart', {
+    type: 'line',
+    data: { labels: growth.labels, datasets: [{ data: growth.counts, borderColor: '#005EB8', backgroundColor: 'rgba(0,94,184,0.08)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: GRID, ticks: { maxTicksLimit: 6 } }, y: { grid: GRID } } },
+  });
+
+  const freeCount = USERS.filter(u => u.plan === 'free').length;
+  renderChart('planChart', {
+    type: 'doughnut',
+    data: { labels: ['Free', 'Member'], datasets: [{ data: [freeCount, est.essentialCount], backgroundColor: ['rgba(124,138,153,0.2)', 'rgba(0,94,184,0.2)'], borderColor: ['#7C8A99', '#005EB8'], borderWidth: 2 }] },
+    options: { maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 10, boxWidth: 10 } } } },
+  });
+
+  document.getElementById('s-scans').textContent = 'Loading…';
+  document.getElementById('s-avg-scans').textContent = 'Loading…';
+  ensureScansLoaded().then(renderDashboardScanWidgets).catch(err => console.error('Failed to load scans for dashboard:', err));
+}
+
+function renderDashboardScanWidgets() {
+  document.getElementById('s-scans').textContent = ALL_SCANS.length.toLocaleString();
+  document.getElementById('s-avg-scans').textContent = USERS.length ? (ALL_SCANS.length / USERS.length).toFixed(1) : '0';
+
+  const days30 = makeDays(30);
+  const dailyCounts = countByDay(ALL_SCANS, 30);
+  renderChart('dailyScansChart', {
+    type: 'bar',
+    data: { labels: days30, datasets: [{ data: dailyCounts, backgroundColor: 'rgba(0,132,61,0.25)', borderColor: '#00843D', borderWidth: 1, borderRadius: 3 }] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: GRID, ticks: { maxTicksLimit: 6 } }, y: { grid: GRID } } },
+  });
+
+  const today = new Date();
+  const todayScans = ALL_SCANS.filter(s => isSameDay(s.scannedAt, today));
+  const verdictCounts = { safe: 0, caution: 0, avoid: 0 };
+  todayScans.forEach(s => verdictCounts[classifyVerdict(s.warnings)]++);
+  renderChart('verdictChart', {
+    type: 'doughnut',
+    data: { labels: ['Safe', 'Caution', 'Avoid'], datasets: [{ data: [verdictCounts.safe, verdictCounts.caution, verdictCounts.avoid], backgroundColor: ['rgba(0,132,61,0.2)', 'rgba(180,83,9,0.2)', 'rgba(197,48,48,0.2)'], borderColor: ['#00843D', '#B45309', '#C53030'], borderWidth: 2 }] },
+    options: { maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { padding: 10, boxWidth: 10 } } } },
+  });
+
+  const counts = {};
+  ALL_SCANS.forEach(s => { if (s.productName) counts[s.productName] = (counts[s.productName] || 0) + 1; });
+  const top5 = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  document.getElementById('top-products-tbody').innerHTML = top5.length ? top5.map(([name, count], i) => `
+    <tr><td class="td-mono">${String(i + 1).padStart(2, '0')}</td><td>${escapeHtml(name)}</td><td><span class="badge badge-blue">${count.toLocaleString()}</span></td></tr>
+  `).join('') : '<tr><td colspan="3" style="color:var(--muted)">No scans yet</td></tr>';
+}
+
+// ═══════════════ SCAN ACTIVITY (real data) ════════════════════════
+function countByDay(scans, n) {
+  const days = [];
+  for (let i = n - 1; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(d); }
+  return days.map(d => scans.filter(s => isSameDay(s.scannedAt, d)).length);
+}
+
+function renderScanActivity() {
+  ['sc-today', 'sc-avg-day', 'sc-caution', 'sc-avoid'].forEach(id => { document.getElementById(id).textContent = 'Loading…'; });
+
+  ensureScansLoaded().then(() => {
+    const today = new Date();
+    const todayScans = ALL_SCANS.filter(s => isSameDay(s.scannedAt, today));
+    document.getElementById('sc-today').textContent = todayScans.length.toLocaleString();
+
+    const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recent = ALL_SCANS.filter(s => s.scannedAt && new Date(s.scannedAt) >= thirtyDaysAgo);
+    document.getElementById('sc-avg-day').textContent = USERS.length ? (recent.length / USERS.length / 30).toFixed(2) : '0';
+
+    const verdictCounts = { safe: 0, caution: 0, avoid: 0 };
+    todayScans.forEach(s => verdictCounts[classifyVerdict(s.warnings)]++);
+    document.getElementById('sc-caution').textContent = verdictCounts.caution;
+    document.getElementById('sc-avoid').textContent = verdictCounts.avoid;
+    document.getElementById('sc-caution-pct').textContent = todayScans.length ? Math.round(verdictCounts.caution / todayScans.length * 100) + '% of today' : '';
+    document.getElementById('sc-avoid-pct').textContent = todayScans.length ? Math.round(verdictCounts.avoid / todayScans.length * 100) + '% of today' : '';
+
+    const hourlyCounts = Array.from({ length: 24 }, () => 0);
+    todayScans.forEach(s => { if (s.scannedAt) hourlyCounts[new Date(s.scannedAt).getHours()]++; });
+    renderChart('hourlyChart', {
+      type: 'bar',
+      data: { labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), datasets: [{ data: hourlyCounts, backgroundColor: 'rgba(65,182,230,0.25)', borderColor: '#41B6E6', borderWidth: 1, borderRadius: 3 }] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: GRID, ticks: { maxTicksLimit: 8 } }, y: { grid: GRID } } },
+    });
+
+    const thisWeekLabels = makeDays(7);
+    const thisWeek = countByDay(ALL_SCANS, 7);
+    const lastWeekDays = [];
+    for (let i = 13; i >= 7; i--) { const d = new Date(); d.setDate(d.getDate() - i); lastWeekDays.push(d); }
+    const lastWeek = lastWeekDays.map(d => ALL_SCANS.filter(s => isSameDay(s.scannedAt, d)).length);
+    renderChart('weeklyChart', {
+      type: 'line',
+      data: { labels: thisWeekLabels, datasets: [
+        { label: 'This week', data: thisWeek, borderColor: '#005EB8', backgroundColor: 'rgba(0,94,184,0.08)', fill: true, tension: 0.3, pointRadius: 3, borderWidth: 2 },
+        { label: 'Previous week', data: lastWeek, borderColor: '#7C8A99', borderDash: [4, 4], tension: 0.3, pointRadius: 2, borderWidth: 1.5 },
+      ] },
+      options: { maintainAspectRatio: false, plugins: { legend: { display: true, position: 'top', labels: { boxWidth: 10, padding: 10 } } }, scales: { x: { grid: GRID }, y: { grid: GRID } } },
+    });
+
+    // Keyword-bucketed (raw warning strings embed specific product/allergen
+    // detail and wouldn't aggregate cleanly) — mirrors generateWarnings()'s
+    // own vocabulary in src/services/userDataService.ts.
+    const buckets = { 'Allergen mention': 0, 'High sugar': 0, 'High salt / sodium': 0, 'Contains gluten': 0, 'Diabetic risk': 0, 'Other': 0 };
+    let totalWarnings = 0;
+    ALL_SCANS.forEach(s => (s.warnings || []).forEach(w => {
+      totalWarnings++;
+      const lw = w.toLowerCase();
+      if (lw.includes('allerg')) buckets['Allergen mention']++;
+      else if (lw.includes('sugar') || lw.includes('glucose') || lw.includes('syrup')) buckets['High sugar']++;
+      else if (lw.includes('salt') || lw.includes('sodium')) buckets['High salt / sodium']++;
+      else if (lw.includes('gluten') || lw.includes('wheat') || lw.includes('barley')) buckets['Contains gluten']++;
+      else if (lw.includes('diabetes')) buckets['Diabetic risk']++;
+      else buckets['Other']++;
+    }));
+    const rows = Object.entries(buckets).filter(([, c]) => c > 0).sort((a, b) => b[1] - a[1]);
+    document.getElementById('warning-types-tbody').innerHTML = rows.length ? rows.map(([label, count]) => `
+      <tr><td>${label}</td><td class="td-mono">${count.toLocaleString()}</td><td><span class="badge badge-orange">${totalWarnings ? Math.round(count/totalWarnings*100) : 0}%</span></td></tr>
+    `).join('') : '<tr><td colspan="3" style="color:var(--muted)">No warnings recorded yet</td></tr>';
+  }).catch(err => console.error('Failed to load scans for Scan Activity:', err));
+}
+
+// ═══════════════ REVENUE (real data) ══════════════════════════════
+function renderRevenuePage() {
+  const est = computeRevenueEstimate(USERS);
+  document.getElementById('rev-mrr').textContent = '£' + est.mrr.toLocaleString();
+  document.getElementById('rev-arr').textContent = '£' + est.arr.toLocaleString();
+  document.getElementById('rev-paying').textContent = est.essentialCount.toLocaleString();
+  document.getElementById('rev-conversion').textContent = est.totalUsers ? Math.round(est.essentialCount / est.totalUsers * 100) + '% conversion' : '';
+  document.getElementById('rev-arpu').textContent = '£' + est.arpu.toFixed(2);
+
+  const freeCount = est.totalUsers - est.essentialCount;
+  renderChart('revenueBreakChart', {
+    type: 'doughnut',
+    data: { labels: ['Free', 'Member'], datasets: [{ data: [freeCount, est.essentialCount], backgroundColor: ['rgba(124,138,153,0.25)', 'rgba(0,94,184,0.25)'], borderColor: ['#7C8A99', '#005EB8'], borderWidth: 2 }] },
+    options: { maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 8 } } } },
+  });
+
+  document.getElementById('revenue-breakdown-rows').innerHTML = `
+    <div class="cost-row"><div class="cost-name"><span style="width:10px;height:10px;border-radius:50%;background:#7C8A99;display:inline-block"></span>Free</div><div><div class="cost-amount">£0</div><div class="cost-detail">${freeCount.toLocaleString()} users</div></div></div>
+    <div class="cost-row"><div class="cost-name"><span style="width:10px;height:10px;border-radius:50%;background:#005EB8;display:inline-block"></span>Member (£${MEMBER_PRICING.monthly}/mo or £${MEMBER_PRICING.yearly}/yr)</div><div><div class="cost-amount">£${est.mrr.toLocaleString()}</div><div class="cost-detail">${est.essentialCount.toLocaleString()} subscribers</div></div></div>
+  `;
+
+  const conversionRate = est.totalUsers ? est.essentialCount / est.totalUsers : 0;
+  document.getElementById('proj-essential-header').textContent = `Member (est. ${Math.round(conversionRate * 100)}%)`;
+  document.getElementById('projections-tbody').innerHTML = [1000, 10000, 50000, 100000].map(n => {
+    const memberCount = Math.round(n * conversionRate);
+    const mrr = memberCount * MEMBER_PRICING.monthly;
+    return `<tr><td>${n.toLocaleString()}</td><td class="td-mono">${memberCount.toLocaleString()}</td><td><span class="badge badge-green">£${mrr.toLocaleString()}</span></td><td class="td-mono">£${(mrr*12).toLocaleString()}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════ MEMBERSHIP (real data — purchase ledger) ═════════
+// Real transaction history: 'purchase' rows are written server-side by
+// iap-verify.js on every verified Apple/Google receipt; 'admin_grant' /
+// 'admin_cancel' / 'refund' rows are written by adminRecordMembershipEvent
+// right after the corresponding mutation in the user modal above.
+let MEMBERSHIP_EVENTS = [];
+let currentMembershipEvents = [];
+let membershipEventTypeFilter = 'all';
+let membershipEventSearch = '';
+
+async function loadAndRenderMembershipEvents() {
+  let items = [];
+  let nextToken = null;
+  try {
+    do {
+      const data = await adminGraphqlRequest(LIST_MEMBERSHIP_EVENTS_QUERY, { limit: 500, nextToken });
+      items = items.concat(data.listMembershipEvents.items || []);
+      nextToken = data.listMembershipEvents.nextToken;
+    } while (nextToken);
+    MEMBERSHIP_EVENTS = items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } catch (err) {
+    console.error('Failed to load membership events:', err);
+    MEMBERSHIP_EVENTS = [];
+  }
+  applyMembershipEventFilters();
+  renderMembershipStats();
+}
+
+function renderMembershipStats() {
+  const est = computeRevenueEstimate(USERS);
+  document.getElementById('mem-active').textContent = est.essentialCount.toLocaleString();
+  document.getElementById('mem-mrr').textContent = '£' + est.mrr.toLocaleString();
+
+  const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+  const thisMonth = (t) => MEMBERSHIP_EVENTS.filter(e => e.type === t && e.createdAt && new Date(e.createdAt) >= monthStart).length;
+  document.getElementById('mem-cancelled').textContent = thisMonth('admin_cancel').toLocaleString();
+  document.getElementById('mem-refunded').textContent = thisMonth('refund').toLocaleString();
+}
+
+function applyMembershipEventFilters() {
+  const q = membershipEventSearch.toLowerCase();
+  currentMembershipEvents = MEMBERSHIP_EVENTS.filter(e => {
+    if (membershipEventTypeFilter !== 'all' && e.type !== membershipEventTypeFilter) return false;
+    if (!q) return true;
+    const u = USERS.find(x => x.id === e.userId);
+    const haystack = `${u ? u.name : ''} ${u ? u.email : e.userId}`.toLowerCase();
+    return haystack.includes(q);
+  });
+  renderMembershipEventsTable();
+}
+
+function filterMembershipEvents(q) { membershipEventSearch = q; applyMembershipEventFilters(); }
+function filterMembershipEventsByType(t) { membershipEventTypeFilter = t; applyMembershipEventFilters(); }
+
+function renderMembershipEventsTable() {
+  document.getElementById('membership-events-tbody').innerHTML = currentMembershipEvents.length ? currentMembershipEvents.map(e => {
+    const u = USERS.find(x => x.id === e.userId);
+    return `<tr>
+      <td class="td-mono">${e.createdAt ? new Date(e.createdAt).toLocaleString('en-GB') : '—'}</td>
+      <td>${u ? `<div style="font-weight:600">${escapeHtml(u.name)}</div><div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${escapeHtml(u.email)}</div>` : `<span class="td-mono" style="color:var(--muted)">${escapeHtml(e.userId)}</span>`}</td>
+      <td>${membershipEventTypeBadge(e.type)}</td>
+      <td>${e.planId ? planBadge(e.planId) : '—'}</td>
+      <td class="td-mono">${e.billingPeriod || '—'}</td>
+      <td class="td-mono">${e.amount != null ? (e.currency === 'GBP' || !e.currency ? '£' : e.currency + ' ') + e.amount.toFixed(2) : '—'}</td>
+      <td>${e.platform === 'admin' ? '<span class="badge badge-muted">admin</span>' : (e.platform ? `<span class="badge badge-blue">${escapeHtml(e.platform)}</span>` : '—')}</td>
+      <td style="font-size:11px;color:var(--muted)">${escapeHtml(e.adminUsername || '—')}</td>
+      <td style="font-size:11px;color:var(--muted)">${escapeHtml(e.note || '—')}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="9" style="color:var(--muted)">No membership events yet</td></tr>';
+}
+
+// ═══════════════ SYSTEM HEALTH (live checks, no fabricated history) ═══
+async function runHealthCheck() {
+  const btn = document.getElementById('health-check-btn');
+  btn.disabled = true; btn.textContent = '🔄 Checking…';
+  const results = [];
+
+  // Real JSON API — same base URL src/services/foodApi.ts hits.
+  try {
+    const t0 = performance.now();
+    const res = await fetch('https://world.openfoodfacts.org/api/v2/product/5000112548587.json');
+    const ms = Math.round(performance.now() - t0);
+    results.push({ name: 'Open Food Facts API', status: res.ok ? 'online' : 'degraded', detail: `HTTP ${res.status}`, latency: ms + 'ms' });
+  } catch (err) {
+    results.push({ name: 'Open Food Facts API', status: 'offline', detail: 'Unreachable', latency: '—' });
+  }
+
+  // Trolley.co.uk is a scraped consumer site, not a CORS-enabled API —
+  // no-cors mode only proves reachability + latency, never a real HTTP status.
+  try {
+    const t0 = performance.now();
+    await fetch('https://www.trolley.co.uk/', { mode: 'no-cors' });
+    const ms = Math.round(performance.now() - t0);
+    results.push({ name: 'Trolley.co.uk', status: 'online', detail: 'Reachable (latency only — no CORS, status unknown)', latency: ms + 'ms' });
+  } catch (err) {
+    results.push({ name: 'Trolley.co.uk', status: 'offline', detail: 'Unreachable', latency: '—' });
+  }
+
+  // AppSync — re-run a cheap already-authorized query as a live ping.
+  try {
+    const t0 = performance.now();
+    await adminGraphqlRequest('query { listUsers(limit: 1) { items { id } } }', {});
+    const ms = Math.round(performance.now() - t0);
+    results.push({ name: 'AppSync (AWS)', status: 'online', detail: 'GraphQL query succeeded', latency: ms + 'ms' });
+  } catch (err) {
+    results.push({ name: 'AppSync (AWS)', status: 'offline', detail: err.message, latency: '—' });
+  }
+
+  document.getElementById('svc-list').innerHTML = results.map(s => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="width:8px;height:8px;border-radius:50%;background:${s.status==='online'?'var(--green)':s.status==='degraded'?'var(--orange)':'var(--red)'};box-shadow:0 0 5px ${s.status==='online'?'var(--green)':s.status==='degraded'?'var(--orange)':'var(--red)'};flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-size:12px;font-weight:600">${s.name}</div><div style="font-size:10px;color:var(--muted)">${s.detail}</div></div>
+      <span class="badge ${s.status==='online'?'badge-green':s.status==='degraded'?'badge-orange':'badge-red'}">${s.status==='online'?'● Online':s.status==='degraded'?'⚠ Degraded':'✕ Offline'}</span>
+      <span class="td-mono">${s.latency}</span>
+    </div>`).join('');
+  document.getElementById('health-check-time').textContent = 'Last checked: ' + new Date().toLocaleTimeString('en-GB');
+
+  btn.disabled = false; btn.textContent = '🔄 Run Health Check';
+}
+
+// ═══════════════ APP CONFIG (real data) ═══════════════════════════
+// Reads never go through AppSync — there is no getAppConfig query in the
+// schema (deliberately: reads are public, writes are admin-only). Both the
+// app itself and this page read the live config from this public,
+// unauthenticated GET endpoint instead; only Save below goes through the
+// authenticated adminUpdateAppConfig mutation.
+const APP_CONFIG_PUBLIC_URL = 'https://fszsrlwn0l.execute-api.eu-west-2.amazonaws.com/';
+const ADMIN_UPDATE_APP_CONFIG_MUTATION = `
+  mutation AdminUpdateAppConfig($input: AdminUpdateAppConfigInput!) {
+    adminUpdateAppConfig(input: $input) {
+      minVersionIOS minVersionAndroid dailyScanLimit priceComparisonEnabled aiAnalysisEnabled photoScanEnabled documentUploadEnabled foodDiaryEnabled wishlistEnabled paymentsEnabled
+    }
+  }`;
+
+function populateAppConfigForm(cfg) {
+  cfg = cfg || {};
+  document.getElementById('ac-minVersionIOS').value = cfg.minVersionIOS || '';
+  document.getElementById('ac-minVersionAndroid').value = cfg.minVersionAndroid || '';
+  document.getElementById('ac-dailyScanLimit').value = cfg.dailyScanLimit != null ? cfg.dailyScanLimit : '';
+  document.getElementById('ac-priceComparisonEnabled').checked = !!cfg.priceComparisonEnabled;
+  document.getElementById('ac-aiAnalysisEnabled').checked = !!cfg.aiAnalysisEnabled;
+  document.getElementById('ac-photoScanEnabled').checked = !!cfg.photoScanEnabled;
+  document.getElementById('ac-documentUploadEnabled').checked = !!cfg.documentUploadEnabled;
+  document.getElementById('ac-foodDiaryEnabled').checked = !!cfg.foodDiaryEnabled;
+  document.getElementById('ac-wishlistEnabled').checked = !!cfg.wishlistEnabled;
+  // Defaults to true (fail-open, matches the backend's DEFAULTS) when the
+  // config row doesn't have this field saved yet at all — cfg.paymentsEnabled
+  // is `undefined` in that case, not `false`.
+  document.getElementById('ac-paymentsEnabled').checked = cfg.paymentsEnabled !== false;
+}
+
+// Deliberately plain fetch() against the public endpoint, not adminGraphqlRequest
+// — see the note above the constants: there's no getAppConfig query to call.
+async function loadAppConfig() {
+  try {
+    const res = await fetch(APP_CONFIG_PUBLIC_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const cfg = await res.json();
+    populateAppConfigForm(cfg);
+  } catch (err) {
+    console.error('Failed to load app config:', err);
+    alert('Failed to load current app config: ' + err.message);
+  }
+}
+
+async function saveAppConfig() {
+  const scanLimitRaw = document.getElementById('ac-dailyScanLimit').value;
+  const input = {
+    minVersionIOS: document.getElementById('ac-minVersionIOS').value.trim(),
+    minVersionAndroid: document.getElementById('ac-minVersionAndroid').value.trim(),
+    dailyScanLimit: scanLimitRaw === '' ? null : parseInt(scanLimitRaw, 10),
+    priceComparisonEnabled: document.getElementById('ac-priceComparisonEnabled').checked,
+    aiAnalysisEnabled: document.getElementById('ac-aiAnalysisEnabled').checked,
+    photoScanEnabled: document.getElementById('ac-photoScanEnabled').checked,
+    documentUploadEnabled: document.getElementById('ac-documentUploadEnabled').checked,
+    foodDiaryEnabled: document.getElementById('ac-foodDiaryEnabled').checked,
+    wishlistEnabled: document.getElementById('ac-wishlistEnabled').checked,
+    paymentsEnabled: document.getElementById('ac-paymentsEnabled').checked,
+  };
+
+  const btn = document.getElementById('appconfig-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    const data = await adminGraphqlRequest(ADMIN_UPDATE_APP_CONFIG_MUTATION, { input });
+    if (data && data.adminUpdateAppConfig) populateAppConfigForm(data.adminUpdateAppConfig);
+    logAudit('data', input.paymentsEnabled === false
+      ? '⚠ Payments switched OFF — all users now have free full access'
+      : 'App config updated (version requirements / feature flags)', input.paymentsEnabled === false ? 'red' : 'blue', input.paymentsEnabled === false ? '⚠️' : '⚙️');
+    alert('App config saved and published to the app ✓');
+  } catch (err) {
+    alert('Failed to save app config: ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = 'Save Changes';
+}
+
+// ═══════════════ CHARTS ══════════════════════════════════════════
+Chart.defaults.color = '#7C8A99';
+Chart.defaults.font.family = 'ui-monospace, SF Mono, Menlo, Consolas, monospace';
+Chart.defaults.font.size = 10;
+
+const GRID = { color:'#E1E8F0' };
+
+function makeDays(n) {
+  return Array.from({length:n},(_,i)=>{const d=new Date();d.setDate(d.getDate()-(n-1-i));return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});});
+}
+
+// Every chart now renders real, computed data (see renderDashboard/
+// renderScanActivity/renderHealthOverview/renderRevenuePage above) instead
+// of being created once upfront with Math.random() filler — so canvases can
+// be (re)rendered on demand (page nav, refresh) rather than only once at
+// login. Destroy any previous instance on that canvas first, since Chart.js
+// throws if you construct a second Chart on the same <canvas> without doing so.
+const chartInstances = {};
+function renderChart(canvasId, config) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  if (chartInstances[canvasId]) chartInstances[canvasId].destroy();
+  chartInstances[canvasId] = new Chart(canvas, config);
+}
+
+// API Costs page is out of scope for the real-data pass (no AWS Cost
+// Explorer integration) — kept as illustrative placeholder data so the page
+// doesn't render a blank canvas.
+function rand(n,a,b) { return Array.from({length:n},()=>Math.floor(Math.random()*(b-a)+a)); }
+function renderCostsChart() {
+  const days30 = makeDays(30);
+  renderChart('costChart', {type:'line',data:{labels:days30,datasets:[{label:'Claude API',data:rand(30,8,18).map(v=>v/100),borderColor:'#003D78',backgroundColor:'rgba(0,61,120,0.08)',fill:true,tension:0.4,pointRadius:0,borderWidth:2},{label:'AWS',data:rand(30,1,3).map(v=>v/100),borderColor:'#41B6E6',backgroundColor:'rgba(65,182,230,0.06)',fill:true,tension:0.4,pointRadius:0,borderWidth:1.5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,padding:10}}},scales:{x:{grid:GRID,ticks:{maxTicksLimit:6}},y:{grid:GRID}}}});
+}
+</script>
+</body>
+</html>
