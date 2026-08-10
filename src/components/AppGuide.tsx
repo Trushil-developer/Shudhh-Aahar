@@ -99,6 +99,8 @@ export function WalkthroughModal({ visible, onComplete }: WalkthroughProps) {
   const wt = useMemo(() => StyleSheet.create({
     overlay:       { flex: 1, backgroundColor: 'rgba(7,8,13,0.85)', alignItems: 'center', justifyContent: 'center', padding: rStyles.space.lg },
     card:          { backgroundColor: Colors.surface, borderRadius: rr(24), padding: rw(22), width: '100%', maxWidth: rw(380), ...Shadow.cardMd },
+    closeBtn:      { position: 'absolute', top: rw(14), right: rw(14), zIndex: 10, width: rw(28), height: rw(28), borderRadius: rr(14), backgroundColor: Colors.surfaceAlt, borderWidth: 1, borderColor: Colors.border, alignItems: 'center', justifyContent: 'center' },
+    closeText:     { fontSize: rf(14), fontWeight: '700', color: Colors.textMuted },
     progressTrack: { height: rh(3), backgroundColor: Colors.border, borderRadius: rr(2), marginBottom: rStyles.space.lg, overflow: 'hidden' },
     progressFill:  { height: rh(3), borderRadius: rr(2) },
     dots:          { flexDirection: 'row', justifyContent: 'center', gap: rw(5), marginBottom: rStyles.space.xl },
@@ -154,6 +156,12 @@ export function WalkthroughModal({ visible, onComplete }: WalkthroughProps) {
       <View style={wt.overlay}>
         <SafeAreaView style={{ width: '100%', alignItems: 'center' }}>
           <View style={wt.card}>
+
+            {/* Close (X) — dismisses the tour from any step, distinct from
+                Skip which only appears on non-final steps. */}
+            <TouchableOpacity style={wt.closeBtn} onPress={handleSkip} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Text style={wt.closeText}>✕</Text>
+            </TouchableOpacity>
 
             {/* Progress bar */}
             <View style={wt.progressTrack}>

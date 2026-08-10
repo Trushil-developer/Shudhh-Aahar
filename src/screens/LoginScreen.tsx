@@ -128,7 +128,7 @@ export default function LoginScreen() {
 const PILLS = [
   { icon: '⚠️', labelKey: 'login.pillHealthWarnings', color: Colors.caution },
   { icon: '💷', labelKey: 'login.pillPriceComparison', color: Colors.safe },
-  { icon: '✨', labelKey: 'login.pillBetterAlternatives', color: Colors.accent },
+  { icon: '🎯', labelKey: 'login.pillPersonalScore', color: Colors.accent },
 ];
 
 function createStyles(rw: (n: number) => number, rh: (n: number) => number, rf: (n: number) => number, rr: (n: number) => number) {

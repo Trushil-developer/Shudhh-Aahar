@@ -7,6 +7,7 @@ import logger from '../utils/logger';
 import perf from '../utils/performance';
 import { scoreProductAccuracy, sanitiseProduct, validateNutrition, validateBarcode } from '../utils/accuracyEngine';
 import errorReporter from '../utils/errorReporter';
+import { AppError } from '../utils/AppError';
 
 export interface Additive {
   code: string;
@@ -204,10 +205,23 @@ export async function fetchProductByBarcode(barcode: string): Promise<ProductDat
       error as Error,
     );
     logger.error('api', `Failed to fetch product: ${barcode}`, error as Error);
-    // Reaching this catch means the request itself failed (timeout, network
-    // down, HTTP/server error) rather than the API cleanly reporting "not in
-    // database" — surface that distinction so the UI doesn't tell the user
-    // the product doesn't exist when the real issue is connectivity.
+
+    // Open Food Facts' v2 API returns HTTP 404 (not a 200 with a status:0
+    // body) for a barcode that's genuinely not in their database — apiClient
+    // throws on any non-2xx response before this function ever gets to
+    // inspect that body, so a real "not found" was landing in this catch
+    // block too, not just actual connectivity/server failures, and getting
+    // shown to the user as "Couldn't Reach the Server" instead of "Product
+    // Not Found". A 404 specifically means the lookup itself succeeded and
+    // came back empty, so treat it the same as the status===0 case above.
+    const isNotFound = error instanceof AppError && error.code === 'httpError' && error.params?.status === 404;
+    if (isNotFound) {
+      logger.info('api', `Product not found (404): ${barcode}`);
+      return { barcode, found: false, networkError: false } as ProductData;
+    }
+
+    // Any other failure (timeout, network down, 5xx) really is connectivity/
+    // server trouble — keep telling the user that, not "not found".
     return { barcode, found: false, networkError: true } as ProductData;
   }
 }

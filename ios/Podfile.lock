@@ -1681,6 +1681,27 @@ PODS:
     - React-Core
   - RNFS (2.20.0):
     - React-Core
+  - RNGestureHandler (2.32.0):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNGoogleSignin (13.3.1):
     - DoubleConversion
     - glog
@@ -1858,6 +1879,7 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNFS (from `../node_modules/react-native-fs`)
+  - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
   - RNIap (from `../node_modules/react-native-iap`)
   - RNKeychain (from `../node_modules/react-native-keychain`)
@@ -2017,6 +2039,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-device-info"
   RNFS:
     :path: "../node_modules/react-native-fs"
+  RNGestureHandler:
+    :path: "../node_modules/react-native-gesture-handler"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
   RNIap:
@@ -2106,6 +2130,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 3ad840f7b17b45ca7ebbbb0e80948564a9513315
   RNDeviceInfo: d79872e11c8e9c4de0d65b0ee6e0cee719f37fea
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
+  RNGestureHandler: b03942e8af56e0db2e841d693326ffdb693bfee5
   RNGoogleSignin: ce618de8a59f44f3b57ae0ffd0b3c52f7d822abd
   RNIap: f193da865e819a25638d29c845629e17a943590c
   RNKeychain: 4708aa0aac1c5d46bc9467d8f2bdfb2fe445646b
@@ -2114,6 +2139,6 @@ SPEC CHECKSUMS:
   VisionCamera: 3ea10c46a5c612f5f89fb46a54bef4a0de8b58a7
   Yoga: 1d66db49f38fd9e576a1d7c3b081e46ab4c28b9e
 
-PODFILE CHECKSUM: 46a33531aaea853be09174ffa37157819087075f
+PODFILE CHECKSUM: 0d2ad406eee086c1a24997a1d78928aab38338af
 
 COCOAPODS: 1.15.2

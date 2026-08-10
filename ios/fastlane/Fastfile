@@ -34,8 +34,9 @@ platform :ios do
   # Triggered by push to staging branch
   # ════════════════════════════════════════════════════════════
   lane :staging do
-    UI.message "🚀 Building Shuddhaahar Staging for TestFlight..."
+    UI.message "🚀 Building Shuddh Aahar Staging for TestFlight..."
 
+    update_google_signin_url_scheme
     api_key = asc_api_key
 
     # Bump build number using latest TestFlight build + 1
@@ -83,7 +84,7 @@ platform :ios do
 
     # Notify Slack
     slack(
-      message:     "✅ Shuddhaahar Staging #{get_version_number} (#{get_build_number}) uploaded to TestFlight",
+      message:     "✅ Shuddh Aahar Staging #{get_version_number} (#{get_build_number}) uploaded to TestFlight",
       channel:     "#releases",
       webhook_url:  ENV["SLACK_WEBHOOK_URL"],
     ) if ENV["SLACK_WEBHOOK_URL"]
@@ -96,8 +97,9 @@ platform :ios do
   # Triggered by push to main branch (after manual approval)
   # ════════════════════════════════════════════════════════════
   lane :production do
-    UI.message "🍎 Building Shuddhaahar for App Store submission..."
+    UI.message "🍎 Building Shuddh Aahar for App Store submission..."
 
+    update_google_signin_url_scheme
     api_key = asc_api_key
 
     # Bump build number
@@ -154,7 +156,7 @@ platform :ios do
 
     # Notify Slack
     slack(
-      message:     "🎉 Shuddhaahar #{version} (#{build}) submitted to App Store for review!",
+      message:     "🎉 Shuddh Aahar #{version} (#{build}) submitted to App Store for review!",
       channel:     "#releases",
       webhook_url:  ENV["SLACK_WEBHOOK_URL"],
     ) if ENV["SLACK_WEBHOOK_URL"]
@@ -180,7 +182,7 @@ platform :ios do
   error do |lane, exception|
     UI.error "Lane '#{lane}' failed: #{exception.message}"
     slack(
-      message:     "❌ Shuddhaahar #{lane} build FAILED: #{exception.message}",
+      message:     "❌ Shuddh Aahar #{lane} build FAILED: #{exception.message}",
       channel:     "#releases",
       webhook_url:  ENV["SLACK_WEBHOOK_URL"],
       success:     false,
@@ -194,4 +196,30 @@ def git_commit_message
   sh("git log -1 --pretty=%B").strip
 rescue
   "Automated build"
+end
+
+# Info.plist's GoogleSignIn CFBundleURLTypes entry is checked in pointing at
+# the dev OAuth client's reversed ID (see the comment in Info.plist) because
+# that one file is shared by all three Xcode schemes — only one environment's
+# Google Sign-In redirect can be correct in the committed file at a time.
+# Every staging/production build must patch it to the client ID for the
+# environment actually being built, or Google Sign-In silently fails to
+# redirect back into the app post-login. ci.yml sets GOOGLE_IOS_CLIENT_ID to
+# the right per-environment secret before invoking each lane.
+def update_google_signin_url_scheme
+  client_id = ENV["GOOGLE_IOS_CLIENT_ID"]
+  UI.user_error!("GOOGLE_IOS_CLIENT_ID is not set — this build's Google Sign-In would be broken") if client_id.to_s.empty?
+
+  id_prefix = client_id.sub(/\.apps\.googleusercontent\.com\z/, "")
+  reversed_scheme = "com.googleusercontent.apps.#{id_prefix}"
+
+  update_info_plist(
+    plist_path: "Shuddhaahar/Info.plist",
+    block: proc do |plist|
+      google_entry = plist["CFBundleURLTypes"].find { |t| t["CFBundleURLName"] == "GoogleSignIn" }
+      UI.user_error!("No GoogleSignIn entry found in Info.plist's CFBundleURLTypes") unless google_entry
+      google_entry["CFBundleURLSchemes"] = [reversed_scheme]
+    end
+  )
+  UI.success "Patched Info.plist GoogleSignIn URL scheme → #{reversed_scheme}"
 end

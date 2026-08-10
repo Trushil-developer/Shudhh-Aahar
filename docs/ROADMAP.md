@@ -1,4 +1,4 @@
-# Shuddhaahar Startup Roadmap — UK → India → Multi-country
+# Shuddh Aahar Startup Roadmap — UK → India → Multi-country
 
 Owners: Trushil (co-founder) + Jaimin (co-founder, incoming). This is a living document — edit it
 together as decisions get made. It assumes the goal stated: rebuild/harden the existing app,
@@ -91,7 +91,7 @@ Start from [Known Issues](KNOWN_ISSUES.md) — it's the existing punch list. Pri
 ## Phase 2 — UK legal & compliance (Weeks 1–8, Trushil-led, runs in parallel with Phase 1)
 
 **None of this is legal advice — get a solicitor for the items marked ⚖️, ideally one with health-tech
-experience.** Shuddhaahar gives personalised health/allergy/medication-interaction guidance, which
+experience.** Shuddh Aahar gives personalised health/allergy/medication-interaction guidance, which
 puts it closer to regulated territory than a typical consumer app.
 
 1. **⚖️ Software-as-a-Medical-Device (SaMD) check.** The UK MHRA has guidance on when health apps

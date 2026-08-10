@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Shuddhaahar Admin</title>
+<title>Shuddh Aahar Admin</title>
 <link rel="icon" type="image/png" href="/favicon-32.png"/>
 <link rel="apple-touch-icon" href="/favicon-180.png"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -240,9 +240,9 @@ tr:hover td{background:rgba(20,28,36,0.025)}
 <div id="login-overlay">
   <div class="login-card">
     <div class="login-logo">
-      <img class="login-logo-mark" src="/favicon-180.png" alt="Shuddhaahar"/>
+      <img class="login-logo-mark" src="/favicon-180.png" alt="Shuddh Aahar"/>
       <div>
-        <div class="login-logo-name">Shuddhaahar</div>
+        <div class="login-logo-name">Shuddh Aahar</div>
         <div style="font-size:9px;color:var(--muted);font-family:var(--mono);letter-spacing:1px">ADMIN CONSOLE</div>
       </div>
     </div>
@@ -281,15 +281,15 @@ tr:hover td{background:rgba(20,28,36,0.025)}
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-mark">
-      <img class="logo-icon" src="/favicon-180.png" alt="Shuddhaahar"/>
-      <div class="logo-name">Shuddhaahar</div>
+      <img class="logo-icon" src="/favicon-180.png" alt="Shuddh Aahar"/>
+      <div class="logo-name">Shuddh Aahar</div>
     </div>
     <div class="logo-sub">Admin Console · v1.0</div>
   </div>
   <nav class="nav">
     <div class="nav-section-label">Overview</div>
     <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span>Dashboard</button>
-    <button class="nav-item" onclick="showPage('users',this)"><span class="nav-icon">👥</span>Users<span class="nav-badge" id="new-badge">3</span></button>
+    <button class="nav-item" onclick="showPage('users',this)"><span class="nav-icon">👥</span>Users<span class="nav-badge" id="new-badge" style="display:none">0</span></button>
 
     <div class="nav-section-label">Analytics</div>
     <button class="nav-item" onclick="showPage('scans',this)"><span class="nav-icon">▦</span>Scan Activity</button>
@@ -508,6 +508,7 @@ tr:hover td{background:rgba(20,28,36,0.025)}
         <div class="stat-card green"><div class="stat-label">Customised in Admin</div><div class="stat-value" id="cms-customised-count">—</div><div class="stat-change neutral">Rest show built-in defaults</div></div>
         <div class="stat-card orange"><div class="stat-label">Contact Submissions</div><div class="stat-value" id="cms-contact-total">—</div></div>
         <div class="stat-card cyan"><div class="stat-label">New / Unread</div><div class="stat-value" id="cms-contact-new">—</div></div>
+        <div class="stat-card red"><div class="stat-label">🗑 Pending Deletion Requests</div><div class="stat-value" id="cms-contact-deletion">—</div><div class="stat-change neutral">GDPR erasure — action via User Management</div></div>
       </div>
       <div class="card">
         <div class="card-title">CMS Pages <span class="card-badge">Manage all app content</span></div>
@@ -532,7 +533,7 @@ tr:hover td{background:rgba(20,28,36,0.025)}
       </div>
       <div class="card">
         <div class="card-title">Contact Submissions <span class="card-badge">Most recent first</span></div>
-        <table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Subject</th><th>Status</th><th>Action</th></tr></thead>
+        <table><thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Subject</th><th>Type</th><th>Status</th><th>Action</th></tr></thead>
         <tbody id="contact-table-body"></tbody></table>
       </div>
     </div>
@@ -593,7 +594,7 @@ tr:hover td{background:rgba(20,28,36,0.025)}
             1. New version is immediately pushed to all app clients<br/>
             2. Next time each user opens the app, they will see the T&C modal<br/>
             3. They MUST scroll to the bottom and tap "I Accept" before using the app<br/>
-            4. If they decline, the app closes — they cannot use Shuddhaahar until they accept<br/>
+            4. If they decline, the app closes — they cannot use Shuddh Aahar until they accept<br/>
             5. All acceptances are timestamped and logged for legal compliance
           </div>
         </div>
@@ -667,6 +668,26 @@ tr:hover td{background:rgba(20,28,36,0.025)}
           </div>
         </div>
 
+        <div style="border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:20px">
+          <div style="font-size:13px;font-weight:800;margin-bottom:6px">Billing Periods for Sale</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+            Controls which billing periods the purchase flow offers to new buyers — e.g. launch monthly-only and turn
+            yearly on later, no app release needed. Turning both off is not a paywall switch: use the Payments Kill
+            Switch above for that instead. This never affects members who already bought the other period — they
+            keep managing their existing plan as normal.
+          </p>
+          <div style="display:flex;gap:24px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <label class="switch"><input type="checkbox" id="ac-monthlyPlanEnabled"/><span class="switch-slider"></span></label>
+              <span style="font-size:12px;font-weight:600">Monthly plan</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <label class="switch"><input type="checkbox" id="ac-yearlyPlanEnabled"/><span class="switch-slider"></span></label>
+              <span style="font-size:12px;font-weight:600">Yearly plan</span>
+            </div>
+          </div>
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
           <div>
             <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">MINIMUM IOS VERSION</label>
@@ -694,7 +715,7 @@ tr:hover td{background:rgba(20,28,36,0.025)}
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <label class="switch"><input type="checkbox" id="ac-photoScanEnabled"/><span class="switch-slider"></span></label>
-            <span style="font-size:12px;font-weight:600">Photo Meal Scan</span>
+            <span style="font-size:12px;font-weight:600">Photo Meal Scan <span style="color:var(--muted);font-weight:400">(not launched)</span></span>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <label class="switch"><input type="checkbox" id="ac-documentUploadEnabled"/><span class="switch-slider"></span></label>
@@ -707,6 +728,10 @@ tr:hover td{background:rgba(20,28,36,0.025)}
           <div style="display:flex;align-items:center;gap:10px">
             <label class="switch"><input type="checkbox" id="ac-wishlistEnabled"/><span class="switch-slider"></span></label>
             <span style="font-size:12px;font-weight:600">Wishlist</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="ac-alternativesEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:12px;font-weight:600">Healthier Alternatives <span style="color:var(--muted);font-weight:400">(not launched)</span></span>
           </div>
         </div>
 
@@ -746,7 +771,7 @@ tr:hover td{background:rgba(20,28,36,0.025)}
         <label class="switch"><input type="checkbox" id="m-membership-switch" onchange="onMembershipSwitchToggle(this)"/><span class="switch-slider"></span></label>
         <span style="font-size:12px;font-weight:600">Membership active</span>
         <select class="filter-select" id="m-grant-billing-period" style="margin-left:auto">
-          <option value="monthly">Monthly (£5)</option>
+          <option value="monthly">Monthly (£3.99)</option>
           <option value="yearly">Yearly (£50)</option>
         </select>
       </div>
@@ -783,12 +808,79 @@ const ADMIN_CONFIG = {
 };
 let adminIdToken = null;
 
+// Persisted in sessionStorage (cleared when the tab closes, not shared across
+// tabs) so a plain page refresh doesn't lose the session — previously
+// adminIdToken only ever lived in this JS variable, so any reload silently
+// dumped the admin back to the login screen even mid-session.
+const ADMIN_TOKEN_STORAGE_KEY = 'shuddhaahar_admin_token';
+// Persists across reloads (unlike ADMIN_TOKEN_STORAGE_KEY, which is
+// sessionStorage) so the Users nav badge stays cleared between admin
+// sessions instead of resetting to a stale count on every login.
+const USERS_BADGE_SEEN_KEY = 'shuddhaahar_admin_users_last_seen';
+
+function base64UrlDecode(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  return atob(str);
+}
+
+// Client-side-only expiry check (no signature verification — that's the
+// server's job) purely to avoid flashing the dashboard for a token we
+// already know is stale before adminGraphqlRequest's 401 handling below
+// would otherwise catch it.
+function isTokenExpired(token) {
+  try {
+    const payload = JSON.parse(base64UrlDecode(token.split('.')[1]));
+    return !payload.exp || payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
+function sessionExpired() {
+  adminIdToken = null;
+  sessionStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+  document.getElementById('app').style.display = 'none';
+  const overlay = document.getElementById('login-overlay');
+  overlay.style.display = 'flex';
+  overlay.style.opacity = '1';
+}
+
+async function restoreSession() {
+  const saved = sessionStorage.getItem(ADMIN_TOKEN_STORAGE_KEY);
+  if (!saved || isTokenExpired(saved)) {
+    sessionStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+    return;
+  }
+  adminIdToken = saved;
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  // Same load-then-render sequence as a fresh login (see attemptLogin) —
+  // renderDashboard() reads the USERS global that only loadAndRenderUsers()
+  // populates, so skipping straight to renderDashboard() here would render
+  // a blank dashboard until the next manual refresh.
+  try {
+    await loadAndRenderUsers();
+  } catch (err) {
+    console.error('Failed to load users on session restore:', err);
+  }
+  renderDashboard();
+}
+
 async function adminGraphqlRequest(query, variables) {
   const res = await fetch(ADMIN_CONFIG.appsyncEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: adminIdToken },
     body: JSON.stringify({ query, variables }),
   });
+  // The Lambda authorizer rejects an expired/invalid token before any
+  // resolver runs, which AppSync surfaces as a bare 401 (no JSON errors
+  // array) — bounce back to login instead of leaving every page silently
+  // failing its data fetch.
+  if (res.status === 401) {
+    sessionExpired();
+    throw new Error('Your session expired. Please sign in again.');
+  }
   const json = await res.json();
   if (json.errors && json.errors.length) {
     throw Object.assign(new Error(json.errors[0].message), { errors: json.errors });
@@ -841,6 +933,7 @@ async function attemptLogin() {
       throw new Error(`Login service error (HTTP ${res.status}): ${data.error || data.Message || 'unknown error'}`);
     }
     adminIdToken = data.token;
+    sessionStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, data.token);
     await loadAndRenderUsers();
   } catch (e) {
     err.textContent = '❌ ' + e.message;
@@ -864,6 +957,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(
 
 function logout() {
   logAudit('auth','Admin signed out','orange','←');
+  sessionStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
   location.reload();
 }
 
@@ -908,7 +1002,10 @@ function showPage(page, btn) {
   const m = PAGE_META[page];
   document.getElementById('page-title').textContent = m.title;
   document.getElementById('page-sub').textContent = m.sub;
-  document.getElementById('new-badge').style.display = page === 'users' ? 'none' : '';
+  if (page === 'users') {
+    localStorage.setItem(USERS_BADGE_SEEN_KEY, new Date().toISOString());
+    updateUsersBadge();
+  }
   if (PAGE_LOADERS[page]) PAGE_LOADERS[page]();
 }
 
@@ -981,10 +1078,10 @@ async function ensureScansLoaded(force) {
 }
 
 // ─── Revenue estimate (shared by Dashboard + Revenue page) ───────
-// £5/month, £50/year — keep in sync with src/services/subscriptionService.ts
+// £3.99/month, £50/year — keep in sync with src/services/subscriptionService.ts
 // PLANS.member.pricing. Yearly members contribute price/12 to MRR, not the
 // flat monthly price — a member on the yearly plan isn't paying £50/month.
-const MEMBER_PRICING = { monthly: 5, yearly: 50 };
+const MEMBER_PRICING = { monthly: 3.99, yearly: 50 };
 function computeRevenueEstimate(users) {
   const members = users.filter(u => u.plan === 'member');
   const mrr = members.reduce((sum, u) => sum + (u.billingPeriod === 'yearly' ? MEMBER_PRICING.yearly / 12 : MEMBER_PRICING.monthly), 0);
@@ -1089,7 +1186,7 @@ async function publishTCVersion() {
     if (requiresAcceptance) document.getElementById('tc-badge').style.display = '';
     logAudit('data', `T&C version ${version} published — ${requiresAcceptance ? 'all users must re-accept' : 'silent update'}`, requiresAcceptance ? 'orange' : 'blue', '📜');
     await loadAndRenderTC();
-    alert(`✓ T&C version ${version} published successfully!\n\n${requiresAcceptance ? 'All users will see the acceptance modal on their next app open.\n\nThey cannot use Shuddhaahar until they accept.' : 'This was a silent update — users will not be prompted.'}`);
+    alert(`✓ T&C version ${version} published successfully!\n\n${requiresAcceptance ? 'All users will see the acceptance modal on their next app open.\n\nThey cannot use Shuddh Aahar until they accept.' : 'This was a silent update — users will not be prompted.'}`);
     document.getElementById('tc-new-version').value = '';
     document.getElementById('tc-summary').value = '';
     document.getElementById('tc-changes').value = '';
@@ -1111,11 +1208,11 @@ function previewTC() {
 // customised yet (getCMSPage returns null for those, and the app itself
 // falls back to its own built-in DEFAULT_PAGES in that case).
 const CMS_PAGE_REGISTRY = [
-  { slug: 'how-it-works', title: 'How Shuddhaahar Works' },
+  { slug: 'how-it-works', title: 'How Shuddh Aahar Works' },
   { slug: 'faq', title: 'FAQ' },
   { slug: 'privacy-policy', title: 'Privacy Policy' },
   { slug: 'terms-of-service', title: 'Terms of Service' },
-  { slug: 'about', title: 'About Shuddhaahar' },
+  { slug: 'about', title: 'About Shuddh Aahar' },
   { slug: 'contact', title: 'Contact Us' },
   { slug: 'allergen-guide', title: 'UK Allergen Guide' },
   { slug: 'subscription-info', title: 'Subscription Plans' },
@@ -1126,7 +1223,7 @@ const ADMIN_UPDATE_CMS_PAGE_MUTATION = `
   mutation AdminUpdateCMSPage($input: AdminUpdateCMSPageInput!) {
     adminUpdateCMSPage(input: $input) { slug }
   }`;
-const LIST_CONTACT_SUBMISSIONS_QUERY = `query { listContactSubmissions(limit: 200) { items { id name email subject status createdAt } } }`;
+const LIST_CONTACT_SUBMISSIONS_QUERY = `query { listContactSubmissions(limit: 200) { items { id name email subject status category source createdAt } } }`;
 const ADMIN_REPLY_CONTACT_MUTATION = `
   mutation AdminReplyContact($id: ID!, $status: String!) {
     adminReplyContactSubmission(id: $id, status: $status) { id status }
@@ -1214,18 +1311,23 @@ async function loadAndRenderContactSubmissions() {
   }
   document.getElementById('cms-contact-total').textContent = CONTACT_SUBMISSIONS.length;
   document.getElementById('cms-contact-new').textContent = CONTACT_SUBMISSIONS.filter(c => c.status === 'new').length;
+  document.getElementById('cms-contact-deletion').textContent = CONTACT_SUBMISSIONS.filter(c => c.category === 'deletion' && c.status !== 'replied').length;
 
-  // name/email/subject are attacker-reachable — any signed-in app user can
-  // submit these, so they're escaped before going into this admin view.
+  // name/email/subject are attacker-reachable — any signed-in app user (or,
+  // for a 'website' submission, any anonymous visitor) can submit these, so
+  // they're escaped before going into this admin view.
   document.getElementById('contact-table-body').innerHTML = CONTACT_SUBMISSIONS.length ? CONTACT_SUBMISSIONS.map(c => `
-    <tr>
+    <tr${c.category === 'deletion' ? ' style="background:var(--red-bg)"' : ''}>
       <td class="td-mono">${c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '—'}</td>
       <td style="font-weight:600">${escapeHtml(c.name)}</td>
       <td class="td-mono">${escapeHtml(c.email)}</td>
       <td>${escapeHtml(c.subject || '—')}</td>
+      <td>${c.category === 'deletion' ? '<span class="badge badge-red">🗑 Deletion</span>' : '<span class="badge badge-cyan">General</span>'}${c.source === 'website' ? ' <span class="td-mono" style="font-size:9px;color:var(--muted)">web</span>' : ''}</td>
       <td><span class="badge ${c.status === 'new' ? 'badge-orange' : c.status === 'replied' ? 'badge-green' : 'badge-cyan'}">${c.status}</span></td>
-      <td><button class="btn btn-ghost" onclick="replyContact('${c.id}', '${escapeHtml(c.email)}')">Reply</button></td>
-    </tr>`).join('') : '<tr><td colspan="6" style="color:var(--muted)">No submissions yet</td></tr>';
+      <td>${c.category === 'deletion'
+          ? `<button class="btn btn-ghost" onclick="replyContact('${c.id}', '${escapeHtml(c.email)}')" title="Then delete the account in User Management">Mark Actioned</button>`
+          : `<button class="btn btn-ghost" onclick="replyContact('${c.id}', '${escapeHtml(c.email)}')">Reply</button>`}</td>
+    </tr>`).join('') : '<tr><td colspan="7" style="color:var(--muted)">No submissions yet</td></tr>';
 }
 
 async function replyContact(id, email) {
@@ -1344,7 +1446,26 @@ async function loadAndRenderUsers() {
   currentUsers = [...USERS];
   renderUsers(currentUsers);
   renderUserStats(USERS);
+  updateUsersBadge();
   return USERS;
+}
+
+// Counts users created since the Users page was last opened, rather than a
+// hardcoded number — previously the badge was baked into the HTML as a
+// literal "3" and only ever had its CSS display toggled, so it reappeared
+// unchanged every time you left the Users page instead of clearing.
+function updateUsersBadge() {
+  const badge = document.getElementById('new-badge');
+  let lastSeen = localStorage.getItem(USERS_BADGE_SEEN_KEY);
+  if (!lastSeen) {
+    // No baseline yet (first load ever) — start counting from now rather
+    // than flagging every existing user as "new".
+    lastSeen = new Date().toISOString();
+    localStorage.setItem(USERS_BADGE_SEEN_KEY, lastSeen);
+  }
+  const count = USERS.filter(u => u.createdAt && new Date(u.createdAt) > new Date(lastSeen)).length;
+  badge.textContent = count;
+  badge.style.display = count > 0 ? '' : 'none';
 }
 
 function renderUserStats(users) {
@@ -1918,10 +2039,13 @@ async function runHealthCheck() {
   btn.disabled = true; btn.textContent = '🔄 Checking…';
   const results = [];
 
-  // Real JSON API — same base URL src/services/foodApi.ts hits.
+  // Real JSON API — same base URL src/services/foodApi.ts hits. Barcode is
+  // Nutella's (3017620422003) — one of Open Food Facts' most-viewed products,
+  // chosen so this canary doesn't false-positive if a less-popular product
+  // ever gets edited/removed from their database.
   try {
     const t0 = performance.now();
-    const res = await fetch('https://world.openfoodfacts.org/api/v2/product/5000112548587.json');
+    const res = await fetch('https://world.openfoodfacts.org/api/v2/product/3017620422003.json');
     const ms = Math.round(performance.now() - t0);
     results.push({ name: 'Open Food Facts API', status: res.ok ? 'online' : 'degraded', detail: `HTTP ${res.status}`, latency: ms + 'ms' });
   } catch (err) {
@@ -1971,7 +2095,7 @@ const APP_CONFIG_PUBLIC_URL = 'https://fszsrlwn0l.execute-api.eu-west-2.amazonaw
 const ADMIN_UPDATE_APP_CONFIG_MUTATION = `
   mutation AdminUpdateAppConfig($input: AdminUpdateAppConfigInput!) {
     adminUpdateAppConfig(input: $input) {
-      minVersionIOS minVersionAndroid dailyScanLimit priceComparisonEnabled aiAnalysisEnabled photoScanEnabled documentUploadEnabled foodDiaryEnabled wishlistEnabled paymentsEnabled
+      minVersionIOS minVersionAndroid dailyScanLimit priceComparisonEnabled aiAnalysisEnabled photoScanEnabled documentUploadEnabled foodDiaryEnabled wishlistEnabled alternativesEnabled paymentsEnabled monthlyPlanEnabled yearlyPlanEnabled
     }
   }`;
 
@@ -1986,10 +2110,16 @@ function populateAppConfigForm(cfg) {
   document.getElementById('ac-documentUploadEnabled').checked = !!cfg.documentUploadEnabled;
   document.getElementById('ac-foodDiaryEnabled').checked = !!cfg.foodDiaryEnabled;
   document.getElementById('ac-wishlistEnabled').checked = !!cfg.wishlistEnabled;
+  // Fails closed (unchecked) when unset — matches the backend DEFAULTS'
+  // alternativesEnabled: false, the one flag here that's off by default.
+  document.getElementById('ac-alternativesEnabled').checked = !!cfg.alternativesEnabled;
   // Defaults to true (fail-open, matches the backend's DEFAULTS) when the
   // config row doesn't have this field saved yet at all — cfg.paymentsEnabled
   // is `undefined` in that case, not `false`.
   document.getElementById('ac-paymentsEnabled').checked = cfg.paymentsEnabled !== false;
+  // Same fail-open-to-true reasoning as paymentsEnabled above.
+  document.getElementById('ac-monthlyPlanEnabled').checked = cfg.monthlyPlanEnabled !== false;
+  document.getElementById('ac-yearlyPlanEnabled').checked = cfg.yearlyPlanEnabled !== false;
 }
 
 // Deliberately plain fetch() against the public endpoint, not adminGraphqlRequest
@@ -2018,8 +2148,16 @@ async function saveAppConfig() {
     documentUploadEnabled: document.getElementById('ac-documentUploadEnabled').checked,
     foodDiaryEnabled: document.getElementById('ac-foodDiaryEnabled').checked,
     wishlistEnabled: document.getElementById('ac-wishlistEnabled').checked,
+    alternativesEnabled: document.getElementById('ac-alternativesEnabled').checked,
     paymentsEnabled: document.getElementById('ac-paymentsEnabled').checked,
+    monthlyPlanEnabled: document.getElementById('ac-monthlyPlanEnabled').checked,
+    yearlyPlanEnabled: document.getElementById('ac-yearlyPlanEnabled').checked,
   };
+
+  if (!input.monthlyPlanEnabled && !input.yearlyPlanEnabled) {
+    alert('At least one billing period (monthly or yearly) must stay enabled — otherwise members have no way to purchase. Use the Payments Kill Switch instead if you want to disable purchasing entirely.');
+    return;
+  }
 
   const btn = document.getElementById('appconfig-save-btn');
   btn.disabled = true; btn.textContent = 'Saving…';
@@ -2070,6 +2208,10 @@ function renderCostsChart() {
   const days30 = makeDays(30);
   renderChart('costChart', {type:'line',data:{labels:days30,datasets:[{label:'Claude API',data:rand(30,8,18).map(v=>v/100),borderColor:'#003D78',backgroundColor:'rgba(0,61,120,0.08)',fill:true,tension:0.4,pointRadius:0,borderWidth:2},{label:'AWS',data:rand(30,1,3).map(v=>v/100),borderColor:'#41B6E6',backgroundColor:'rgba(65,182,230,0.06)',fill:true,tension:0.4,pointRadius:0,borderWidth:1.5}]},options:{maintainAspectRatio:false,plugins:{legend:{display:true,position:'top',labels:{boxWidth:10,padding:10}}},scales:{x:{grid:GRID,ticks:{maxTicksLimit:6}},y:{grid:GRID}}}});
 }
+
+// Runs immediately — this script tag is at the end of <body>, so every
+// element it touches (#login-overlay, #app) already exists in the DOM.
+restoreSession();
 </script>
 </body>
 </html>

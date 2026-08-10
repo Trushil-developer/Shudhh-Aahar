@@ -13,7 +13,7 @@ platform :android do
   # STAGING → Play Store Internal Track
   # ════════════════════════════════════════════════════════════
   lane :staging do
-    UI.message "🤖 Building Shuddhaahar Staging for Play Internal Track..."
+    UI.message "🤖 Building Shuddh Aahar Staging for Play Internal Track..."
 
     gradle(
       task:              "bundle",
@@ -40,7 +40,7 @@ platform :android do
     )
 
     slack(
-      message:    "✅ Shuddhaahar Android Staging uploaded to Play Internal Track",
+      message:    "✅ Shuddh Aahar Android Staging uploaded to Play Internal Track",
       channel:    "#releases",
       webhook_url: ENV["SLACK_WEBHOOK_URL"],
     ) if ENV["SLACK_WEBHOOK_URL"]
@@ -50,7 +50,7 @@ platform :android do
   # PRODUCTION → Play Store Production (as draft)
   # ════════════════════════════════════════════════════════════
   lane :production do
-    UI.message "🤖 Building Shuddhaahar for Play Store production..."
+    UI.message "🤖 Building Shuddh Aahar for Play Store production..."
 
     gradle(
       task:              "bundle",
@@ -76,7 +76,7 @@ platform :android do
     )
 
     slack(
-      message:    "🎉 Shuddhaahar Android submitted to Play Store (10% staged rollout)!",
+      message:    "🎉 Shuddh Aahar Android submitted to Play Store (10% staged rollout)!",
       channel:    "#releases",
       webhook_url: ENV["SLACK_WEBHOOK_URL"],
     ) if ENV["SLACK_WEBHOOK_URL"]

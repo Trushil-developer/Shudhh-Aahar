@@ -350,7 +350,7 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
   if (step === 'processing') {
     const pct = progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0;
     return (
-      <FeatureGate feature="documentUpload">
+      <FeatureGate feature="documentUpload" fullScreen>
       <SafeAreaView style={[s.container, s.centered]}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
         <ActivityIndicator size="large" color={Colors.navy} style={s.processingSpinner} />
@@ -375,7 +375,7 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
   // ── Error state — extraction threw; let the user see why and retry ──
   if (step === 'error') {
     return (
-      <FeatureGate feature="documentUpload">
+      <FeatureGate feature="documentUpload" fullScreen>
       <SafeAreaView style={[s.container, s.centered]}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
         <Text style={s.doneEmoji}>⚠️</Text>
@@ -392,7 +392,7 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
   // ── Saving state ───────────────────────────────────────────
   if (step === 'saving') {
     return (
-      <FeatureGate feature="documentUpload">
+      <FeatureGate feature="documentUpload" fullScreen>
       <SafeAreaView style={[s.container, s.centered]}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
         <ActivityIndicator size="large" color={Colors.navy} />
@@ -414,7 +414,7 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
     if (addedMedications > 0) summaryBadges.push({ label: t('documentUpload.summaryMedications', { count: addedMedications }), count: addedMedications });
 
     return (
-      <FeatureGate feature="documentUpload">
+      <FeatureGate feature="documentUpload" fullScreen>
       <SafeAreaView style={[s.container, s.centered]}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
         <Text style={s.doneEmoji}>✅</Text>
@@ -496,7 +496,7 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
     };
 
     return (
-      <FeatureGate feature="documentUpload">
+      <FeatureGate feature="documentUpload" fullScreen>
       <SafeAreaView style={s.container}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
 
@@ -655,7 +655,7 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
 
   // ── Upload state ───────────────────────────────────────────
   return (
-    <FeatureGate feature="documentUpload">
+    <FeatureGate feature="documentUpload" fullScreen>
     <SafeAreaView style={s.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
 

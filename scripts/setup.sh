@@ -26,9 +26,11 @@ case "$ENV" in
   *) err "Unknown environment: $ENV. Use: dev, staging, or prod" ;;
 esac
 
+ENV_UPPER=$(echo "$ENV" | tr '[:lower:]' '[:upper:]')
+
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}║       Shuddhaahar Setup — ${ENV^^} Environment        ${NC}${BOLD}║${NC}"
+echo -e "${BOLD}║       Shuddhaahar Setup — ${ENV_UPPER} Environment        ${NC}${BOLD}║${NC}"
 echo -e "${BOLD}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 

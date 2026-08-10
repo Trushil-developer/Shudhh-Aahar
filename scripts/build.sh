@@ -21,9 +21,9 @@ ENV=${1:-dev}
 PLATFORM=${2:-ios}
 
 case "$ENV" in
-  dev|development) ENV=development; SCHEME_SUFFIX="Dev" ;;
-  staging)         ENV=staging;     SCHEME_SUFFIX="Staging" ;;
-  prod|production) ENV=production;  SCHEME_SUFFIX="" ;;
+  dev|development) ENV=development ;;
+  staging)         ENV=staging ;;
+  prod|production) ENV=production ;;
   *) err "Unknown env: $ENV. Use dev, staging, or prod" ;;
 esac
 
@@ -32,9 +32,12 @@ case "$PLATFORM" in
   *) err "Unknown platform: $PLATFORM. Use ios or android" ;;
 esac
 
+ENV_UPPER=$(echo "$ENV" | tr '[:lower:]' '[:upper:]')
+PLATFORM_UPPER=$(echo "$PLATFORM" | tr '[:lower:]' '[:upper:]')
+
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}║  Shuddhaahar Build: ${ENV^^} / ${PLATFORM^^}${NC}${BOLD}             ║${NC}"
+echo -e "${BOLD}║  Shuddhaahar Build: ${ENV_UPPER} / ${PLATFORM_UPPER}${NC}${BOLD}             ║${NC}"
 echo -e "${BOLD}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -70,14 +73,32 @@ if [ "$PLATFORM" = "ios" ]; then
 
   if [ "$ENV" = "development" ]; then
     info "Building for iOS Simulator..."
-    xcodebuild build \
-      -workspace Shuddhaahar.xcworkspace \
-      -scheme "Shuddhaahar${SCHEME_SUFFIX}" \
-      -configuration Debug \
-      -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=latest' \
-      -derivedDataPath build \
-      CODE_SIGNING_ALLOWED=NO \
-      | xcpretty || true
+    # Only one scheme ("Shuddhaahar") actually exists in the Xcode project —
+    # there's no ShuddhaaharDev/Staging/Production scheme per environment,
+    # despite what the docs/Fastfile assume. Piping through xcpretty (if
+    # present) is cosmetic only — PIPESTATUS[0] is checked explicitly so a
+    # real xcodebuild failure isn't masked into a false "success".
+    if command -v xcpretty &>/dev/null; then
+      xcodebuild build \
+        -workspace Shuddhaahar.xcworkspace \
+        -scheme "Shuddhaahar" \
+        -configuration Debug \
+        -destination 'generic/platform=iOS Simulator' \
+        -derivedDataPath build \
+        CODE_SIGNING_ALLOWED=NO \
+        | xcpretty
+      BUILD_STATUS=${PIPESTATUS[0]}
+    else
+      xcodebuild build \
+        -workspace Shuddhaahar.xcworkspace \
+        -scheme "Shuddhaahar" \
+        -configuration Debug \
+        -destination 'generic/platform=iOS Simulator' \
+        -derivedDataPath build \
+        CODE_SIGNING_ALLOWED=NO
+      BUILD_STATUS=$?
+    fi
+    [ "$BUILD_STATUS" -eq 0 ] || err "iOS build failed"
     ok "iOS Dev build complete — open simulator to run"
 
   elif [ "$ENV" = "staging" ]; then

@@ -1,5 +1,5 @@
 // src/screens/SubscriptionScreen.tsx
-// Membership: Member (£5/month or £50/year — same perks either way)
+// Membership: Member (£3.99/month or £50/year — same perks either way)
 // Single clean flow: what you get → one pricing card with one CTA → trust → footer.
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -53,12 +53,32 @@ export default function SubscriptionScreen({ onClose, highlightFeature }: Props)
   // empty store subscriptions list). Checked separately here, ahead of
   // isMember, so it always wins and shows the real explanation instead.
   const paymentsEnabled = appConfig.paymentsEnabled !== false;
+  // Which billing periods are for sale, admin-controlled (e.g. launch
+  // monthly-only, turn yearly on later with no app release — see
+  // appConfigService's comment on these two fields). Both fail open to
+  // true, same as paymentsEnabled, so a config fetch failure never removes
+  // a purchase option nobody meant to hide. If a bad config somehow
+  // disables both, fall back to monthly rather than rendering no purchase
+  // option at all.
+  const monthlyPlanEnabled = appConfig.monthlyPlanEnabled !== false;
+  const yearlyPlanEnabled  = appConfig.yearlyPlanEnabled !== false;
+  const showPeriodToggle = monthlyPlanEnabled && yearlyPlanEnabled;
+  const singlePeriod: BillingPeriod | null = showPeriodToggle
+    ? null
+    : yearlyPlanEnabled && !monthlyPlanEnabled ? 'yearly' : 'monthly';
   const { rw, rh, rf, rr, isTablet } = useResponsive();
   const s = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
   const [loading,   setLoading]   = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [subState,  setSubState]  = useState<SubscriptionState | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>('monthly');
+
+  // Only-one-period-enabled admin config can change (or load in) after the
+  // toggle's own local state was initialised — keep them in sync so the
+  // purchase button never offers a period that isn't actually for sale.
+  useEffect(() => {
+    if (singlePeriod) setBillingPeriod(singlePeriod);
+  }, [singlePeriod]);
 
   const headerFade = useRef(new Animated.Value(0)).current;
   const cardSlide  = useRef(new Animated.Value(24)).current;
@@ -208,24 +228,28 @@ export default function SubscriptionScreen({ onClose, highlightFeature }: Props)
 
             {!isMember ? (
               <>
-                {/* Toggle */}
-                <View style={s.periodToggle}>
-                  <TouchableOpacity
-                    style={[s.periodOption, billingPeriod === 'monthly' && s.periodOptionActive]}
-                    onPress={() => setBillingPeriod('monthly')}
-                    activeOpacity={0.85}
-                  >
-                    <Text style={[s.periodOptionText, billingPeriod === 'monthly' && s.periodOptionTextActive]}>{t('subscription.monthly')}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[s.periodOption, billingPeriod === 'yearly' && s.periodOptionActive]}
-                    onPress={() => setBillingPeriod('yearly')}
-                    activeOpacity={0.85}
-                  >
-                    <Text style={[s.periodOptionText, billingPeriod === 'yearly' && s.periodOptionTextActive]}>{t('subscription.yearly')}</Text>
-                    <View style={s.periodBadge}><Text style={s.periodBadgeText}>{t('subscription.twoMonthsFree')}</Text></View>
-                  </TouchableOpacity>
-                </View>
+                {/* Toggle — hidden when the admin config only has one
+                    billing period for sale, since there's nothing to
+                    switch between. */}
+                {showPeriodToggle && (
+                  <View style={s.periodToggle}>
+                    <TouchableOpacity
+                      style={[s.periodOption, billingPeriod === 'monthly' && s.periodOptionActive]}
+                      onPress={() => setBillingPeriod('monthly')}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={[s.periodOptionText, billingPeriod === 'monthly' && s.periodOptionTextActive]}>{t('subscription.monthly')}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[s.periodOption, billingPeriod === 'yearly' && s.periodOptionActive]}
+                      onPress={() => setBillingPeriod('yearly')}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={[s.periodOptionText, billingPeriod === 'yearly' && s.periodOptionTextActive]}>{t('subscription.yearly')}</Text>
+                      <View style={s.periodBadge}><Text style={s.periodBadgeText}>{t('subscription.twoMonthsFree')}</Text></View>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
                 {/* Price */}
                 <Text style={s.noCommitmentLabel}>{t('subscription.noCommitment')}</Text>

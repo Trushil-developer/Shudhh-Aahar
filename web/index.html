@@ -3,107 +3,244 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Shuddhaahar — Clinical Nutrition Intelligence</title>
-<meta name="description" content="Personalised AI health analysis for every UK supermarket product. Scan a barcode, get an NHS-informed verdict against your allergies, conditions and medications, and find the cheapest store."/>
+<title>Shuddh Aahar — Clinical Nutrition Intelligence</title>
+<meta name="description" content="Shuddh Aahar gives you a personalised health verdict on every UK supermarket product — scan a barcode and see, in seconds, whether it's right for your allergies, conditions and medications, plus where to buy it cheapest."/>
 <link rel="icon" type="image/png" href="/favicon-32.png"/>
 <link rel="apple-touch-icon" href="/favicon-180.png"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  /* NHS blue + white — mirrors src/theme/medical.ts's "Health-Market
-     Hybrid" palette, leaning fully into the blue/white NHS reading (green
-     dropped from this page's chrome; it's used elsewhere for fresh/safe
-     signals inside the app, not here). Always light — color-scheme:light
-     stops the browser from auto-darkening form controls/scrollbars to
-     match the visitor's OS, same intent as dropping the dark-mode block
-     below used to serve. */
   color-scheme:light;
-  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F0F6FC;--border:#E1E8F0;--border2:#C7D2E0;
-  --navy:#003D78;--accent:#005EB8;--accent-glow:rgba(0,94,184,0.10);
-  --hero-blue:#003D78;--hero-blue2:#005EB8;
-  --text:#141C24;--text2:#4C5B6B;--muted:#7C8A99;
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F3F8FD;--border:#E3EAF1;--border2:#CBD8E4;
+  --navy:#0A3B70;--accent:#0468C4;--accent-dark:#034E96;--accent-glow:rgba(4,104,196,0.09);
+  --hero-1:#062B57;--hero-2:#0468C4;
+  --text:#101823;--text2:#4C5B6B;--muted:#7C8A99;
+  --safe:#0F8A4B;--safe-bg:#E9F7EF;
+  --caution:#B45309;--caution-bg:#FEF3CD;
+  --shadow-sm:0 1px 2px rgba(10,30,60,0.05),0 1px 1px rgba(10,30,60,0.04);
+  --shadow-md:0 10px 30px rgba(6,43,87,0.10);
+  --shadow-lg:0 20px 50px rgba(6,43,87,0.18);
+  --radius:16px;
   --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 }
-body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
 a{color:inherit}
+img{max-width:100%;display:block}
+button{font-family:inherit}
 
 /* ── Header ── */
-header{padding:18px 0;border-bottom:1px solid var(--border)}
-.header-inner{display:flex;align-items:center;gap:12px}
-.logo-mark{width:36px;height:36px;border-radius:10px;display:block;object-fit:cover;box-shadow:0 4px 14px rgba(0,94,184,0.2)}
-.logo-name{font-size:16px;font-weight:800}
-.logo-sub{font-size:9px;color:var(--accent);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.85);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--border)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+.header-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:34px;height:34px;border-radius:9px;display:block;object-fit:cover;box-shadow:0 3px 10px rgba(4,104,196,0.28)}
+.logo-name{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.01em}
+.logo-sub{font-size:9px;color:var(--accent);font-family:var(--mono);letter-spacing:1.4px;text-transform:uppercase;font-weight:700}
+.header-nav{display:flex;align-items:center;gap:28px}
+.header-nav a{font-size:13px;font-weight:600;color:var(--text2);text-decoration:none}
+.header-nav a:hover{color:var(--accent)}
+.header-cta{background:var(--navy);color:#fff;font-size:13px;font-weight:700;padding:9px 18px;border-radius:99px;text-decoration:none;white-space:nowrap;box-shadow:var(--shadow-sm)}
+.header-cta:hover{background:var(--accent-dark)}
+.nav-links-desktop{display:flex}
 
-/* ── Hero — solid NHS-blue band, full-bleed, white text (a fixed brand
-   block, not a theme-following surface — same idea as NHS.uk's blue
-   banner staying blue regardless of the visitor's OS theme) ── */
-.hero{padding:64px 0 72px;text-align:center;background:linear-gradient(160deg,var(--hero-blue),var(--hero-blue2));color:#fff}
-.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.14);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:0.4px;margin-bottom:22px}
-.hero h1{font-size:clamp(30px,5vw,48px);font-weight:800;letter-spacing:-0.02em;line-height:1.12;max-width:760px;margin:0 auto 18px;color:#fff}
-.hero p{font-size:17px;color:rgba(255,255,255,0.85);max-width:560px;margin:0 auto 34px}
-.store-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
-.store-badge{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:12px;padding:11px 20px;font-size:13px;color:var(--muted);cursor:default;user-select:none;box-shadow:0 6px 20px rgba(0,20,50,0.18)}
-.store-badge .glyph{font-size:20px}
+/* ── Hero ── */
+.hero{position:relative;padding:76px 0 0;background:linear-gradient(150deg,var(--hero-1),var(--hero-2) 78%);color:#fff;overflow:hidden}
+.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(560px 320px at 85% 10%,rgba(255,255,255,0.12),transparent 60%)}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr 0.95fr;gap:48px;align-items:center;padding-bottom:64px}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.13);color:#fff;border:1px solid rgba(255,255,255,0.28);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:0.4px;margin-bottom:20px}
+.hero h1{font-size:clamp(32px,4.4vw,50px);font-weight:800;letter-spacing:-0.02em;line-height:1.1;margin:0 0 18px;color:#fff}
+.hero h1 em{font-style:normal;color:#8FD0FF}
+.hero p{font-size:17px;color:rgba(255,255,255,0.86);max-width:480px;margin:0 0 30px}
+.store-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.store-badge{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:12px;padding:11px 18px;font-size:13px;color:var(--muted);cursor:default;user-select:none;box-shadow:var(--shadow-md)}
+.store-badge .glyph{font-size:19px}
 .store-badge .label{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25}
-.store-badge .label small{font-size:10px;font-family:var(--mono);letter-spacing:0.5px;color:var(--accent)}
+.store-badge .label small{font-size:9.5px;font-family:var(--mono);letter-spacing:0.5px;color:var(--accent);font-weight:700}
 .store-badge .label strong{font-size:13px;color:var(--navy)}
-.hero-note{font-size:12px;color:rgba(255,255,255,0.75)}
+.hero-note{font-size:12.5px;color:rgba(255,255,255,0.7)}
+
+/* ── Hero visual — a self-drawn "scan result" preview card, no real
+   screenshot needed; also doubles as a concrete illustration of what the
+   product actually does, not just a decorative graphic. ── */
+.hero-visual{position:relative;display:flex;justify-content:center}
+.phone{width:270px;background:#0C1420;border-radius:34px;padding:12px;box-shadow:var(--shadow-lg);transform:rotate(2deg)}
+.phone-screen{background:var(--bg);border-radius:24px;overflow:hidden;padding-bottom:14px}
+.phone-notch{height:22px;display:flex;align-items:center;justify-content:center}
+.phone-notch::before{content:'';width:56px;height:5px;border-radius:99px;background:#1c2530}
+.phone-card{margin:0 12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow-sm)}
+.phone-product{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.phone-thumb{width:40px;height:40px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.phone-product strong{display:block;font-size:12.5px;color:var(--text)}
+.phone-product span{display:block;font-size:10px;color:var(--muted);font-family:var(--mono)}
+.phone-verdict{display:flex;align-items:center;gap:8px;background:var(--caution-bg);border:1px solid rgba(180,83,9,0.25);border-radius:10px;padding:9px 11px;margin-bottom:10px}
+.phone-verdict .dot{width:8px;height:8px;border-radius:99px;background:var(--caution);flex-shrink:0}
+.phone-verdict span{font-size:11px;font-weight:700;color:var(--caution)}
+.phone-reason{font-size:10.5px;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.phone-price-row{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--border2);padding-top:10px}
+.phone-price-row .store{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+.phone-price-row .price{font-size:15px;font-weight:800;color:var(--safe)}
+.phone-mini-card{margin:10px 12px 0;background:var(--safe-bg);border:1px solid rgba(15,138,75,0.22);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px}
+.phone-mini-card span{font-size:10.5px;font-weight:700;color:var(--safe)}
+.float-chip{position:absolute;background:#fff;border-radius:12px;box-shadow:var(--shadow-md);padding:9px 13px;font-size:11.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px}
+.float-chip.c1{top:6%;left:-6%}
+.float-chip.c2{bottom:10%;right:-8%}
+
+/* ── How it works ── */
+.how{padding:72px 0}
+.section-label{text-align:center;font-size:11px;font-family:var(--mono);color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700}
+.section-title{text-align:center;font-size:clamp(22px,3vw,30px);font-weight:800;margin-bottom:14px;color:var(--navy);letter-spacing:-0.01em}
+.section-sub{text-align:center;font-size:15px;color:var(--text2);max-width:520px;margin:0 auto 44px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.step{position:relative;padding:28px 22px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border)}
+.step-num{width:32px;height:32px;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.step h3{font-size:16px;font-weight:800;margin-bottom:8px;color:var(--navy)}
+.step p{font-size:13.5px;color:var(--text2)}
 
 /* ── Features ── */
-.features{padding:20px 0 60px}
-.section-label{text-align:center;font-size:11px;font-family:var(--mono);color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700}
-.section-title{text-align:center;font-size:26px;font-weight:800;margin-bottom:40px;color:var(--navy)}
-.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px}
-.feature-icon{width:42px;height:42px;border-radius:11px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:14px}
-.feature-card h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--navy)}
+.features{padding:20px 0 72px}
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;transition:transform 0.15s,box-shadow 0.15s}
+.feature-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.feature-icon{width:44px;height:44px;border-radius:12px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+.feature-card h3{font-size:15.5px;font-weight:800;margin-bottom:7px;color:var(--navy)}
 .feature-card p{font-size:13.5px;color:var(--text2)}
 
+/* ── Why us — confident comparison strip ── */
+.why{background:var(--navy);padding:64px 0;color:#fff}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:40px}
+.why-item{text-align:center;padding:0 12px}
+.why-item .num{font-size:34px;font-weight:900;color:#8FD0FF;margin-bottom:6px;letter-spacing:-0.02em}
+.why-item p{font-size:13px;color:rgba(255,255,255,0.78);line-height:1.5}
+.why .section-title,.why .section-sub{color:#fff}
+.why .section-sub{color:rgba(255,255,255,0.8)}
+.why .section-label{color:#8FD0FF}
+
 /* ── Trust strip ── */
-.trust{background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:26px 0}
-.trust-row{display:flex;gap:28px;justify-content:center;flex-wrap:wrap}
+.trust{background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:24px 0}
+.trust-row{display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
 .trust-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);font-weight:600}
 .trust-item .dot{width:6px;height:6px;border-radius:99px;background:var(--accent)}
 
+/* ── Final CTA ── */
+.final-cta{padding:72px 0;text-align:center}
+.final-cta h2{font-size:clamp(24px,3.4vw,34px);font-weight:800;color:var(--navy);margin-bottom:12px;letter-spacing:-0.01em}
+.final-cta p{font-size:15px;color:var(--text2);max-width:460px;margin:0 auto 30px}
+
 /* ── Footer ── */
-footer{padding:32px 0;text-align:center}
+footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
 footer p{font-size:12px;color:var(--muted)}
 footer a{color:var(--accent);text-decoration:none;font-weight:600}
 footer a:hover{text-decoration:underline}
 .footer-links{margin-top:8px}
+
+/* ── Responsive ── */
+@media (max-width:880px){
+  .hero-grid{grid-template-columns:1fr;text-align:center;padding-bottom:48px}
+  .hero p{margin-left:auto;margin-right:auto}
+  .store-row{justify-content:center}
+  .hero-visual{margin-top:8px}
+  .float-chip{display:none}
+  .steps,.why-grid{grid-template-columns:1fr}
+  .header-nav{display:none}
+}
+@media (max-width:520px){
+  .wrap{padding:0 18px}
+  .hero{padding-top:64px}
+  .phone{width:230px}
+  .header-cta{padding:8px 14px;font-size:12px}
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap header-inner">
-    <img class="logo-mark" src="/favicon-180.png" alt="Shuddhaahar"/>
-    <div>
-      <div class="logo-name">Shuddhaahar</div>
-      <div class="logo-sub">Clinical Nutrition Intelligence</div>
-    </div>
+    <a class="header-brand" href="/">
+      <img class="logo-mark" src="/favicon-180.png" alt="Shuddh Aahar"/>
+      <div>
+        <div class="logo-name">Shuddh Aahar</div>
+        <div class="logo-sub">Clinical Nutrition Intelligence</div>
+      </div>
+    </a>
+    <nav class="header-nav nav-links-desktop">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#why">Why Shuddh Aahar</a>
+      <a href="/contact">Contact</a>
+    </nav>
+    <a class="header-cta" href="#download">Get the app</a>
   </div>
 </header>
 
 <section class="hero">
-  <div class="wrap">
-    <span class="hero-badge">🇬🇧 Launching soon in the UK</span>
-    <h1>A personalised health verdict on every product you scan</h1>
-    <p>Shuddhaahar checks any UK supermarket barcode against your allergies, conditions and medications — with NHS-informed guidance and the cheapest nearby price, in seconds.</p>
-    <div class="store-row">
-      <span class="store-badge"><span class="glyph">🍎</span><span class="label"><small>COMING SOON ON THE</small><strong>App Store</strong></span></span>
-      <span class="store-badge"><span class="glyph">▶</span><span class="label"><small>COMING SOON ON</small><strong>Google Play</strong></span></span>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="hero-badge">🇬🇧 Launching soon in the UK</span>
+      <h1>Know if it's <em>actually</em> right for you<br/>before it's in your basket</h1>
+      <p>Scan any UK supermarket barcode and get an instant, personal verdict — checked against your own allergies, conditions and medications — plus where to buy it cheapest.</p>
+      <div class="store-row" id="download">
+        <span class="store-badge"><span class="glyph">🍎</span><span class="label"><small>COMING SOON ON THE</small><strong>App Store</strong></span></span>
+        <span class="store-badge"><span class="glyph">▶</span><span class="label"><small>COMING SOON ON</small><strong>Google Play</strong></span></span>
+      </div>
+      <p class="hero-note">In closed testing now — public UK release coming shortly.</p>
     </div>
-    <p class="hero-note">In closed testing now — public UK release coming shortly.</p>
+    <div class="hero-visual">
+      <span class="float-chip c1">🎯 Matched to you</span>
+      <span class="float-chip c2">💰 Cheapest nearby</span>
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-notch"></div>
+          <div class="phone-card">
+            <div class="phone-product">
+              <div class="phone-thumb">🥣</div>
+              <div>
+                <strong>Oat & Honey Granola</strong>
+                <span>Scanned just now</span>
+              </div>
+            </div>
+            <div class="phone-verdict"><span class="dot"></span><span>⚠ High sugar for your goals</span></div>
+            <p class="phone-reason">18g sugar per serving — above your daily target. Contains oats: safe against your allergy profile.</p>
+            <div class="phone-price-row"><span class="store">Cheapest nearby</span><span class="price">£2.10</span></div>
+          </div>
+          <div class="phone-mini-card"><span>✓ Checked against your health profile</span></div>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="features">
+<section class="how" id="how">
   <div class="wrap">
-    <div class="section-label">Why Shuddhaahar</div>
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">Three steps, every time</h2>
+    <p class="section-sub">No generic traffic-light score. Every verdict is built fresh, from your own health profile.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Scan a barcode</h3>
+        <p>Point your camera at any product barcode for an instant lookup against a live UK product database.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Get your verdict</h3>
+        <p>AI checks the product against your allergies, conditions, medications and goals, and explains the "why" in plain English.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>See the best price</h3>
+        <p>Real-time price comparison across UK supermarkets shows exactly where to buy it for less.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="section-label">What's inside</div>
     <h2 class="section-title">Built for your health, not a generic diet</h2>
+    <p class="section-sub">Everything is scored against you specifically — not an average shopper.</p>
     <div class="feature-grid">
       <div class="feature-card">
         <div class="feature-icon">🩺</div>
@@ -112,8 +249,8 @@ footer a:hover{text-decoration:underline}
       </div>
       <div class="feature-card">
         <div class="feature-icon">✚</div>
-        <h3>NHS-informed guidance</h3>
-        <p>Warnings are grounded in NHS nutritional guidelines, so the advice reads like a clinician's, not a diet fad.</p>
+        <h3>Clinically-grounded guidance</h3>
+        <p>Warnings are grounded in established nutritional science, so the advice reads like a clinician's, not a diet fad.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📷</div>
@@ -129,6 +266,28 @@ footer a:hover{text-decoration:underline}
   </div>
 </section>
 
+<section class="why" id="why">
+  <div class="wrap">
+    <div class="section-label">Why Shuddh Aahar</div>
+    <h2 class="section-title">A genuinely better way to shop</h2>
+    <p class="section-sub">Not another traffic-light label or generic diet score — a verdict built around you, every time.</p>
+    <div class="why-grid">
+      <div class="why-item">
+        <div class="num">1:1</div>
+        <p>Every verdict is scored against your own allergies, conditions and medications — never a generic average shopper.</p>
+      </div>
+      <div class="why-item">
+        <div class="num">2-in-1</div>
+        <p>Health verdict and cheapest price, together, in one scan — no switching between a diet app and a price comparison site.</p>
+      </div>
+      <div class="why-item">
+        <div class="num">0</div>
+        <p>Your health data is never sold, shared or monetised — full stop.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <div class="trust">
   <div class="wrap trust-row">
     <span class="trust-item"><span class="dot"></span>UK GDPR compliant</span>
@@ -137,10 +296,21 @@ footer a:hover{text-decoration:underline}
   </div>
 </div>
 
+<section class="final-cta">
+  <div class="wrap">
+    <h2>Be first to know when we launch</h2>
+    <p>Shuddh Aahar is in closed testing now, with a public UK release coming shortly.</p>
+    <div class="store-row" style="justify-content:center">
+      <span class="store-badge"><span class="glyph">🍎</span><span class="label"><small>COMING SOON ON THE</small><strong>App Store</strong></span></span>
+      <span class="store-badge"><span class="glyph">▶</span><span class="label"><small>COMING SOON ON</small><strong>Google Play</strong></span></span>
+    </div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
-    <p>© 2026 Shuddhaahar Ltd · NHS-informed nutritional guidance, not medical advice</p>
-    <p class="footer-links"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a></p>
+    <p>© 2026 Shuddh Aahar · Informational guidance only, not medical advice</p>
+    <p class="footer-links"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/contact">Contact & Support</a> · <a href="/delete-data">Delete My Data</a></p>
   </div>
 </footer>
 

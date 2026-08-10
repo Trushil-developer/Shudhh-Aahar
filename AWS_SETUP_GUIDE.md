@@ -9,7 +9,7 @@ Estimated time: ~45 minutes first time.
 
 ### Step 1: Create Google OAuth Credentials
 1. Go to https://console.cloud.google.com
-2. Create a new project → name it "Shuddhaahar"
+2. Create a new project → name it "Shuddh Aahar"
 3. Go to **APIs & Services → Credentials**
 4. Click **Create Credentials → OAuth Client ID**
 5. Choose **iOS** → enter bundle ID: `com.yourname.shuddhaahar`
@@ -97,7 +97,7 @@ cd ios && pod install && cd ..
 Add to `ios/Shuddhaahar/Info.plist`:
 ```xml
 <key>NSCameraUsageDescription</key>
-<string>Shuddhaahar needs camera access to scan barcodes.</string>
+<string>Shuddh Aahar needs camera access to scan barcodes.</string>
 
 <key>CFBundleURLTypes</key>
 <array>

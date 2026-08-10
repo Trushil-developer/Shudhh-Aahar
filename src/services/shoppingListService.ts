@@ -4,6 +4,17 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// One store's price for a saved item — snapshotted at add-time and
+// refreshable via updateItemPrices() (see ShoppingListScreen's "Refresh
+// Prices" action). loyaltyPrice/loyaltyLabel carry a Clubcard/Nectar/etc.
+// price when the source comparison found one (see priceApi.ts).
+export interface StorePriceEntry {
+  supermarket: string;
+  price: number;
+  loyaltyPrice?: number;
+  loyaltyLabel?: string;
+}
+
 export interface ShoppingListItem {
   id: string;
   barcode: string;
@@ -11,8 +22,13 @@ export interface ShoppingListItem {
   brand: string;
   image: string;
   quantity: string;
+  // Effective (loyalty-aware) price/store at the cheapest option — derived
+  // from storePrices, kept alongside it so screens that only need the
+  // headline number don't have to recompute it.
   cheapestPrice?: number;
   cheapestStore?: string;
+  storePrices?: StorePriceEntry[];   // full per-store breakdown, for grouping-by-store
+  pricesUpdatedAt?: string;          // ISO timestamp of the last price refresh
   aiScore: number;
   addedAt: string;
   checked: boolean;        // ticked off while shopping
@@ -53,6 +69,27 @@ export async function removeFromShoppingList(barcode: string): Promise<void> {
   const task = writeQueue.then(async () => {
     const list = await getShoppingList();
     await AsyncStorage.setItem(KEY, JSON.stringify(list.filter(i => i.barcode !== barcode)));
+  });
+  writeQueue = task.catch(() => {});
+  return task;
+}
+
+// Writes a freshly re-fetched per-store price breakdown for one item —
+// used by ShoppingListScreen's "Refresh Prices" action, one barcode at a
+// time (each call independently queued, same race-safety as every other
+// mutation here).
+export async function updateItemPrices(
+  barcode: string,
+  storePrices: StorePriceEntry[],
+  cheapestPrice?: number,
+  cheapestStore?: string,
+): Promise<void> {
+  const task = writeQueue.then(async () => {
+    const list = await getShoppingList();
+    const updated = list.map(i => i.barcode === barcode
+      ? { ...i, storePrices, cheapestPrice, cheapestStore, pricesUpdatedAt: new Date().toISOString() }
+      : i);
+    await AsyncStorage.setItem(KEY, JSON.stringify(updated));
   });
   writeQueue = task.catch(() => {});
   return task;

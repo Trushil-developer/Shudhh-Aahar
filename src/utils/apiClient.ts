@@ -133,6 +133,16 @@ class APIClient {
 
     const execute = async (): Promise<T> => {
       let lastError: Error | null = null;
+      // A 404 means the resource genuinely doesn't exist (e.g. a barcode
+      // that isn't in Open Food Facts' database) — a normal, expected
+      // response, not evidence the service itself is unhealthy. Tracked
+      // separately so recordFailure below can skip it: counting it would
+      // let a handful of routine "not found" lookups trip the circuit
+      // breaker and start blocking every request to the domain for a full
+      // minute afterward — including lookups for products that DO exist —
+      // which then shows as a misleading "Couldn't Reach the Server" for a
+      // service that was never actually down.
+      let isNotFound = false;
 
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
@@ -163,8 +173,6 @@ class APIClient {
               retryCount: attempt,
             });
 
-            // Don't retry client errors (4xx)
-            if (response.status >= 400 && response.status < 500) throw err;
             throw err;
           }
 
@@ -185,6 +193,20 @@ class APIClient {
             perf.recordAPICall({ endpoint: url, method, duration: timeout, status: 'timeout', cacheHit: false, retryCount: attempt });
           }
 
+          // A 4xx means the server gave a definitive answer (not found, bad
+          // request, unauthorized, etc.) — the exact same request will
+          // always get the exact same answer, so retrying it just wastes
+          // requests and the exponential-backoff delay below for no chance
+          // of a different outcome. Stop immediately instead. (5xx/network/
+          // timeout errors fall through to the retry below as before — those
+          // genuinely can succeed on a later attempt.)
+          const status = err instanceof AppError ? err.params?.status : undefined;
+          const isClientError = typeof status === 'number' && status >= 400 && status < 500;
+          if (isClientError) {
+            isNotFound = status === 404;
+            break;
+          }
+
           if (attempt < retries) {
             const delay = retryDelay * Math.pow(2, attempt); // exponential backoff
             logger.info('api', `Retrying ${url} in ${delay}ms`, { attempt: attempt + 1, maxRetries: retries });
@@ -193,7 +215,7 @@ class APIClient {
         }
       }
 
-      this.recordFailure(domain);
+      if (!isNotFound) this.recordFailure(domain);
       perf.recordAPICall({ endpoint: url, method, duration: Date.now() - start, status: 'error', cacheHit: false, retryCount: retries });
       throw lastError || new AppError('requestFailed', `Request failed: ${url}`, { url });
     };

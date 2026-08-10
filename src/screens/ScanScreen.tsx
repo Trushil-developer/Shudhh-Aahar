@@ -88,7 +88,7 @@ export default function ScanScreen() {
         justifyContent: 'center',
       },
       iconBtnActive: { backgroundColor: 'rgba(0,132,61,0.5)' },
-      iconBtnText: { fontSize: rf(16) },
+      iconBtnText: { fontSize: rf(16), color: '#FFF' },
       bottomHint: {
         position: 'absolute',
         bottom: rh(60),

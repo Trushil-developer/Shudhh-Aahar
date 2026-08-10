@@ -76,7 +76,7 @@ export interface FeatureFlags {
 // ─── Development ──────────────────────────────────────────────
 const DEV_CONFIG: EnvironmentConfig = {
   env: 'development',
-  appName: 'Shuddhaahar DEV',
+  appName: 'Shuddh Aahar DEV',
   bundleId: 'com.shuddhaahar.dev',
   applicationId: 'com.shuddhaahar.dev',
   appVersion: NATIVE_APP_VERSION,
@@ -122,7 +122,7 @@ const DEV_CONFIG: EnvironmentConfig = {
 const STAGING_CONFIG: EnvironmentConfig = {
   ...DEV_CONFIG,
   env: 'staging',
-  appName: 'Shuddhaahar Staging',
+  appName: 'Shuddh Aahar Staging',
   bundleId: 'com.shuddhaahar.staging',
   applicationId: 'com.shuddhaahar.staging',
 
@@ -158,7 +158,7 @@ const STAGING_CONFIG: EnvironmentConfig = {
 const PROD_CONFIG: EnvironmentConfig = {
   ...STAGING_CONFIG,
   env: 'production',
-  appName: 'Shuddhaahar',
+  appName: 'Shuddh Aahar',
   bundleId: 'com.shuddhaahar',
   applicationId: 'com.shuddhaahar',
 

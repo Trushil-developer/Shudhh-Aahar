@@ -9,6 +9,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar, View, ActivityIndicator, Text, Image, Platform, Linking, TouchableOpacity } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DeviceInfo from 'react-native-device-info';
@@ -266,20 +267,24 @@ function AppNavigator() {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <ErrorBoundary>
-        {/* AppConfigProvider wraps AuthProvider (not just AppNavigator) because
-            AuthContext's AuthProvider itself calls useAppConfig() to source the
-            daily scan limit — it needs AppConfigProvider as an ancestor, not a
-            sibling. AppConfigProvider has no dependency on auth state, so this
-            nesting is safe either way; this order is required for the above. */}
-        <AppConfigProvider>
-          <AuthProvider>
-            <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
-            <AppNavigator />
-          </AuthProvider>
-        </AppConfigProvider>
-      </ErrorBoundary>
-    </SafeAreaProvider>
+    // Required by react-native-gesture-handler (powers HomeScreen's
+    // swipe-to-delete) — must wrap the whole tree, as high as possible.
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ErrorBoundary>
+          {/* AppConfigProvider wraps AuthProvider (not just AppNavigator) because
+              AuthContext's AuthProvider itself calls useAppConfig() to source the
+              daily scan limit — it needs AppConfigProvider as an ancestor, not a
+              sibling. AppConfigProvider has no dependency on auth state, so this
+              nesting is safe either way; this order is required for the above. */}
+          <AppConfigProvider>
+            <AuthProvider>
+              <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
+              <AppNavigator />
+            </AuthProvider>
+          </AppConfigProvider>
+        </ErrorBoundary>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

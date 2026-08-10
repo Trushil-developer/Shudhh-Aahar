@@ -1,5 +1,5 @@
 // src/services/subscriptionService.ts
-// Membership — Free / Member (£5/month or £50/year, same perks either way)
+// Membership — Free / Member (£3.99/month or £50/year, same perks either way)
 // Free tier gets 3 free scans per calendar day; while under that daily cap,
 // every member-only feature (Personal Score, lowest-price reveal, wishlist)
 // is unlocked too — scanning is what's rationed, not each feature
@@ -97,14 +97,17 @@ export const PLANS: Record<PlanId, Plan> = {
     tagline: 'Full access, every feature',
     colour: Colors.navy,
     pricing: {
-      monthly: { price: 5, priceDisplay: '£5', appleProductId: 'com.shuddhaahar.member.monthly', googleProductId: 'shuddhaahar_member_monthly' },
+      monthly: { price: 3.99, priceDisplay: '£3.99', appleProductId: 'com.shuddhaahar.member.monthly', googleProductId: 'shuddhaahar_member_monthly' },
       yearly:  { price: 50, priceDisplay: '£50', appleProductId: 'com.shuddhaahar.member.yearly', googleProductId: 'shuddhaahar_member_yearly' },
     },
     limits: {
       aiAnalysis: true,
       priceComparison: true,
       foodDiary: true,
-      photoScan: true,
+      // Not launched yet — see FeatureGate/AppConfig's photoScanEnabled,
+      // which is the real (currently off) gate; this stays in sync with
+      // that so this metadata never claims an entitlement nobody has.
+      photoScan: false,
       healthKitSync: true,
       documentUpload: true,
       familyProfiles: 1,
@@ -118,7 +121,6 @@ export const PLANS: Record<PlanId, Plan> = {
       { label: 'Add products to your wishlist', included: true },
       { label: 'AI health analysis', included: true },
       { label: 'Document upload (AI)', included: true },
-      { label: 'Photo meal scan', included: true },
       { label: 'Apple Health / Google Fit sync', included: true },
     ],
   },

@@ -2,9 +2,10 @@ import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   ScrollView, StatusBar, Modal, ActivityIndicator, Image,
-  Animated, PanResponder,
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { AnimatedTourModal } from '../components/AppTour';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -49,101 +50,71 @@ function getGreeting(t: (key: string, options?: Record<string, any>) => string) 
   return h < 12 ? t('home.greetingMorning') : h < 17 ? t('home.greetingAfternoon') : t('home.greetingEvening');
 }
 
-// Swipe-left-to-delete row. Built with Animated + PanResponder (no gesture
-// library in this project) — swiping reveals a Delete button underneath.
-// Receives `styles`, `rf`, and `deleteWidth` from the parent HomeScreen (which
-// owns the live useResponsive() values) rather than importing static scale
-// functions itself.
+// Swipe-left-to-delete row. Built on react-native-gesture-handler's Swipeable
+// (native-thread gesture recognition + Animated native driver throughout) —
+// swiping reveals a Delete button underneath. Receives `styles`, `rf`, and
+// `deleteWidth` from the parent HomeScreen (which owns the live
+// useResponsive() values) rather than importing static scale functions itself.
 function RecentScanRow({ scan, isLast, onPress, onDelete, styles, rf, deleteWidth }: {
   scan: ScanRecord; isLast: boolean; onPress: () => void; onDelete: () => Promise<boolean>;
   styles: any; rf: (n: number) => number; deleteWidth: number;
 }) {
   const DELETE_WIDTH = deleteWidth;
   const s = styles;
-  // `pan` drives the drag on the JS thread. It must stay JS-driven (not
-  // native) throughout: React Native's Animated.event(...) only returns a
-  // plain callable function when useNativeDriver is false — with true, it
-  // returns the AnimatedEvent instance itself (not callable), which is what
-  // was crashing PanResponder ("... is not a function") when it tried to
-  // invoke onPanResponderMove directly. Mixing native- and JS-driven
-  // animations on the same Animated.Value also isn't supported, so
-  // setOffset/setValue below and the spring/timing calls later all need to
-  // agree on useNativeDriver: false too.
   const { t } = useTranslation();
-  const pan = useRef(new Animated.Value(0)).current;
-  const open = useRef(false);
-  // React Native's Animated still invokes the completion callback on an
-  // interrupted animation, so two taps within the ~150ms swipe-out window
-  // can fire onDelete twice concurrently for the same row. Guard with an
-  // in-flight ref (reset only on failure — the row unmounts on success, so
-  // there's nothing to reset then) so the second tap is a no-op.
+  const swipeableRef = useRef<Swipeable>(null);
+  // Swipeable still invokes onSwipeableClose asynchronously, so two taps
+  // within that window can fire onDelete twice concurrently for the same
+  // row. Guard with an in-flight ref (reset only on failure — the row
+  // unmounts on success, so there's nothing to reset then) so the second
+  // tap is a no-op.
   const deletingRef = useRef(false);
-
-  const translateX = pan.interpolate({
-    inputRange: [-DELETE_WIDTH, 0],
-    outputRange: [-DELETE_WIDTH, 0],
-    extrapolate: 'clamp',
-  });
-
-  const panEvent = useRef(Animated.event([null, { dx: pan }], { useNativeDriver: false })).current;
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 8 && Math.abs(g.dx) > Math.abs(g.dy),
-      onPanResponderGrant: () => {
-        pan.setOffset(open.current ? -DELETE_WIDTH : 0);
-        pan.setValue(0);
-      },
-      onPanResponderMove: panEvent,
-      onPanResponderRelease: (_, g) => {
-        pan.flattenOffset();
-        const base = open.current ? -DELETE_WIDTH : 0;
-        const endValue = base + g.dx;
-        const shouldOpen = endValue < -DELETE_WIDTH / 2;
-        open.current = shouldOpen;
-        Animated.spring(pan, { toValue: shouldOpen ? -DELETE_WIDTH : 0, useNativeDriver: false, bounciness: 0 }).start();
-      },
-    }),
-  ).current;
 
   const handleDelete = () => {
     if (deletingRef.current) return; // already deleting this row, ignore repeat tap
     deletingRef.current = true;
-    Animated.timing(pan, { toValue: -400, duration: 150, useNativeDriver: false }).start(() => {
-      onDelete().then(ok => {
-        // On success the row unmounts (parent removes it from the list), so
-        // there's nothing left to reset. On failure the row sticks around
-        // (rolled back), so allow another delete attempt.
-        if (!ok) deletingRef.current = false;
-      });
+    swipeableRef.current?.close();
+    onDelete().then(ok => {
+      // On success the row unmounts (parent removes it from the list), so
+      // there's nothing left to reset. On failure the row sticks around
+      // (rolled back), so allow another delete attempt.
+      if (!ok) deletingRef.current = false;
     });
   };
+
+  const renderRightActions = () => (
+    <View style={[s.deleteAction, { width: DELETE_WIDTH }]}>
+      <TouchableOpacity style={s.deleteActionBtn} onPress={handleDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <Text style={s.deleteActionText}>✕{'\n'}{t('common.delete')}</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   const safe = !scan.warnings?.length;
 
   return (
-    <View style={[s.swipeContainer, !isLast && s.scanRowBorder]}>
-      <View style={s.deleteAction}>
-        <TouchableOpacity style={s.deleteActionBtn} onPress={handleDelete} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={s.deleteActionText}>✕{'\n'}{t('common.delete')}</Text>
-        </TouchableOpacity>
-      </View>
-      <Animated.View style={[s.scanRow, { backgroundColor: Colors.surface, transform: [{ translateX }] }]} {...panResponder.panHandlers}>
-        <TouchableOpacity style={s.scanRowTouchable} onPress={onPress} activeOpacity={0.75}>
-          {scan.image ? (
-            <Image source={{ uri: scan.image }} style={s.scanThumb} resizeMode="contain" />
-          ) : (
-            <View style={s.scanThumbPlaceholder}><Text style={{ fontSize: rf(16) }}>📦</Text></View>
-          )}
-          <View style={[s.dot, safe ? s.dotSafe : s.dotWarn]} />
-          <View style={s.scanInfo}>
-            <Text style={s.scanName} numberOfLines={1}>{scan.productName || scan.barcode}</Text>
-            {scan.brand ? <Text style={s.scanBrand}>{scan.brand}</Text> : null}
-          </View>
-          <Text style={s.scanTime}>{timeAgo(scan.scannedAt, t)}</Text>
-        </TouchableOpacity>
-      </Animated.View>
-    </View>
+    <Swipeable
+      ref={swipeableRef}
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      rightThreshold={DELETE_WIDTH / 2}
+      containerStyle={!isLast ? s.scanRowBorder : undefined}
+      childrenContainerStyle={s.scanRow}
+    >
+      <TouchableOpacity style={[s.scanRowTouchable, { backgroundColor: Colors.surface }]} onPress={onPress} activeOpacity={0.75}>
+        {scan.image ? (
+          <Image source={{ uri: scan.image }} style={s.scanThumb} resizeMode="contain" />
+        ) : (
+          <View style={s.scanThumbPlaceholder}><Text style={{ fontSize: rf(16) }}>📦</Text></View>
+        )}
+        <View style={[s.dot, safe ? s.dotSafe : s.dotWarn]} />
+        <View style={s.scanInfo}>
+          <Text style={s.scanName} numberOfLines={1}>{scan.productName || scan.barcode}</Text>
+          {scan.brand ? <Text style={s.scanBrand}>{scan.brand}</Text> : null}
+        </View>
+        <Text style={s.scanTime}>{timeAgo(scan.scannedAt, t)}</Text>
+      </TouchableOpacity>
+    </Swipeable>
   );
 }
 
@@ -155,6 +126,7 @@ export default function HomeScreen() {
   const DELETE_WIDTH = rw(76);
 
   const [showHealthProfile, setShowHealthProfile] = useState(false);
+  const [showTour, setShowTour]                   = useState(false);
   const [recentScans, setRecentScans]             = useState<ScanRecord[]>([]);
   const [loadingScans, setLoadingScans]           = useState(true);
 
@@ -188,6 +160,13 @@ export default function HomeScreen() {
     healthProfileSub:   { fontSize: rf(12), color: Colors.textSecondary, marginTop: rh(2) },
     healthProfileArrow: { fontSize: rf(22), color: Colors.navy, opacity: 0.4 },
 
+    // App tour banner
+    tourBanner:  { flexDirection: 'row', alignItems: 'center', gap: rw(14), backgroundColor: Colors.surface, borderRadius: rr(18), padding: rw(16), marginBottom: rh(16), borderWidth: 1, borderColor: Colors.border },
+    tourIconWrap:{ width: rw(44), height: rw(44), borderRadius: rr(13), backgroundColor: Colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+    tourIcon:    { fontSize: rf(20) },
+    tourTitle:   { fontSize: rf(14), fontWeight: '700', color: Colors.textPrimary },
+    tourSub:     { fontSize: rf(12), color: Colors.textSecondary, marginTop: rh(2) },
+
     // Section title
     sectionRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: rh(10) },
     sectionTitle: { fontSize: rf(15), fontWeight: '700', color: Colors.textPrimary },
@@ -195,11 +174,13 @@ export default function HomeScreen() {
 
     // Scans card
     scansCard:    { backgroundColor: Colors.surface, borderRadius: rr(18), borderWidth: 1, borderColor: Colors.border, overflow: 'hidden', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-    swipeContainer: { overflow: 'hidden' },
     scanRow:      { width: '100%' },
     scanRowTouchable: { flexDirection: 'row', alignItems: 'center', paddingVertical: rh(14), paddingHorizontal: rw(16), gap: rw(12) },
     scanRowBorder:{ borderBottomWidth: 1, borderBottomColor: Colors.border },
-    deleteAction: { position: 'absolute', right: 0, top: 0, bottom: 0, width: DELETE_WIDTH, backgroundColor: Colors.danger, alignItems: 'center', justifyContent: 'center' },
+    // No position/right/top/bottom here — Swipeable's own rightActions
+    // wrapper is already absolute-fill + row-reverse, so this just needs its
+    // own width to claim space at the right edge.
+    deleteAction: { backgroundColor: Colors.danger, alignItems: 'center', justifyContent: 'center' },
     deleteActionBtn: { flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' },
     deleteActionText: { color: '#FFF', fontSize: rf(11), fontWeight: '700', textAlign: 'center', lineHeight: rf(16) },
     scanThumb:    { width: rw(36), height: rw(36), borderRadius: rr(8), backgroundColor: Colors.surfaceAlt, borderWidth: 1, borderColor: Colors.border, flexShrink: 0 },
@@ -266,6 +247,18 @@ export default function HomeScreen() {
 
         {/* TODO: Today's Activity (health stats) removed for now — re-add when ready */}
 
+        {/* ── App tour ── */}
+        <TouchableOpacity style={s.tourBanner} onPress={() => setShowTour(true)} activeOpacity={0.85}>
+          <View style={s.tourIconWrap}>
+            <Text style={s.tourIcon}>🎬</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.tourTitle}>{t('home.tourTitle')}</Text>
+            <Text style={s.tourSub}>{t('home.tourSubtitle')}</Text>
+          </View>
+          <Text style={s.healthProfileArrow}>›</Text>
+        </TouchableOpacity>
+
         {/* ── Health profile ── */}
         <TouchableOpacity style={s.healthProfileCard} onPress={() => setShowHealthProfile(true)} activeOpacity={0.85}>
           <View style={s.healthProfileIcon}>
@@ -325,6 +318,8 @@ export default function HomeScreen() {
           <HealthProfileScreen onComplete={() => setShowHealthProfile(false)} />
         </SafeAreaProvider>
       </Modal>
+
+      <AnimatedTourModal visible={showTour} onComplete={() => setShowTour(false)} />
     </SafeAreaView>
   );
 }

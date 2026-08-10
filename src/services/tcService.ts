@@ -57,27 +57,27 @@ export const FALLBACK_TC: TCVersion = {
   summary: 'Initial Terms of Service',
   changes: [],
   requiresReAcceptance: true,
-  fullText: `SHUDDHAAHAR TERMS OF SERVICE
+  fullText: `SHUDDH AAHAR TERMS OF SERVICE
 
 Last updated: 1 June 2026
 Version: 1.0.0
 
-By creating an account or using Shuddhaahar, you agree to these Terms of Service.
+By creating an account or using Shuddh Aahar, you agree to these Terms of Service.
 
 1. SERVICE DESCRIPTION
-Shuddhaahar provides nutritional information, AI-assisted health guidance and local supermarket price comparison. It is an informational tool only and does not constitute medical advice, diagnosis or treatment.
+Shuddh Aahar provides nutritional information, AI-assisted health guidance and local supermarket price comparison. It is an informational tool only and does not constitute medical advice, diagnosis or treatment.
 
 2. ELIGIBILITY
-You must be at least 13 years old to use Shuddhaahar. By using the service, you confirm you meet this requirement.
+You must be at least 13 years old to use Shuddh Aahar. By using the service, you confirm you meet this requirement.
 
 3. SUBSCRIPTIONS & PAYMENT
-The Member plan (£5/month or £50/year) includes a 7-day free trial for new subscribers. Subscriptions auto-renew unless cancelled at least 24 hours before the renewal date. Payments are processed by Apple (App Store) or Google (Play Store) in-app purchase — Shuddhaahar never sees or stores your card details.
+The Member plan (£3.99/month or £50/year) includes a 7-day free trial for new subscribers. Subscriptions auto-renew unless cancelled at least 24 hours before the renewal date. Payments are processed by Apple (App Store) or Google (Play Store) in-app purchase — Shuddh Aahar never sees or stores your card details.
 
 4. CANCELLATION & REFUNDS
 You may cancel your subscription at any time. Access continues until the end of the paid period. Annual subscriptions may be refunded on a pro-rata basis within 14 days of purchase, in line with applicable consumer protection law in your market.
 
 5. MEDICAL DISCLAIMER
-Shuddhaahar is NOT a medical device and does NOT provide medical advice. Information is for general informational purposes only. Always consult a qualified healthcare professional before making dietary changes, especially if you have a medical condition or take prescription medications.
+Shuddh Aahar is NOT a medical device and does NOT provide medical advice. Information is for general informational purposes only. Always consult a qualified healthcare professional before making dietary changes, especially if you have a medical condition or take prescription medications.
 
 6. ACCURACY DISCLAIMER
 Product data is sourced from Open Food Facts and may not always be complete or up to date. Always verify allergen information against the physical product label before consumption.
@@ -89,7 +89,7 @@ Your health data is stored encrypted in AWS data centers. It is never sold or sh
 You agree not to: reverse engineer the app; attempt to access other users' data; use the service for commercial data scraping; or misuse our AI analysis systems.
 
 9. LIMITATION OF LIABILITY
-To the maximum extent permitted by law, Shuddhaahar Ltd shall not be liable for any indirect, incidental, or consequential damages arising from your use of the service.
+To the maximum extent permitted by law, Shuddh Aahar shall not be liable for any indirect, incidental, or consequential damages arising from your use of the service.
 
 10. CHANGES TO TERMS
 We may update these Terms from time to time. When we make material changes, you will be notified and required to accept the new Terms before continuing to use the app.
@@ -98,9 +98,8 @@ We may update these Terms from time to time. When we make material changes, you 
 These terms are governed by English law. Disputes shall be subject to the exclusive jurisdiction of the English courts.
 
 CONTACT
-Shuddhaahar Ltd
-Email: info@shuddhaahar.shop
-Address: 123 Health Street, London, EC1A 1BB`,
+Shuddh Aahar
+Email: info@shuddhaahar.shop`,
 };
 
 // ─── Fetch current T&C version from server ────────────────────

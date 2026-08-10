@@ -1,6 +1,6 @@
-# Shuddhaahar Documentation
+# Shuddh Aahar Documentation
 
-Deep-dive technical documentation for the Shuddhaahar app, generated from a full read of the
+Deep-dive technical documentation for the Shuddh Aahar app, generated from a full read of the
 codebase. Start here, then follow the links below for the area you need.
 
 | Doc | Covers |

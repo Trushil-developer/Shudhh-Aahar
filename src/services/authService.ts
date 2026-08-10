@@ -51,7 +51,7 @@ export async function getCurrentUser(): Promise<UserProfile | null> {
     const hasPrevious = await GoogleSignin.hasPreviousSignIn();
     if (!hasPrevious) return null;
     const response = await GoogleSignin.signInSilently();
-    if (!isSuccessResponse(response)) return null;
+    if (response.type !== 'success') return null;
     return toUserProfile(response.data.user);
   } catch {
     return null;

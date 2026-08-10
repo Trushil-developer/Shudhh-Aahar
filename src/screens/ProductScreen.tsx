@@ -10,7 +10,7 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { fetchProductByBarcode, ProductData } from '../services/foodApi';
-import { fetchPricesByBarcode, PriceComparison } from '../services/priceApi';
+import { fetchPricesByBarcode, PriceComparison, effectivePrice, getSupermarketColor, getSupermarketLogo } from '../services/priceApi';
 import { analyseProductForUser, AIHealthAnalysis } from '../services/aiHealthService';
 import { findSimilarProducts, RecommendedProduct } from '../services/recommendationService';
 import { useAuth } from '../context/AuthContext';
@@ -24,16 +24,11 @@ import { buildPersonalNutrientRows, excludeAlreadyMentioned, PersonalNutrientRow
 import { addToShoppingList, isInShoppingList } from '../services/shoppingListService';
 import { useSubscription } from '../hooks/useSubscription';
 import { FeatureGate } from '../components/FeatureGate';
+import { useAppConfig } from '../context/AppConfigContext';
 // PHASE 2: import { FeatureTooltip, useGuide } from '../components/AppGuide';
 
 type Route = RouteProp<RootStackParamList, 'Product'>;
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-
-const SUPERMARKET_COLORS: Record<string, string> = {
-  tesco: '#EE1C2E', sainsburys: '#FF7B00', asda: '#78BE20',
-  morrisons: '#FFC90D', waitrose: '#73AA2D', ocado: '#5C2D91',
-  aldi: '#003882', lidl: '#0050AA', coop: '#00B1E7', iceland: '#CC0000',
-};
 
 export default function ProductScreen() {
   const { t } = useTranslation();
@@ -41,6 +36,7 @@ export default function ProductScreen() {
   const navigation = useNavigation<Nav>();
   const { barcode, fromRecommendation, whyBetter, fromScan, scansRemaining } = route.params as any;
   const { user, healthProfile } = useAuth();
+  const { config: appConfig } = useAppConfig();
   const { rw, rh, rf, rr, isTablet } = useResponsive();
   const styles = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
   // Personal Score, lowest-price reveal and wishlist all just check
@@ -210,11 +206,22 @@ export default function ProductScreen() {
             style={styles.addToListBtn}
             onPress={async () => {
               if (!hasFreeAccess) { openPaywall(t('features.wishlist')); return; }
+              // Snapshot the full per-store breakdown (not just the single
+              // cheapest price) so the wishlist can group by store and show
+              // each store's own price — see ShoppingListScreen. Only kept
+              // when a real comparison was found; the isLink:true fallback
+              // search links (price: 0) aren't real prices worth storing.
+              const storePrices = prices?.found ? prices.prices.map(p => ({
+                supermarket: p.supermarket, price: p.price,
+                loyaltyPrice: p.loyaltyPrice, loyaltyLabel: p.loyaltyLabel,
+              })) : undefined;
               await addToShoppingList({
                 barcode: product!.barcode, name: product!.name, brand: product!.brand,
                 image: product!.image, quantity: product!.quantity,
-                cheapestPrice: prices?.cheapest?.price,
+                cheapestPrice: prices?.cheapest ? effectivePrice(prices.cheapest) : undefined,
                 cheapestStore: prices?.cheapest?.supermarket,
+                storePrices,
+                pricesUpdatedAt: storePrices ? new Date().toISOString() : undefined,
                 aiScore: productScore.score,
                 category: product!.categories,
               });
@@ -729,6 +736,26 @@ function IngredientsCard({ product }: { product: ProductData }) {
   );
 }
 
+// Real store logo (Clearbit, see priceApi.ts) when available, falling back
+// to a plain colour dot on load failure (no network, retailer not in
+// Clearbit's index) — used for every store row below instead of the bare
+// colour dot this screen used to always show.
+function StoreBadge({ name, color, size = 20 }: { name: string; color: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  const logo = !failed ? getSupermarketLogo(name) : null;
+  if (logo) {
+    return (
+      <Image
+        source={{ uri: logo }}
+        style={{ width: size, height: size, borderRadius: 4 }}
+        resizeMode="contain"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+  return <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color }} />;
+}
+
 function PriceCard({ prices, loading, revealed, onUnlock }: {
   prices: PriceComparison | null; loading: boolean; revealed: boolean; onUnlock: () => void;
 }) {
@@ -745,17 +772,12 @@ function PriceCard({ prices, loading, revealed, onUnlock }: {
         <Text style={{ color: Colors.textMuted, fontSize: 12, marginBottom: 12 }}>
           {t('product.price.liveDataUnavailable')}
         </Text>
-        {prices.prices.map((item, i) => {
-          const smKey = item.supermarket.toLowerCase().replace(/[' ]/g, '');
-          const colorKey = Object.keys(SUPERMARKET_COLORS).find(k => smKey.includes(k));
-          const smColor = colorKey ? SUPERMARKET_COLORS[colorKey] : Colors.navyMid;
-          return (
-            <View key={i} style={[styles.storeRow, { marginBottom: 6 }]}>
-              <View style={[styles.storeColorDot, { backgroundColor: smColor }]} />
-              <Text style={[styles.storeName, { flex: 1 }]}>{item.supermarket}</Text>
-            </View>
-          );
-        })}
+        {prices.prices.map((item, i) => (
+          <View key={i} style={[styles.storeRow, { marginBottom: 6 }]}>
+            <StoreBadge name={item.supermarket} color={getSupermarketColor(item.supermarket)} />
+            <Text style={[styles.storeName, { flex: 1 }]}>{item.supermarket}</Text>
+          </View>
+        ))}
         <Text style={styles.priceSource}>{t('product.price.sourceNote')}</Text>
       </View>
     );
@@ -770,9 +792,14 @@ function PriceCard({ prices, loading, revealed, onUnlock }: {
     );
   }
 
-  const max = prices.most_expensive?.price || 1;
+  // effectivePrice, not .price — prices.cheapest is now picked by loyalty-
+  // aware price (see priceApi.ts), so the summary/bar-chart/saving figures
+  // must use the same basis or "cheapest" and the number shown for it could
+  // silently disagree (e.g. a Clubcard deal made a store cheapest, but its
+  // shelf price displayed here was actually higher than another store's).
+  const max = prices.most_expensive ? effectivePrice(prices.most_expensive) : 1;
   const saving = prices.cheapest && prices.most_expensive
-    ? (prices.most_expensive.price - prices.cheapest.price).toFixed(2)
+    ? (effectivePrice(prices.most_expensive) - effectivePrice(prices.cheapest)).toFixed(2)
     : null;
 
   return (
@@ -785,8 +812,11 @@ function PriceCard({ prices, loading, revealed, onUnlock }: {
         <View style={styles.bestPricePanel}>
           <View>
             <Text style={styles.bestPriceLabel}>{t('product.price.lowestPrice')}</Text>
-            <Text style={styles.bestPriceValue}>£{prices.cheapest?.price.toFixed(2)}</Text>
-            <Text style={styles.bestPriceStore}>{prices.cheapest?.supermarket}</Text>
+            <Text style={styles.bestPriceValue}>£{prices.cheapest ? effectivePrice(prices.cheapest).toFixed(2) : '—'}</Text>
+            <Text style={styles.bestPriceStore}>
+              {prices.cheapest?.supermarket}
+              {prices.cheapest?.loyaltyLabel ? ` · ${prices.cheapest.loyaltyLabel}` : ''}
+            </Text>
           </View>
           {saving && parseFloat(saving) > 0 && (
             <View style={styles.savingPanel}>
@@ -819,9 +849,7 @@ function PriceCard({ prices, loading, revealed, onUnlock }: {
         <Text style={styles.storeListCol}>{t('product.price.priceCol')}</Text>
       </View>
       {(revealed ? prices.prices : [...prices.prices].sort((a, b) => a.supermarket.localeCompare(b.supermarket))).map((item, i) => {
-        const smKey = item.supermarket.toLowerCase().replace(/[' ]/g, '');
-        const colorKey = Object.keys(SUPERMARKET_COLORS).find(k => smKey.includes(k));
-        const smColor = colorKey ? SUPERMARKET_COLORS[colorKey] : Colors.navyMid;
+        const smColor = getSupermarketColor(item.supermarket);
 
         if (!revealed) {
           return (
@@ -831,7 +859,7 @@ function PriceCard({ prices, loading, revealed, onUnlock }: {
               onPress={onUnlock}
               activeOpacity={0.7}
             >
-              <View style={[styles.storeColorDot, { backgroundColor: smColor }]} />
+              <StoreBadge name={item.supermarket} color={smColor} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.storeName}>{item.supermarket}</Text>
                 {!item.in_stock && <Text style={[styles.storePromo, { color: Colors.danger }]}>{t('product.price.outOfStock')}</Text>}
@@ -843,25 +871,32 @@ function PriceCard({ prices, loading, revealed, onUnlock }: {
 
         // Which store is "best" is itself part of the member-only reveal.
         const isBest = item.supermarket === prices.cheapest?.supermarket;
-        const barW = max > 0 ? (item.price / max) * 100 : 0;
+        // effectivePrice — a Clubcard/Nectar price, when this store has one,
+        // both for the displayed number and the bar-chart proportion, same
+        // reasoning as the summary panel above.
+        const rowPrice = effectivePrice(item);
+        const barW = max > 0 ? (rowPrice / max) * 100 : 0;
 
         return (
           <View
             key={i}
             style={[styles.storeRow, !item.in_stock && { opacity: 0.4 }, isBest && styles.storeRowBest]}
           >
-            <View style={[styles.storeColorDot, { backgroundColor: smColor }]} />
+            <StoreBadge name={item.supermarket} color={smColor} />
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
                 <Text style={[styles.storeName, isBest && { color: Colors.price, fontWeight: '700' }]}>{item.supermarket}</Text>
-                <Text style={[styles.storePrice, isBest && { color: Colors.price }]}>£{item.price.toFixed(2)}</Text>
+                <Text style={[styles.storePrice, isBest && { color: Colors.price }]}>£{rowPrice.toFixed(2)}</Text>
               </View>
               <View style={styles.priceBarTrack}>
                 <View style={[styles.priceBarFill, { width: `${barW}%`, backgroundColor: isBest ? Colors.price : smColor }]} />
               </View>
-              {(item.promotion || !item.in_stock) && (
+              {/* item.promotion is the raw scraped text (e.g. "£1.70
+                  CLUBCARD") that loyaltyLabel was parsed from — show the
+                  clean label instead of repeating that same info twice. */}
+              {(item.loyaltyLabel || item.promotion || !item.in_stock) && (
                 <Text style={[styles.storePromo, !item.in_stock && { color: Colors.danger }]}>
-                  {!item.in_stock ? t('product.price.outOfStock') : item.promotion}
+                  {!item.in_stock ? t('product.price.outOfStock') : item.loyaltyLabel || item.promotion}
                 </Text>
               )}
             </View>
@@ -1192,7 +1227,6 @@ function createStyles(
   storeListCol: { fontSize: rf(9), fontWeight: '700', color: Colors.textMuted, letterSpacing: 1.2 },
   storeRow: { flexDirection: 'row', alignItems: 'center', gap: rw(10), paddingVertical: rh(10), borderBottomWidth: 1, borderColor: Colors.border },
   storeRowBest: { backgroundColor: Colors.safeBg, marginHorizontal: -rw(4), paddingHorizontal: rw(4), borderRadius: rr(8) },
-  storeColorDot: { width: rw(10), height: rw(10), borderRadius: rw(5) },
   storeName: { fontSize: rf(14), color: Colors.textPrimary },
   storePrice: { fontSize: rf(15), fontWeight: '600', color: Colors.textPrimary },
   storePriceLocked: { fontSize: rf(13), fontWeight: '600', color: Colors.textMuted },

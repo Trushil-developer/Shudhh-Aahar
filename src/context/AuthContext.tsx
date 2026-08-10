@@ -244,6 +244,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadUser();
   }, []);
 
+  // Re-resolve membership whenever the payments kill switch's real value
+  // changes. appConfig starts at DEFAULT_APP_CONFIG (paymentsEnabled: true,
+  // fail-open) and fetchAppConfig() resolves asynchronously — loadUser()'s
+  // own resolveEffectiveMembership call above closes over whatever appConfig
+  // was at mount time, so if the real config (payments off) lands after that
+  // call already ran, isMember is stuck showing "Become a Member" for a real
+  // signed-in user even though the kill switch is on. This effect re-checks
+  // once the config settles (or changes) and once the user is available,
+  // so the free-for-everyone state always converges.
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const dbUser = await fetchUserProfile(user.id);
+      const member = await resolveEffectiveMembership(dbUser);
+      setIsMember(member);
+      await refreshDailyScans(member);
+    })();
+  }, [appConfig.paymentsEnabled, user?.id]);
+
   return (
     <AuthContext.Provider value={{ user, healthProfile, profileComplete, loading, isMember, dailyScansRemaining, consumeScan, signIn, signOut, refreshProfile, updateHealthProfile }}>
       {children}

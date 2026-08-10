@@ -143,7 +143,7 @@ export default function PhotoScanScreen({ onClose }: { onClose: () => void }) {
   }), [rw, rh, rf, rr]);
 
   return (
-    <FeatureGate feature="photoScan">
+    <FeatureGate feature="photoScan" fullScreen>
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <View style={styles.topBar}>

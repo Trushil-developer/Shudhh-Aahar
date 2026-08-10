@@ -159,7 +159,7 @@ don't run `amplify push` against it without reconciling first.
 
 ## Admin panel (`admin/index.html`)
 
-A single-file, client-only "Shuddhaahar Admin" dashboard mockup: user management (ban/delete), T&C/CMS
+A single-file, client-only "Shuddh Aahar Admin" dashboard mockup: user management (ban/delete), T&C/CMS
 editor, contact-message replies, cost breakdown, service status, audit log, and Chart.js charts.
 
 **It is not wired to the real backend.** There are no `fetch`/XHR calls to AppSync or any reference

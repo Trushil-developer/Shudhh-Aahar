@@ -13,10 +13,10 @@ For infra details, see [Backend Infrastructure](BACKEND_INFRASTRUCTURE.md).
 
 Env vars live in `.env.development` / `.env.staging` / `.env.production` (templates, committed)
 and `.env.<env>.local` (real secrets, gitignored). Each defines, prefixed `DEV_`/`STAGING_`/`PROD_`:
-`SHUDDHAAHAR_ENV`, `*_COGNITO_USER_POOL_ID`, `*_COGNITO_CLIENT_ID`, `*_COGNITO_DOMAIN`,
-`*_ANTHROPIC_API_KEY`, `*_TROLLEY_API_KEY`, `*_STRIPE_PUBLISHABLE_KEY`. Production additionally
-defines four Stripe price IDs (`PROD_STRIPE_PRO_MONTHLY`/`_ANNUAL`, `PROD_STRIPE_MAX_MONTHLY`/`_ANNUAL`).
-See [environment.ts](SERVICES_AND_UTILS.md#environment-config-srcconfigenvironmentts) for how these
+`SHUDDHAAHAR_ENV`, `*_APPSYNC_ENDPOINT`, `*_GOOGLE_WEB_CLIENT_ID`, `*_GOOGLE_IOS_CLIENT_ID`,
+`*_ANTHROPIC_API_KEY`, `*_TROLLEY_API_KEY`, `*_IAP_VERIFY_URL`, `*_APP_CONFIG_URL`. Auth is native
+Google Sign-In (no Cognito) and payments are Apple/Google IAP verified server-side (no Stripe) — see
+[environment.ts](SERVICES_AND_UTILS.md#environment-config-srcconfigenvironmentts) for how these
 are consumed at runtime.
 
 ## Local development
@@ -81,7 +81,7 @@ rule.
 | All environments | `CODECOV_TOKEN`, `SLACK_WEBHOOK_URL` (optional) |
 | iOS | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_API_KEY_BASE64`, `IOS_DISTRIBUTION_CERT_BASE64`, `IOS_CERT_PASSWORD`, `IOS_STAGING_PROVISION_BASE64`, `IOS_PROD_PROVISION_BASE64`, `KEYCHAIN_PASSWORD`, `APPLE_TEAM_ID` |
 | Android | `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEY_ALIAS`, `ANDROID_STORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` |
-| API keys (per env) | `{DEV,STAGING,PROD}_ANTHROPIC_API_KEY`, `{DEV,STAGING,PROD}_STRIPE_PUBLISHABLE_KEY`, `PROD_STRIPE_*` price IDs, `{DEV,STAGING,PROD}_COGNITO_USER_POOL_ID` |
+| API keys (per env) | `{DEV,STAGING,PROD}_APPSYNC_ENDPOINT`, `{DEV,STAGING,PROD}_GOOGLE_WEB_CLIENT_ID`, `{DEV,STAGING,PROD}_GOOGLE_IOS_CLIENT_ID`, `{DEV,STAGING,PROD}_ANTHROPIC_API_KEY`, `{DEV,STAGING,PROD}_TROLLEY_API_KEY`, `{DEV,STAGING,PROD}_IAP_VERIFY_URL`, `{DEV,STAGING,PROD}_APP_CONFIG_URL` |
 
 ## Releases (`scripts/release.sh`)
 
@@ -120,6 +120,6 @@ git push origin staging:main      # → production (after sign-off + manual CI a
 
 ## App identity
 
-`app.json` is minimal: `{"name": "Shuddhaahar", "displayName": "Shuddhaahar"}` — no Expo config, no
+`app.json` is minimal: `{"name": "Shuddhaahar", "displayName": "Shuddh Aahar"}` — no Expo config, no
 versioning; versioning lives in `package.json`/native project files instead (see release script
 above).

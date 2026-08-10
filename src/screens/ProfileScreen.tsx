@@ -13,7 +13,17 @@ import SubscriptionScreen from './SubscriptionScreen';
 import { Colors } from '../theme/medical';
 import { useResponsive, TABLET_CONTENT_MAX_WIDTH } from '../utils/responsive';
 import { getSubscriptionState, SubscriptionState } from '../services/subscriptionService';
+import { graphqlRequest } from '../services/userDataService';
+import logger from '../utils/logger';
 import type { PageSlug } from '../services/cmsService';
+
+// `category: 'deletion'` is what lets admin filter this out from generic
+// contact messages in the Contact Submissions queue — see admin/index.html.
+const CREATE_CONTACT_SUBMISSION = /* GraphQL */ `
+  mutation CreateContactSubmission($input: CreateContactSubmissionInput!) {
+    createContactSubmission(input: $input) { id }
+  }
+`;
 
 export default function ProfileScreen() {
   const { t } = useTranslation();
@@ -25,6 +35,7 @@ export default function ProfileScreen() {
   const [cmsPage, setCMSPage]                   = useState<PageSlug | null>(null);
   const [showSubscription, setShowSubscription] = useState(false);
   const [subState, setSubState]                 = useState<SubscriptionState | null>(null);
+  const [deletingData, setDeletingData]         = useState(false);
 
   // Re-syncs membership/plan status every time this tab is opened (not just
   // on first mount — Profile stays mounted in the background as a tab screen,
@@ -54,6 +65,35 @@ export default function ProfileScreen() {
     await refreshProfile();
     setOpeningEdit(false);
     setEditingProfile(true);
+  };
+
+  // Submits a real deletion request (a flagged ContactSubmission an admin
+  // actions manually, same as the rest of GDPR erasure today — see
+  // admin/index.html's User Management delete flow) rather than deleting
+  // anything client-side. Signs the user out on success since their account
+  // is now pending deletion; on failure they stay signed in and can retry.
+  const submitDeleteRequest = async () => {
+    setDeletingData(true);
+    try {
+      await graphqlRequest(CREATE_CONTACT_SUBMISSION, {
+        input: {
+          name: user?.name || 'Unknown',
+          email: user?.email || '',
+          subject: 'Account Deletion Request',
+          message: `User ${user?.id || 'unknown'} (${user?.email || 'no email'}) has requested permanent deletion of their account and all associated data.`,
+          category: 'deletion',
+        },
+      });
+      Alert.alert(
+        t('profile.deleteRequestSuccessTitle'),
+        t('profile.deleteRequestSuccessMessage'),
+        [{ text: t('common.ok'), onPress: signOut }]
+      );
+    } catch (err) {
+      logger.warn('profile', 'Failed to submit data deletion request', {}, err as Error);
+      Alert.alert(t('profile.deleteRequestErrorTitle'), t('profile.deleteRequestErrorMessage'));
+    }
+    setDeletingData(false);
   };
 
   const hp   = healthProfile;
@@ -165,18 +205,22 @@ export default function ProfileScreen() {
         <TouchableOpacity
           style={s.deleteBtn}
           activeOpacity={0.8}
+          disabled={deletingData}
           onPress={() =>
             Alert.alert(
               t('profile.deleteMyData'),
               t('profile.deleteConfirmMessage'),
               [
                 { text: t('common.cancel'), style: 'cancel' },
-                { text: t('profile.deleteEverything'), style: 'destructive', onPress: signOut },
+                { text: t('profile.deleteEverything'), style: 'destructive', onPress: submitDeleteRequest },
               ]
             )
           }
         >
-          <Text style={s.deleteText}>{t('profile.deleteMyData')}</Text>
+          {deletingData
+            ? <ActivityIndicator size="small" color={Colors.danger} />
+            : <Text style={s.deleteText}>{t('profile.deleteMyData')}</Text>
+          }
         </TouchableOpacity>
 
         <Text style={s.version}>{t('profile.version')}</Text>

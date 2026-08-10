@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Contact & Support — Shuddh Aahar</title>
+<meta name="description" content="Get in touch with the Shuddh Aahar team — general enquiries, support, privacy requests and press."/>
+<link rel="icon" type="image/png" href="/favicon-32.png"/>
+<link rel="apple-touch-icon" href="/favicon-180.png"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  color-scheme:light;
+  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F6F8FB;--border:#E1E8F0;--border2:#C7D2E0;
+  --navy:#003D78;--accent:#005EB8;--accent-glow:rgba(0,94,184,0.10);
+  --text:#141C24;--text2:#4C5B6B;--muted:#7C8A99;
+  --red:#B3261E;--red-bg:#FCEBEA;
+  --green:#0F8A4B;--green-bg:#E9F7EF;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6}
+.wrap{max-width:640px;margin:0 auto;padding:0 24px}
+a{color:var(--accent)}
+
+header{padding:18px 0;border-bottom:1px solid var(--border)}
+.header-inner{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo-mark{width:34px;height:34px;border-radius:9px;display:block;object-fit:cover;box-shadow:0 4px 14px rgba(0,94,184,0.2)}
+.logo-name{font-size:15px;font-weight:800;color:var(--text)}
+.logo-sub{font-size:9px;color:var(--accent);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;font-weight:700}
+
+.page-title{font-size:clamp(26px,4vw,34px);font-weight:800;letter-spacing:-0.02em;margin:28px 0 4px;color:var(--navy)}
+.page-subtitle{font-size:15px;color:var(--text2);margin-bottom:28px}
+
+.quick-link{display:block;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-decoration:none;max-width:280px}
+.quick-link .icon{font-size:17px;margin-bottom:6px;display:block}
+.quick-link strong{display:block;font-size:13px;color:var(--text);margin-bottom:2px}
+.quick-link span{display:block;font-size:12px;color:var(--text2)}
+
+.section-heading{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+
+form{display:flex;flex-direction:column;gap:16px;margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px}
+.field input,.field textarea{width:100%;font:inherit;font-size:14px;color:var(--text);background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px 13px}
+.field input:focus,.field textarea:focus{outline:2px solid var(--accent-glow);border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:110px}
+
+.submit-btn{background:var(--navy);color:#fff;font-size:14px;font-weight:700;padding:13px 20px;border:none;border-radius:10px;cursor:pointer}
+.submit-btn:disabled{opacity:0.6;cursor:not-allowed}
+.submit-btn:hover:not(:disabled){filter:brightness(1.1)}
+
+.form-status{font-size:13px;border-radius:10px;padding:12px 14px;display:none}
+.form-status.error{display:block;background:var(--red-bg);color:var(--red)}
+.form-status.success{display:block;background:var(--green-bg);color:var(--green)}
+
+.response-times{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2);margin-top:28px}
+.response-times strong{color:var(--text);display:block;margin-bottom:6px;font-size:13px}
+.response-times ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+
+.back-link{display:inline-block;margin:32px 0 48px;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none}
+.back-link:hover{text-decoration:underline}
+
+footer{border-top:1px solid var(--border);padding:24px 0;text-align:center}
+footer p{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="header-inner" href="/">
+      <img class="logo-mark" src="/favicon-180.png" alt="Shuddh Aahar"/>
+      <div>
+        <div class="logo-name">Shuddh Aahar</div>
+        <div class="logo-sub">Clinical Nutrition Intelligence</div>
+      </div>
+    </a>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1 class="page-title">Contact & Support</h1>
+  <p class="page-subtitle">We're here to help — send us a message, or reach us directly below.</p>
+
+  <a class="quick-link" href="mailto:info@shuddhaahar.shop">
+    <span class="icon">📧</span>
+    <strong>Email us directly</strong>
+    <span>info@shuddhaahar.shop</span>
+  </a>
+
+  <div class="section-heading" style="margin-top:28px">Or send us a message</div>
+
+  <form id="contact-form">
+    <div class="field">
+      <label for="name">Your name</label>
+      <input type="text" id="name" name="name" autocomplete="name" required/>
+    </div>
+    <div class="field">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" autocomplete="email" required/>
+    </div>
+    <div class="field">
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" name="subject" placeholder="What's this about?" required/>
+    </div>
+    <div class="field">
+      <label for="message">Message</label>
+      <textarea id="message" name="message" required></textarea>
+    </div>
+    <div id="form-status" class="form-status"></div>
+    <button type="submit" class="submit-btn" id="submit-btn">Send Message</button>
+  </form>
+
+  <div class="response-times">
+    <strong>Response times</strong>
+    <ul>
+      <li>Support requests: within 24 hours (Mon–Fri)</li>
+      <li>Privacy/data requests: within 72 hours</li>
+      <li>Billing queries: within 48 hours</li>
+    </ul>
+  </div>
+
+  <a class="back-link" href="/">← Back to shuddhaahar.shop</a>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 Shuddh Aahar</p>
+  </div>
+</footer>
+
+<script>
+// Same public, unauthenticated endpoint as web/delete-data.html
+// (terraform/data_deletion_request.tf + terraform/lambda/data-deletion-request.js),
+// generalised to accept category:'general' — lands in the same admin
+// ContactSubmission queue, tagged source:'website'.
+const ENDPOINT = 'https://4tigigcfb3.execute-api.eu-west-2.amazonaws.com/';
+
+const form = document.getElementById('contact-form');
+const status = document.getElementById('form-status');
+const btn = document.getElementById('submit-btn');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  status.className = 'form-status';
+  status.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  const payload = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    subject: document.getElementById('subject').value.trim(),
+    message: document.getElementById('message').value.trim(),
+    category: 'general',
+  };
+
+  try {
+    const res = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+
+    status.className = 'form-status success';
+    status.textContent = "Message sent — we'll get back to you soon.";
+    form.reset();
+    btn.textContent = 'Message Sent ✓';
+  } catch (err) {
+    status.className = 'form-status error';
+    status.textContent = err.message || 'Could not send your message. Please try again or email info@shuddhaahar.shop.';
+    btn.disabled = false;
+    btn.textContent = 'Send Message';
+  }
+});
+</script>
+
+</body>
+</html>

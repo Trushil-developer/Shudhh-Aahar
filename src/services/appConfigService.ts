@@ -3,10 +3,12 @@
 // switches, daily scan limit ceiling. Backed by a public, unauthenticated
 // GET endpoint — safe to call before login.
 //
-// Fail-open by design: any failure (network, parse, timeout) falls back to
-// DEFAULT_APP_CONFIG below, which mirrors the backend's own fail-open shape
-// (every feature enabled, a permissive min version, the standard scan
-// limit). This must never throw and must never block app startup.
+// Mostly fail-open by design: most failures (network, parse, timeout) fall
+// back to DEFAULT_APP_CONFIG below, which mirrors the backend's own mostly-
+// fail-open shape (most features enabled, a permissive min version, the
+// standard scan limit) — except photoScanEnabled/alternativesEnabled, which
+// default off since those features aren't launched yet (see each flag's own
+// comment). This must never throw and must never block app startup.
 
 import Config from '../config/environment';
 
@@ -20,11 +22,21 @@ export interface AppConfig {
   documentUploadEnabled: boolean;
   foodDiaryEnabled: boolean;
   wishlistEnabled: boolean;
+  // "Healthier Alternatives" (ProductScreen's ranked-substitute section) —
+  // not launched yet. Defaults false, unlike every flag above.
+  alternativesEnabled: boolean;
   // Global membership/paywall kill switch, admin-controlled (see
   // AppConfig's comment in terraform/dynamodb.tf). false means every user
   // gets full member-level access for free and the app never shows a
   // purchase flow — see AuthContext's isMember and SubscriptionScreen.
   paymentsEnabled: boolean;
+  // Which billing periods the purchase flow offers, admin-controlled — e.g.
+  // launch monthly-only and turn yearly on later without an app release.
+  // See SubscriptionScreen, which hides the period toggle when only one is
+  // enabled. Never affects an existing member's ability to manage a plan
+  // they already bought on the now-disabled period.
+  monthlyPlanEnabled: boolean;
+  yearlyPlanEnabled: boolean;
 }
 
 // Kept in sync with dailyAccessService.ts's DAILY_SCAN_LIMIT (=3) — see the
@@ -37,11 +49,14 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   dailyScanLimit: 3,
   priceComparisonEnabled: true,
   aiAnalysisEnabled: true,
-  photoScanEnabled: true,
+  photoScanEnabled: false,
   documentUploadEnabled: true,
   foodDiaryEnabled: true,
   wishlistEnabled: true,
+  alternativesEnabled: false,
   paymentsEnabled: true,
+  monthlyPlanEnabled: true,
+  yearlyPlanEnabled: true,
 };
 
 const FETCH_TIMEOUT_MS = 5000;

@@ -86,7 +86,7 @@ export default function DiaryScreen() {
   const calPct = totals ? Math.min(100, Math.round((totals.calories / adjustedCalGoal) * 100)) : 0;
 
   return (
-    <FeatureGate feature="foodDiary">
+    <FeatureGate feature="foodDiary" fullScreen>
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <View style={styles.topBar}>

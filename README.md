@@ -1,10 +1,10 @@
-# ✚ Shuddhaahar — Clinical Nutrition Intelligence
+# ✚ Shuddh Aahar — Clinical Nutrition Intelligence
 
 > Personalised AI health analysis for every UK supermarket product
 
 ## Overview
 
-Shuddhaahar is a React Native app (iOS + Android) that gives users a personalised health verdict on any scanned product — powered by Claude AI, NHS-informed guidelines, and real-time UK supermarket price comparison.
+Shuddh Aahar is a React Native app (iOS + Android) that gives users a personalised health verdict on any scanned product — powered by Claude AI, clinically-grounded nutritional guidance, and real-time UK supermarket price comparison.
 
 ---
 
@@ -294,4 +294,4 @@ src/
 
 ---
 
-*Shuddhaahar Ltd · UK GDPR compliant · NHS-informed nutritional guidance*
+*Shuddh Aahar · UK GDPR compliant · Clinically-grounded nutritional guidance*

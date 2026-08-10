@@ -45,11 +45,17 @@ xcuserdata
 android/app/build/
 android/build/
 android/.gradle/
+android/app/.cxx/
 android/local.properties
 android/app/google-services.json
+android/app/release.keystore
+android/keystore.properties
 *.apk
 *.aab
 *.ap_
+
+# ── Marketing / store assets (upload-once, not source) ──────────
+ios-device/
 
 # Metro bundler
 .metro-health-check*

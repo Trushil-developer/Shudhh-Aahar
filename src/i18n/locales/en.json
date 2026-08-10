@@ -49,10 +49,10 @@
     "lowestPrice": "Lowest Price"
   },
   "app": {
-    "brandName": "Shuddhaahar",
-    "splashLoading": "Loading Shuddhaahar…",
+    "brandName": "Shuddh Aahar",
+    "splashLoading": "Loading Shuddh Aahar…",
     "updateRequiredTitle": "Update Required",
-    "updateRequiredMessage": "A new version of Shuddhaahar is available. Please update the app to continue.",
+    "updateRequiredMessage": "A new version of Shuddh Aahar is available. Please update the app to continue.",
     "updateNow": "Update Now",
     "tabHome": "Home",
     "tabWishlist": "Wishlist",
@@ -63,7 +63,7 @@
     "tagline": "Personalised health analysis. Local price comparison.\nAll from a barcode scan.",
     "pillHealthWarnings": "Health Warnings",
     "pillPriceComparison": "Price Comparison",
-    "pillBetterAlternatives": "Better Alternatives",
+    "pillPersonalScore": "Personal Score",
     "continueWithGoogle": "Continue with Google",
     "badgePrivateSecure": "🔒 Private & secure",
     "badgeProducts": "🛒 5M+ products",
@@ -456,13 +456,15 @@
     "greetingEvening": "Good evening",
     "defaultName": "there",
     "scanProduct": "Scan a Product",
-    "scanProductSubtitle": "Check ingredients, allergens & alternatives",
+    "scanProductSubtitle": "Check ingredients, allergens & your personal score",
     "healthProfileTitle": "Your Health Profile",
     "healthProfileSubtitle": "Allergies, conditions & goals",
     "recentScans": "Recent Scans",
     "viewAll": "View All",
     "noScansYet": "No scans yet",
-    "noScansSubtitle": "Tap \"{{action}}\" to get started"
+    "noScansSubtitle": "Tap \"{{action}}\" to get started",
+    "tourTitle": "New here? Take the tour",
+    "tourSubtitle": "Watch a 15-second animated demo"
   },
   "diary": {
     "foodDiary": "Food Diary",
@@ -526,7 +528,7 @@
     "deleteRecordsButton_other": "Delete {{count}} Records"
   },
   "shoppingList": {
-    "title": "My Recommendations",
+    "title": "Wishlist",
     "clearChecked": "Clear checked",
     "removeItemTitle": "Remove Item",
     "removeItemMessage": "Remove {{name}} from your list?",
@@ -541,13 +543,17 @@
     "itemsToBuyWithChecked_other": "{{count}} items to buy · {{checked}} checked off",
     "emptyTitle": "Your wishlist is empty",
     "emptySub": "When you scan a product that's suitable for your health profile, tap \"Add to Wishlist\" to save it here.",
-    "startScanning": "Start Scanning →"
+    "startScanning": "Start Scanning →",
+    "unpriced": "Not yet priced",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "refreshingProgress": "Refreshing prices… {{done}}/{{count}}"
   },
   "scan": {
     "requestingPermission": "Requesting camera permission...",
     "cameraAccessRequired": "Camera Access Required",
-    "permissionDeniedMessage": "Camera permission was denied. Open Settings to enable it for Shuddhaahar.",
-    "permissionNeededMessage": "Shuddhaahar needs camera access to scan product barcodes.",
+    "permissionDeniedMessage": "Camera permission was denied. Open Settings to enable it for Shuddh Aahar.",
+    "permissionNeededMessage": "Shuddh Aahar needs camera access to scan product barcodes.",
     "openSettings": "Open Settings",
     "allowCamera": "Allow Camera",
     "goBack": "Go Back",
@@ -604,13 +610,13 @@
     "editHealthProfile": "Edit health profile",
     "membership": "Membership",
     "planPriceYearly": "£50/year",
-    "planPriceMonthly": "£5/month",
+    "planPriceMonthly": "£3.99/month",
     "memberBenefitsUnlocked": "Personal Score, lowest price, unlimited scans and wishlist are all unlocked.",
     "memberBenefitsLocked": "Unlock Personal Score, the lowest price at each store, unlimited scans and your wishlist.",
     "manageMembership": "Manage Membership",
     "becomeMember": "Become a Member",
     "information": "Information",
-    "howItWorks": "How Shuddhaahar Works",
+    "howItWorks": "How Shuddh Aahar Works",
     "allergenGuide": "Allergen Guide",
     "faq": "FAQ",
     "contactSupport": "Contact Support",
@@ -618,16 +624,20 @@
     "termsOfService": "Terms of Service",
     "signOutConfirm": "Are you sure you want to sign out?",
     "deleteMyData": "Delete My Data",
-    "deleteConfirmMessage": "This permanently deletes all your data from our servers and cannot be undone.",
+    "deleteConfirmMessage": "We'll submit a request to permanently delete your account and all your data. This is processed within 72 hours and cannot be undone.",
     "deleteEverything": "Delete Everything",
-    "version": "Shuddhaahar v1.0.0"
+    "deleteRequestSuccessTitle": "Request Submitted",
+    "deleteRequestSuccessMessage": "Your data deletion request has been received. We'll process it within 72 hours and email you once it's complete.",
+    "deleteRequestErrorTitle": "Something Went Wrong",
+    "deleteRequestErrorMessage": "We couldn't submit your request. Please check your connection and try again.",
+    "version": "Shuddh Aahar v1.0.0"
   },
   "subscription": {
     "month": "month",
     "year": "year",
     "appStoreName": "the App Store",
     "googlePlayName": "Google Play",
-    "welcomeTitle": "Welcome to Shuddhaahar Membership!",
+    "welcomeTitle": "Welcome to Shuddh Aahar Membership!",
     "welcomeMessage": "Personal Score, lowest-price reveal, unlimited scans and wishlist are all unlocked.",
     "startScanning": "Start Scanning",
     "purchaseFailedTitle": "Purchase Failed",
@@ -707,10 +717,18 @@
     "messagePlaceholder": "How can we help?",
     "sendMessageButton": "Send Message →"
   },
+  "appTour": {
+    "beats": {
+      "scan": "Scan any barcode",
+      "score": "Get your personal score",
+      "price": "Compare real prices",
+      "save": "Save it & find better"
+    }
+  },
   "appGuide": {
     "slides": {
       "welcome": {
-        "title": "Welcome to Shuddhaahar",
+        "title": "Welcome to Shuddh Aahar",
         "body": "Your personal clinical nutrition intelligence. We cross-reference every product against your specific health profile — your allergies, conditions, medications and goals.",
         "tip": "Takes about 60 seconds to set up"
       },
@@ -751,8 +769,8 @@
       },
       "allSet": {
         "title": "You're All Set!",
-        "body": "Shuddhaahar works best when your health profile is complete. Start by scanning something in your kitchen — you might be surprised what the AI finds. Help is always one tap away.",
-        "tip": "Profile → How Shuddhaahar Works, any time"
+        "body": "Shuddh Aahar works best when your health profile is complete. Start by scanning something in your kitchen — you might be surprised what the AI finds. Help is always one tap away.",
+        "tip": "Profile → How Shuddh Aahar Works, any time"
       }
     },
     "tooltips": {
@@ -786,12 +804,12 @@
       }
     },
     "stepProgress": "{{current}} of {{total}}",
-    "disclaimer": "Shuddhaahar provides nutritional information only and is not a substitute for professional medical advice. Always consult your GP or registered dietitian before making dietary changes if you have a medical condition.",
+    "disclaimer": "Shuddh Aahar provides nutritional information only and is not a substitute for professional medical advice. Always consult your GP or registered dietitian before making dietary changes if you have a medical condition.",
     "startScanning": "Start Scanning!"
   },
   "tcConsent": {
-    "alertTitle": "Cannot Use Shuddhaahar",
-    "alertMessage": "You must accept the Terms of Service and Privacy Policy to use Shuddhaahar. If you decline, the app will close.\n\nYou can reopen the app at any time to accept.",
+    "alertTitle": "Cannot Use Shuddh Aahar",
+    "alertMessage": "You must accept the Terms of Service and Privacy Policy to use Shuddh Aahar. If you decline, the app will close.\n\nYou can reopen the app at any time to accept.",
     "alertReviewTerms": "Review Terms",
     "alertCloseApp": "Close App",
     "headerBadgeUpdated": "UPDATED TERMS",
@@ -799,7 +817,7 @@
     "titleUpdated": "Terms & Conditions Updated",
     "title": "Terms & Conditions",
     "subtitleUpdated": "Version {{version}} · Please review and accept to continue",
-    "subtitle": "Please read and accept to use Shuddhaahar",
+    "subtitle": "Please read and accept to use Shuddh Aahar",
     "progressRead": "✓ You have read the full Terms",
     "progressReading": "Read {{percent}}% — scroll to the bottom to continue",
     "changesTitle": "📋 What changed from v{{version}}",
@@ -852,7 +870,7 @@
     "additivesHeading": "2 — Additives (30% of the score)",
     "additivesBody": "Additives are substances added to a product to change its properties, such as preservatives, dyes or sweeteners. Each additive is assigned a risk level (safe / caution / avoid) based on published food safety guidance.",
     "organicStatusHeading": "3 — Organic status (10% of the score)",
-    "organicStatusBody": "Shuddhaahar doesn't currently detect organic certification from our product data source, so this portion is held at a neutral value for every product rather than guessed.",
+    "organicStatusBody": "Shuddh Aahar doesn't currently detect organic certification from our product data source, so this portion is held at a neutral value for every product rather than guessed.",
     "differsFromPersonalHeading": "How this differs from the Personal Score",
     "differsFromPersonalBody": "This Product Score is general nutritional quality — the same number every user sees for this product. The Personal Score (further down this screen) is tailored to you specifically: it uses AI to check this product against your own allergies, conditions, medications, diet and goals, so it can be quite different from this general score.",
     "modalNote": "This score reflects general product quality — it is not personalised to your allergies, conditions or medications. Always check the physical label for allergen information."
