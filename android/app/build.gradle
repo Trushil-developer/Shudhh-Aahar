@@ -72,6 +72,17 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'org.webkit:android-jsc:+'
 
+// Release signing: android/keystore.properties (gitignored, for local manual builds)
+// takes priority; falls back to the -Pandroid.injected.signing.* project properties
+// scripts/build.sh and ci.yml already pass in for staging/production CI builds; falls
+// back to the debug keystore (dev-only, never used for a real release) if neither is set,
+// so `npm run build:dev:android` keeps working with zero signing setup.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -82,8 +93,8 @@ android {
         applicationId "com.shuddhaahar"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "0.0.1"
         missingDimensionStrategy 'store', 'play'
     }
     signingConfigs {
@@ -92,6 +103,21 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+        if (keystorePropertiesFile.exists()) {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        } else if (project.hasProperty('android.injected.signing.store.file')) {
+            release {
+                storeFile file(project.property('android.injected.signing.store.file'))
+                storePassword project.property('android.injected.signing.store.password')
+                keyAlias project.property('android.injected.signing.key.alias')
+                keyPassword project.property('android.injected.signing.key.password')
+            }
         }
     }
     splits {
@@ -109,9 +135,10 @@ android {
             debuggable true
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // Real release keystore when keystore.properties or the CI signing
+            // properties are present (see signingConfigs above); falls back to the
+            // debug keystore otherwise so dev-only release-variant builds don't fail.
+            signingConfig signingConfigs.findByName('release') ?: signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
