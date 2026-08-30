@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
+import { useAppConfig } from '../context/AppConfigContext';
 import { saveHealthProfile, HealthProfile, HealthTestResult, DEFAULT_HEALTH_PROFILE } from '../services/userDataService';
 import DocumentUploadScreen from './DocumentUploadScreen';
 import { Colors, Shadow } from '../theme/medical';
@@ -128,6 +129,7 @@ const METRIC_BOUNDS: Partial<Record<MetricField, [number, number]>> = {
 export default function HealthProfileScreen({ onComplete }: { onComplete: () => void }) {
   const { t } = useTranslation();
   const { user, healthProfile, updateHealthProfile } = useAuth();
+  const { config: appConfig } = useAppConfig();
   const { rw, rh, rf, rr, isTablet } = useResponsive();
   const s = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
   const existingData = hasExistingProfile(healthProfile);
@@ -286,7 +288,7 @@ export default function HealthProfileScreen({ onComplete }: { onComplete: () => 
     return (
       <DocumentUploadScreen
         existingProfile={profile}
-        onComplete={(updated) => { setProfile(updated); setMode('view'); setShowDocUpload(false); }}
+        onComplete={(updated) => { setProfile(updated); updateHealthProfile(updated); setMode('view'); setShowDocUpload(false); }}
         onSkip={() => setShowDocUpload(false)}
       />
     );
@@ -311,7 +313,7 @@ export default function HealthProfileScreen({ onComplete }: { onComplete: () => 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[s.scrollContent, isTablet && s.scrollCenterWrap]}>
         <View style={isTablet ? s.tabletContent : s.fullWidthContent}>
 
-          <DocumentUploadPrompt onPress={() => setShowDocUpload(true)} />
+          {appConfig.documentUploadEnabled && <DocumentUploadPrompt onPress={() => setShowDocUpload(true)} />}
 
           <Text style={s.editHint}>{t('healthProfile.editHint')}</Text>
 
@@ -687,7 +689,7 @@ export default function HealthProfileScreen({ onComplete }: { onComplete: () => 
         enableAutomaticScroll
       >
         <View style={isTablet ? s.tabletContent : s.fullWidthContent}>
-        <DocumentUploadPrompt onPress={() => setShowDocUpload(true)} />
+        {appConfig.documentUploadEnabled && <DocumentUploadPrompt onPress={() => setShowDocUpload(true)} />}
 
         {renderStep()}
         </View>

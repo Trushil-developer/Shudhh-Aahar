@@ -172,6 +172,24 @@ export async function saveSubscriptionState(state: SubscriptionState): Promise<v
   await AsyncStorage.setItem(SUB_KEY, JSON.stringify({ ...state, cachedAt: new Date().toISOString() }));
 }
 
+// ─── StoreKit / Play Billing connection lifecycle ───────────
+// react-native-iap requires initConnection() to resolve before ANY other
+// call (requestPurchase, requestSubscription, getAvailablePurchases) will
+// work — without it, every purchase attempt fails immediately at the native
+// layer, before ever reaching purchaseSubscription() below or the
+// iap-verify backend. Called once at app startup (see App.tsx); there's no
+// matching endConnection() call since this app never tears down its root
+// for the lifetime of the process.
+export async function initIAPConnection(): Promise<void> {
+  try {
+    const { initConnection } = require('react-native-iap');
+    await initConnection();
+    logger.info('subscription', 'IAP connection initialised');
+  } catch (err) {
+    logger.error('subscription', 'IAP initConnection failed', err as Error);
+  }
+}
+
 // ─── Purchase flow ─────────────────────────────────────────
 // Purchases are verified server-side by the iap-verify Lambda (see
 // terraform/lambda/iap-verify.js) — the client's own report of "purchase
@@ -200,7 +218,21 @@ export async function purchaseSubscription(
 async function purchaseAppleIAP(plan: Plan, billingPeriod: BillingPeriod): Promise<{ success: boolean; error?: string }> {
   const pricing = plan.pricing![billingPeriod];
   try {
-    const { requestPurchase, finishTransaction } = require('react-native-iap');
+    const { requestPurchase, finishTransaction, getSubscriptions } = require('react-native-iap');
+    // requestPurchase's native iOS implementation looks the sku up in a
+    // local `validProducts` cache that's populated ONLY by a prior
+    // getSubscriptions()/getProducts() call — without this, buyProduct
+    // rejects immediately with "Invalid product ID" (E_DEVELOPER_ERROR)
+    // before StoreKit's payment sheet ever appears and before this ever
+    // reaches verifyPurchaseWithBackend below.
+    const fetched = await getSubscriptions({ skus: [pricing.appleProductId] });
+    if (!fetched?.length) {
+      // Product genuinely not found in App Store Connect (missing, not yet
+      // approved, or Paid Applications Agreement not active) — surface that
+      // clearly instead of letting requestPurchase fail with a native
+      // "Invalid product ID" error that gives the user no useful signal.
+      return { success: false, error: 'This plan is not currently available. Please try again shortly.' };
+    }
     const purchase = await requestPurchase({ sku: pricing.appleProductId });
 
     const validation = await verifyPurchaseWithBackend({
@@ -233,8 +265,21 @@ async function purchaseAppleIAP(plan: Plan, billingPeriod: BillingPeriod): Promi
 async function purchaseGooglePlay(plan: Plan, billingPeriod: BillingPeriod): Promise<{ success: boolean; error?: string }> {
   const pricing = plan.pricing![billingPeriod];
   try {
-    const { requestSubscription } = require('react-native-iap');
-    const purchase = await requestSubscription({ sku: pricing.googleProductId });
+    const { requestSubscription, getSubscriptions } = require('react-native-iap');
+    // Same prerequisite as purchaseAppleIAP above, plus Google Play Billing
+    // (v5+) requires an explicit offerToken per sku — there's no default —
+    // which only comes from this same getSubscriptions() call's
+    // subscriptionOfferDetails. Skipping it means requestSubscription has
+    // nothing valid to send and fails before ever reaching Play Billing.
+    const [subscription] = await getSubscriptions({ skus: [pricing.googleProductId] });
+    const offerToken = subscription?.subscriptionOfferDetails?.[0]?.offerToken;
+    if (!offerToken) {
+      return { success: false, error: 'This plan is not currently available. Please try again shortly.' };
+    }
+    const purchase = await requestSubscription({
+      sku: pricing.googleProductId,
+      subscriptionOffers: [{ sku: pricing.googleProductId, offerToken }],
+    });
 
     const validation = await verifyPurchaseWithBackend({
       platform: 'android', productId: pricing.googleProductId,

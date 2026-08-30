@@ -26,6 +26,7 @@ import errorReporter, { setupGlobalErrorHandler, setupPromiseRejectionHandler } 
 import TCConsentModal from './src/components/TCConsentModal';
 import { TabIcon } from './src/components/TabIcon';
 import { checkTCAcceptance, TCVersion, TCCheckResult } from './src/services/tcService';
+import { initIAPConnection } from './src/services/subscriptionService';
 
 import LoginScreen from './src/screens/LoginScreen';
 import HealthProfileScreen from './src/screens/HealthProfileScreen';
@@ -40,6 +41,12 @@ import ShoppingListScreen from './src/screens/ShoppingListScreen';
 setupGlobalErrorHandler();
 setupPromiseRejectionHandler();
 logger.info('app', 'Shuddhaahar starting', { version: DeviceInfo.getVersion(), env: __DEV__ ? 'dev' : 'prod' });
+
+// Must resolve before any StoreKit/Play Billing call (requestPurchase,
+// restorePurchases, etc.) will work — see subscriptionService.ts's
+// initIAPConnection comment for why every purchase attempt was failing
+// without this.
+void initIAPConnection();
 
 export type RootStackParamList = {
   Home: undefined;

@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet, StatusBar,
-  ActivityIndicator, Image,
+  ActivityIndicator, Image, Platform,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { AppleButton } from '@invertase/react-native-apple-authentication';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../theme/medical';
 import { useResponsive, TABLET_CONTENT_MAX_WIDTH } from '../utils/responsive';
@@ -13,8 +14,9 @@ import { translateError } from '../utils/AppError';
 export default function LoginScreen() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [error, setError]     = useState('');
-  const { signIn } = useAuth();
+  const { signIn, signInWithApple } = useAuth();
   const insets = useSafeAreaInsets();
   const { rw, rh, rf, rr, isTablet } = useResponsive();
 
@@ -37,6 +39,19 @@ export default function LoginScreen() {
       const translated = translateError(err, t);
       setError(__DEV__ && err?.message ? `${translated} (${err.message})` : translated);
       setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setAppleLoading(true);
+    setError('');
+    try {
+      await signInWithApple();
+    } catch (err: any) {
+      console.error('Apple sign-in failed:', err);
+      const translated = translateError(err, t);
+      setError(__DEV__ && err?.message ? `${translated} (${err.message})` : translated);
+      setAppleLoading(false);
     }
   };
 
@@ -103,6 +118,26 @@ export default function LoginScreen() {
               </>
             )}
           </TouchableOpacity>
+
+          {/* Sign in with Apple — required by App Store guideline 4.8 as an
+              equivalent option alongside Google. iOS only: appleAuth has no
+              Android counterpart, and Apple's own guidelines only require
+              this button be offered where Sign in with Apple is available. */}
+          {Platform.OS === 'ios' && (
+            appleLoading ? (
+              <View style={[s.googleBtn, { backgroundColor: '#000' }]}>
+                <ActivityIndicator color="#FFF" />
+              </View>
+            ) : (
+              <AppleButton
+                buttonStyle={AppleButton.Style.BLACK}
+                buttonType={AppleButton.Type.CONTINUE}
+                cornerRadius={rr(16)}
+                style={s.appleBtn}
+                onPress={handleAppleSignIn}
+              />
+            )
+          )}
 
           {/* One consolidated trust line — was two overlapping rows before */}
           <View style={s.badgesRow}>
@@ -221,6 +256,10 @@ function createStyles(rw: (n: number) => number, rh: (n: number) => number, rf: 
   gIconBox:      { width: rw(28), height: rw(28), borderRadius: rr(7), backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center' },
   gLetter:       { fontSize: rf(15), fontWeight: '900', color: '#4285F4' },
   googleBtnText: { fontSize: rf(16), fontWeight: '700', color: '#FFF', letterSpacing: -0.2 },
+
+  // Matches googleBtn's footprint so the two buttons read as one consistent
+  // pair — AppleButton renders its own native label/mark, no custom text.
+  appleBtn: { width: '100%', height: rh(58), borderRadius: rr(16), marginBottom: rh(20) },
 
   badgesRow:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: rw(8), marginBottom: rh(18) },
   badge:       { fontSize: rf(12), color: Colors.textSecondary, fontWeight: '600' },

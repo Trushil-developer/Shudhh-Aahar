@@ -47,6 +47,12 @@ export interface EnvironmentConfig {
   // they're plan data, not per-environment config)
   iapVerifyUrl: string;
 
+  // Sign in with Apple — exchanges a native identityToken for a long-lived
+  // session token (see authService.ts's signInWithApple + terraform's
+  // apple-auth.js for why a session token, not the identityToken itself, is
+  // what's used for every subsequent request).
+  appleAuthUrl: string;
+
   // Remote app-config — admin-controlled min version / kill switches / daily
   // scan limit (see src/services/appConfigService.ts). Public, unauthenticated
   // GET, not secret.
@@ -98,6 +104,7 @@ const DEV_CONFIG: EnvironmentConfig = {
   trolleyApiKey:      process.env.DEV_TROLLEY_API_KEY       || '',
 
   iapVerifyUrl:       process.env.DEV_IAP_VERIFY_URL        || '',
+  appleAuthUrl:       process.env.DEV_APPLE_AUTH_URL        || '',
 
   appConfigUrl:       process.env.DEV_APP_CONFIG_URL        || '',
 
@@ -141,6 +148,7 @@ const STAGING_CONFIG: EnvironmentConfig = {
   trolleyApiKey:     process.env.STAGING_TROLLEY_API_KEY      || '',
 
   iapVerifyUrl:      process.env.STAGING_IAP_VERIFY_URL       || '',
+  appleAuthUrl:      process.env.STAGING_APPLE_AUTH_URL       || '',
 
   appConfigUrl:      process.env.STAGING_APP_CONFIG_URL       || '',
 
@@ -179,6 +187,10 @@ const PROD_CONFIG: EnvironmentConfig = {
   // Real, deployed endpoint (terraform output iap_verify_url) — not secret,
   // so it's safe to bake in as the default rather than requiring CI injection.
   iapVerifyUrl:      process.env.PROD_IAP_VERIFY_URL || 'https://7u4wesz7mb.execute-api.eu-west-2.amazonaws.com/',
+
+  // Real, deployed endpoint (terraform output apple_auth_url) — not secret,
+  // same rationale as iapVerifyUrl above.
+  appleAuthUrl:      process.env.PROD_APPLE_AUTH_URL || 'https://j94bj71hff.execute-api.eu-west-2.amazonaws.com',
 
   // Real, deployed endpoint — public GET, not secret, so it's safe to bake
   // in as the default rather than requiring CI injection.

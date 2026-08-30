@@ -1,6 +1,6 @@
 // src/context/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getCurrentUser, signInWithGoogle, signOut as authSignOut, UserProfile } from '../services/authService';
+import { getCurrentUser, signInWithGoogle, signInWithApple, signOut as authSignOut, UserProfile } from '../services/authService';
 import { createUserRecord, fetchUserProfile, HealthProfile, DEFAULT_HEALTH_PROFILE } from '../services/userDataService';
 import { getSubscriptionState, saveSubscriptionState, BillingPeriod } from '../services/subscriptionService';
 import { DAILY_SCAN_LIMIT, fetchDailyScansRemaining, consumeDailyScan } from '../services/dailyAccessService';
@@ -23,6 +23,7 @@ interface AuthContextType {
   // AFTER this use (0 once exhausted). Members never need to call this.
   consumeScan: () => Promise<number>;
   signIn: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateHealthProfile: (profile: HealthProfile) => void;
@@ -37,6 +38,7 @@ const AuthContext = createContext<AuthContextType>({
   dailyScansRemaining: DAILY_SCAN_LIMIT,
   consumeScan: async () => DAILY_SCAN_LIMIT,
   signIn: async () => {},
+  signInWithApple: async () => {},
   signOut: async () => {},
   refreshProfile: async () => {},
   updateHealthProfile: () => {},
@@ -186,8 +188,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signIn = async () => {
-    const currentUser = await signInWithGoogle();
+  // Shared by both providers — everything past "we have a UserProfile" is
+  // identical regardless of whether it came from Google or Apple.
+  const completeSignIn = async (currentUser: UserProfile) => {
     await createUserRecord(currentUser.id, currentUser.email, currentUser.name);
     const dbUser = await fetchUserProfile(currentUser.id);
     if (dbUser?.banned) {
@@ -202,6 +205,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const member = await resolveEffectiveMembership(dbUser);
     setIsMember(member);
     await refreshDailyScans(member);
+  };
+
+  const signIn = async () => {
+    const currentUser = await signInWithGoogle();
+    await completeSignIn(currentUser);
+  };
+
+  const signInApple = async () => {
+    const currentUser = await signInWithApple();
+    await completeSignIn(currentUser);
   };
 
   const signOut = async () => {
@@ -264,7 +277,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [appConfig.paymentsEnabled, user?.id]);
 
   return (
-    <AuthContext.Provider value={{ user, healthProfile, profileComplete, loading, isMember, dailyScansRemaining, consumeScan, signIn, signOut, refreshProfile, updateHealthProfile }}>
+    <AuthContext.Provider value={{ user, healthProfile, profileComplete, loading, isMember, dailyScansRemaining, consumeScan, signIn, signInWithApple: signInApple, signOut, refreshProfile, updateHealthProfile }}>
       {children}
     </AuthContext.Provider>
   );

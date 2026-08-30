@@ -92,6 +92,9 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
   const [editValues, setEditValues] = useState<Record<string, string>>({});
   const [editFlag, setEditFlag] = useState<HealthTestResult['flag'] | undefined>(undefined);
 
+  const [showPasteModal, setShowPasteModal] = useState(false);
+  const [pasteText, setPasteText] = useState('');
+
   const extractionAbortRef = useRef<AbortController | null>(null);
 
   const { rw, rh, rf, rr, isTablet } = useResponsive();
@@ -163,6 +166,21 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
       }));
       addDocs(docs);
     }
+  };
+
+  // Pasted text is sent through the exact same pipeline as an uploaded .txt
+  // file — documentHealthService's extractBatch already treats any
+  // non-pdf/image UploadedDocument as raw base64-encoded text (see the
+  // `atob(doc.base64)` branch), so no service/backend changes are needed.
+  const addPastedText = () => {
+    const trimmed = pasteText.trim();
+    if (!trimmed) {
+      Alert.alert(t('documentUpload.pasteTextEmptyTitle'), t('documentUpload.pasteTextEmptyMessage'));
+      return;
+    }
+    addDocs([{ name: t('documentUpload.pastedReportName'), type: 'text', base64: btoa(trimmed), mediaType: 'text/plain' }]);
+    setPasteText('');
+    setShowPasteModal(false);
   };
 
   // Wrapped in try/catch — extractHealthDataFromDocuments can throw (network
@@ -689,6 +707,19 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
           </View>
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[s.uploadButton, s.uploadButtonSpaced, remainingSlots <= 0 && s.uploadButtonDisabled]}
+          onPress={() => setShowPasteModal(true)}
+          activeOpacity={0.75}
+          disabled={remainingSlots <= 0}
+        >
+          <Text style={s.uploadButtonIcon}>📝</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={s.uploadButtonLabel}>{t('documentUpload.pasteTextLabel')}</Text>
+            <Text style={s.uploadButtonSub}>{t('documentUpload.pasteTextSub')}</Text>
+          </View>
+        </TouchableOpacity>
+
         {uploadedDocs.length > 0 && (
           <View style={s.fileListCard}>
             <Text style={s.fileListCardTitle}>{t('documentUpload.addedCount', { count: uploadedDocs.length, max: MAX_DOCUMENTS })}</Text>
@@ -728,6 +759,34 @@ export default function DocumentUploadScreen({ existingProfile, onComplete, onSk
           </View>
         </View>
       )}
+
+      <Modal visible={showPasteModal} transparent animationType="fade" onRequestClose={() => setShowPasteModal(false)}>
+        <KeyboardAvoidingView style={s.editOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={s.editCard}>
+            <Text style={s.editCardTitle}>{t('documentUpload.pasteTextModalTitle')}</Text>
+            <View style={s.editFieldWrap}>
+              <TextInput
+                style={s.pasteTextInput}
+                value={pasteText}
+                onChangeText={setPasteText}
+                placeholder={t('documentUpload.pasteTextPlaceholder')}
+                placeholderTextColor={Colors.textMuted}
+                multiline
+                textAlignVertical="top"
+                autoFocus
+              />
+            </View>
+            <View style={s.editActionsRow}>
+              <TouchableOpacity style={s.editCancelBtn} onPress={() => { setShowPasteModal(false); setPasteText(''); }} activeOpacity={0.8}>
+                <Text style={s.editCancelText}>{t('common.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={s.editSaveBtn} onPress={addPastedText} activeOpacity={0.85}>
+                <Text style={s.editSaveText}>{t('documentUpload.pasteTextAddButton')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
     </FeatureGate>
   );
@@ -1042,6 +1101,7 @@ function createStyles(rw: (n: number) => number, rh: (n: number) => number, rf: 
   editFieldWrap:  { marginBottom: rh(14) },
   editFieldLabel: { fontSize: rf(12), fontWeight: '600', color: Colors.textSecondary, marginBottom: rh(6) },
   editFieldInput: { backgroundColor: Colors.surfaceAlt, borderRadius: rr(10), paddingHorizontal: rw(12), paddingVertical: rh(10), fontSize: rf(14), color: Colors.textPrimary, borderWidth: 1, borderColor: Colors.border },
+  pasteTextInput: { backgroundColor: Colors.surfaceAlt, borderRadius: rr(10), paddingHorizontal: rw(12), paddingVertical: rh(10), fontSize: rf(14), color: Colors.textPrimary, borderWidth: 1, borderColor: Colors.border, height: rh(220) },
 
   flagOptionsRow:    { flexDirection: 'row', flexWrap: 'wrap', gap: rw(8) },
   flagOption:        { borderRadius: rr(20), paddingHorizontal: rw(12), paddingVertical: rh(7), backgroundColor: Colors.surfaceAlt, borderWidth: 1, borderColor: Colors.border },

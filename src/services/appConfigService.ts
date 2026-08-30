@@ -43,15 +43,24 @@ export interface AppConfig {
 // comment there. Every flag defaults to enabled and the min versions default
 // to '0.0.0' (nothing is ever below it) so a config fetch failure never
 // blocks or degrades the app.
+//
+// aiAnalysisEnabled/documentUploadEnabled/foodDiaryEnabled default OFF
+// (alongside the already-off photoScanEnabled) following Google Play's
+// rejection over the "Health apps" developer-account requirement — these are
+// the health-profile-personalised/medical-document/health-data-sync features
+// that put the app in that category. This is only the fail-open FALLBACK
+// used when the remote config fetch fails; the live switch is the admin
+// dashboard (admin/index.html), which must also have these turned off for
+// the change to take effect for the currently-installed app.
 export const DEFAULT_APP_CONFIG: AppConfig = {
   minVersionIOS: '0.0.0',
   minVersionAndroid: '0.0.0',
   dailyScanLimit: 3,
   priceComparisonEnabled: true,
-  aiAnalysisEnabled: true,
+  aiAnalysisEnabled: false,
   photoScanEnabled: false,
-  documentUploadEnabled: true,
-  foodDiaryEnabled: true,
+  documentUploadEnabled: false,
+  foodDiaryEnabled: false,
   wishlistEnabled: true,
   alternativesEnabled: false,
   paymentsEnabled: true,
