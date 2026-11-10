@@ -36,8 +36,9 @@ export interface EnvironmentConfig {
   googleIosClientId: string;   // required by GoogleSignin on iOS to build the native sign-in flow
   dynamoTableName: string;
 
-  // Anthropic / Claude
-  anthropicApiKey: string;
+  // Claude — calls go through the ai-proxy Lambda, which holds the
+  // Anthropic key server-side (see src/services/aiProxy.ts)
+  aiProxyUrl: string;
 
   // Trolley price API
   trolleyApiKey: string;
@@ -100,7 +101,7 @@ const DEV_CONFIG: EnvironmentConfig = {
   googleIosClientId:  process.env.DEV_GOOGLE_IOS_CLIENT_ID  || '',
   dynamoTableName:    'shuddhaahar-dev-users',
 
-  anthropicApiKey:    process.env.DEV_ANTHROPIC_API_KEY     || '',
+  aiProxyUrl:         process.env.DEV_AI_PROXY_URL          || '',
   trolleyApiKey:      process.env.DEV_TROLLEY_API_KEY       || '',
 
   iapVerifyUrl:       process.env.DEV_IAP_VERIFY_URL        || '',
@@ -144,7 +145,7 @@ const STAGING_CONFIG: EnvironmentConfig = {
   googleIosClientId: process.env.STAGING_GOOGLE_IOS_CLIENT_ID || '',
   dynamoTableName:   'shuddhaahar-staging-users',
 
-  anthropicApiKey:   process.env.STAGING_ANTHROPIC_API_KEY    || '',
+  aiProxyUrl:        process.env.STAGING_AI_PROXY_URL         || '',
   trolleyApiKey:     process.env.STAGING_TROLLEY_API_KEY      || '',
 
   iapVerifyUrl:      process.env.STAGING_IAP_VERIFY_URL       || '',
@@ -181,7 +182,9 @@ const PROD_CONFIG: EnvironmentConfig = {
   googleIosClientId: process.env.PROD_GOOGLE_IOS_CLIENT_ID || '',
   dynamoTableName:   'shuddhaahar-prod-users',
 
-  anthropicApiKey:   process.env.PROD_ANTHROPIC_API_KEY    || '',
+  // Real, deployed endpoint (terraform output ai_proxy_url) — not secret;
+  // callers must still present a valid sign-in token.
+  aiProxyUrl:        process.env.PROD_AI_PROXY_URL || 'https://cxe2w6odd7.execute-api.eu-west-2.amazonaws.com',
   trolleyApiKey:     process.env.PROD_TROLLEY_API_KEY      || '',
 
   // Real, deployed endpoint (terraform output iap_verify_url) — not secret,

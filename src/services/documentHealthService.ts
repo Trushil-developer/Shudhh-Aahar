@@ -3,7 +3,7 @@
 // Claude reads them and extracts structured health data to pre-fill the profile
 
 import { HealthProfile, Medication } from './userDataService';
-import Config from '../config/environment';
+import { isAIConfigured, postClaudeMessages } from './aiProxy';
 import { AppError } from '../utils/AppError';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -56,8 +56,7 @@ export async function extractHealthDataFromDocuments(
   onProgress?: (documentsDone: number, documentsTotal: number) => void,
   signal?: AbortSignal,
 ): Promise<ExtractedHealthData | null> {
-  const apiKey = Config.anthropicApiKey;
-  if (!apiKey) {
+  if (!isAIConfigured()) {
     return getMockExtraction(documents);
   }
 
@@ -73,7 +72,7 @@ export async function extractHealthDataFromDocuments(
     let documentsDone = 0;
     for (const batch of batches) {
       if (signal?.aborted) return null;
-      const result = await extractBatch(batch, apiKey, signal);
+      const result = await extractBatch(batch, signal);
       allResults.push(result);
       documentsDone = Math.min(documentsDone + batch.length, documents.length);
       onProgress?.(documentsDone, documents.length);
@@ -89,7 +88,6 @@ export async function extractHealthDataFromDocuments(
 
 async function extractBatch(
   documents: UploadedDocument[],
-  apiKey: string,
   externalSignal?: AbortSignal,
 ): Promise<ExtractedHealthData> {
   const contentBlocks: any[] = [];
@@ -125,20 +123,11 @@ async function extractBatch(
   externalSignal?.addEventListener('abort', onExternalAbort);
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: contentBlocks }],
-      }),
-    });
+    const response = await postClaudeMessages({
+      model: MODEL,
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: contentBlocks }],
+    }, controller.signal);
 
     if (!response.ok) {
       const errBody = await response.text();

@@ -95,28 +95,7 @@ export default function ProductScoreCard({ product }: Props) {
         </View>
       </View>
 
-      {/* Positives / Negatives — side by side, not a long stacked list */}
-      {(result.positives.length > 0 || result.negatives.length > 0) && (
-        <View style={styles.columnsRow}>
-          <View style={styles.column}>
-            <Text style={[styles.columnTitle, { color: Colors.safe }]}>{t('productScoreCard.good')}</Text>
-            {result.positives.length > 0 ? (
-              result.positives.map(item => <CompactItem key={item.key} item={item} />)
-            ) : (
-              <Text style={styles.columnEmpty}>{t('productScoreCard.nothingStandsOut')}</Text>
-            )}
-          </View>
-          <View style={styles.columnDivider} />
-          <View style={styles.column}>
-            <Text style={[styles.columnTitle, { color: Colors.danger }]}>{t('productScoreCard.watchOut')}</Text>
-            {result.negatives.length > 0 ? (
-              result.negatives.map(item => <CompactItem key={item.key} item={item} />)
-            ) : (
-              <Text style={styles.columnEmpty}>{t('productScoreCard.noConcernsFound')}</Text>
-            )}
-          </View>
-        </View>
-      )}
+      <ProductScoreBreakdown product={product} />
 
       <Modal visible={showInfo} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowInfo(false)}>
         <SafeAreaProvider>
@@ -125,6 +104,42 @@ export default function ProductScoreCard({ product }: Props) {
       </Modal>
     </View>
   );
+}
+
+// Positives / Negatives — side by side, not a long stacked list. Exported so
+// ProductScreen's combined Scores card can show it inside its own breakdown.
+export function ProductScoreBreakdown({ product }: Props) {
+  const { t } = useTranslation();
+  const { rw, rh, rf, rr, rStyles } = useResponsive();
+  const styles = useMemo(() => buildStyles(rw, rh, rf, rr, rStyles), [rw, rh, rf, rr, rStyles]);
+  const result = calculateProductScore(product);
+  if (result.positives.length === 0 && result.negatives.length === 0) return null;
+
+  return (
+    <View style={styles.columnsRow}>
+      <View style={styles.column}>
+        <Text style={[styles.columnTitle, { color: Colors.safe }]}>{t('productScoreCard.good')}</Text>
+        {result.positives.length > 0 ? (
+          result.positives.map(item => <CompactItem key={item.key} item={item} />)
+        ) : (
+          <Text style={styles.columnEmpty}>{t('productScoreCard.nothingStandsOut')}</Text>
+        )}
+      </View>
+      <View style={styles.columnDivider} />
+      <View style={styles.column}>
+        <Text style={[styles.columnTitle, { color: Colors.danger }]}>{t('productScoreCard.watchOut')}</Text>
+        {result.negatives.length > 0 ? (
+          result.negatives.map(item => <CompactItem key={item.key} item={item} />)
+        ) : (
+          <Text style={styles.columnEmpty}>{t('productScoreCard.noConcernsFound')}</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+export function blurbForProduct(product: ProductData, t: (key: string) => string): string {
+  return blurbFor(calculateProductScore(product).band, t);
 }
 
 function statusColor(status: ScoreItem['status']): string {
@@ -150,7 +165,7 @@ function CompactItem({ item }: { item: ScoreItem }) {
   );
 }
 
-function ScoringInfoModal({ onClose }: { onClose: () => void }) {
+export function ScoringInfoModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation();
   const { rw, rh, rf, rr, rStyles } = useResponsive();
   const styles = useMemo(() => buildStyles(rw, rh, rf, rr, rStyles), [rw, rh, rf, rr, rStyles]);

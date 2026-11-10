@@ -10,7 +10,10 @@
 import { graphqlRequest } from './userDataService';
 import logger from '../utils/logger';
 
-export const RETAILERS = ['Tesco', "Sainsbury's", 'Asda', 'Morrisons', 'Aldi', 'Lidl', 'Other'] as const;
+// Only these retailers' coupons are accepted for now — mirrored by
+// ALLOWED_RETAILERS in terraform/lambda/coupon-actions.js, which rejects
+// anything else server-side.
+export const RETAILERS = ['Tesco', 'Waitrose'] as const;
 export type Retailer = typeof RETAILERS[number];
 
 export type CouponStatus = 'AVAILABLE' | 'CLAIMED' | 'VALIDATED' | 'SCAM_REPORTED' | 'EXPIRED' | 'REMOVED';
@@ -59,7 +62,10 @@ const LIST_AVAILABLE_COUPONS = /* GraphQL */ `
 
 export async function listAvailableCoupons(nextToken?: string): Promise<{ items: Coupon[]; nextToken?: string }> {
   const data = await graphqlRequest(LIST_AVAILABLE_COUPONS, { nextToken });
-  return data.listAvailableCoupons;
+  // Coupons listed before the Tesco/Waitrose-only rule can still be in the
+  // table, so keep them out of the shared feed.
+  const page = data.listAvailableCoupons;
+  return { ...page, items: page.items.filter((c: Coupon) => (RETAILERS as readonly string[]).includes(c.retailer)) };
 }
 
 const LIST_MY_UPLOADED_COUPONS = /* GraphQL */ `

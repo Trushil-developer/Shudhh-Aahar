@@ -4,7 +4,7 @@
 
 import { ProductData } from './foodApi';
 import { HealthProfile } from './userDataService';
-import Config from '../config/environment';
+import { isAIConfigured, postClaudeMessages } from './aiProxy';
 import { Colors } from '../theme/medical';
 import { AppError } from '../utils/AppError';
 
@@ -145,25 +145,15 @@ Respond ONLY in this JSON format, no other text:
   ]
 }`;
 
-  const anthropicApiKey = Config.anthropicApiKey;
-
-  if (!anthropicApiKey) {
+  if (!isAIConfigured()) {
     return getMockRecommendations(candidates);
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 512,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+    const response = await postClaudeMessages({
+      model: MODEL,
+      max_tokens: 512,
+      messages: [{ role: 'user', content: prompt }],
     });
 
     const data = await response.json();

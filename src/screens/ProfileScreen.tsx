@@ -12,7 +12,7 @@ import CMSPageScreen from './CMSPageScreen';
 import SubscriptionScreen from './SubscriptionScreen';
 import { Colors } from '../theme/medical';
 import { useResponsive, TABLET_CONTENT_MAX_WIDTH } from '../utils/responsive';
-import { getSubscriptionState, SubscriptionState } from '../services/subscriptionService';
+import { getSubscriptionState, SubscriptionState, MEMBERSHIP_ENABLED } from '../services/subscriptionService';
 import { graphqlRequest } from '../services/userDataService';
 import logger from '../utils/logger';
 import type { PageSlug } from '../services/cmsService';
@@ -121,11 +121,13 @@ export default function ProfileScreen() {
           }
           <Text style={s.userName}>{user?.name || t('profile.myAccount')}</Text>
           <Text style={s.userEmail}>{user?.email || ''}</Text>
-          <View style={[s.planBadge, isMember ? { backgroundColor: Colors.navyLight, borderColor: Colors.navy } : { backgroundColor: Colors.surfaceAlt, borderColor: Colors.border }]}>
-            <Text style={[s.planBadgeText, { color: isMember ? Colors.navy : Colors.textMuted }]}>
-              {isMember ? t('profile.member') : t('profile.freePlan')}
-            </Text>
-          </View>
+          {MEMBERSHIP_ENABLED && (
+            <View style={[s.planBadge, isMember ? { backgroundColor: Colors.navyLight, borderColor: Colors.navy } : { backgroundColor: Colors.surfaceAlt, borderColor: Colors.border }]}>
+              <Text style={[s.planBadgeText, { color: isMember ? Colors.navy : Colors.textMuted }]}>
+                {isMember ? t('profile.member') : t('profile.freePlan')}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* ── Health profile ── */}
@@ -157,6 +159,7 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        {MEMBERSHIP_ENABLED && (<>
         <Text style={s.sectionLabel}>{t('profile.membership')}</Text>
         <View style={[s.card, s.membershipCard]}>
           <View style={s.membershipHeaderRow}>
@@ -176,6 +179,7 @@ export default function ProfileScreen() {
             <Text style={s.upgradeBtnFullText}>{isMember ? t('profile.manageMembership') : t('profile.becomeMember')}</Text>
           </TouchableOpacity>
         </View>
+        </>)}
 
         {/* ── App links ── */}
         <Text style={s.sectionLabel}>{t('profile.information')}</Text>

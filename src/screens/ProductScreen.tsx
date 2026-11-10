@@ -18,7 +18,7 @@ import { saveScanHistory, HealthProfile } from '../services/userDataService';
 import { Colors, Shadow, NutriscoreColors, StatusConfig } from '../theme/medical';
 import { useResponsive, TABLET_CONTENT_MAX_WIDTH } from '../utils/responsive';
 // PHASE 2: import UPFCard from '../components/UPFCard';
-import ProductScoreCard from '../components/ProductScoreCard';
+import { ProductScoreBreakdown, ScoringInfoModal, blurbForProduct } from '../components/ProductScoreCard';
 import { calculateProductScore } from '../utils/productScore';
 import { buildPersonalNutrientRows, excludeAlreadyMentioned, PersonalNutrientRow } from '../utils/personalNutrientTargets';
 import { addToShoppingList, isInShoppingList } from '../services/shoppingListService';
@@ -234,23 +234,18 @@ export default function ProductScreen() {
           </TouchableOpacity>
         )}
 
-        {/* ── Product score #1: general, same for every user ── */}
-        <ProductScoreCard product={product} />
-
-        {/* ── Product score #2: personalised to this user's health profile —
-             member-only perk. Free accounts get this too as long as they're
-             under today's 3-free-scan cap (see hasFreeAccess above). ── */}
-        <FeatureGate feature="aiAnalysis">
-          {!hasFreeAccess ? (
-            <LockedPersonalScoreCard onUnlock={() => openPaywall(t('features.personalScore'))} />
-          ) : loadingAI ? (
-            <LoadingCard eyebrow={t('product.personalScore.eyebrow')} label={t('product.personalScore.scoringLabel')} />
-          ) : analysis ? (
-            <PersonalScoreCard analysis={analysis} product={product} healthProfile={healthProfile} generalScore={productScore.score} />
-          ) : (
-            <AIUnavailableCard onRetry={() => runAIAnalysis(product)} />
-          )}
-        </FeatureGate>
+        {/* ── Product Score + Personal Score, merged into one card ── */}
+        <ScoresCard
+          product={product}
+          healthProfile={healthProfile}
+          personal={
+            !appConfig.aiAnalysisEnabled ? { status: 'off' }
+              : !hasFreeAccess ? { status: 'locked', onUnlock: () => openPaywall(t('features.personalScore')) }
+              : loadingAI ? { status: 'loading' }
+              : analysis ? { status: 'ready', analysis }
+              : { status: 'unavailable', onRetry: () => runAIAnalysis(product) }
+          }
+        />
 
         {/* PHASE 2: Nutrition facts / Ingredients & Allergens / Processing & Additives —
             covered (at a summary level) by ProductScoreCard above for Phase 1
@@ -325,174 +320,50 @@ function LoadingCard({ eyebrow, label }: { eyebrow: string; label: string }) {
   );
 }
 
-// Shown instead of the Personal Score whenever a real AI result couldn't be
-// produced (no API key configured, request failed, bad response) — never a
-// mock/fallback result standing in for real analysis.
-function AIUnavailableCard({ onRetry }: { onRetry: () => void }) {
-  const { t } = useTranslation();
-  const { rw, rh, rf, rr } = useResponsive();
-  const styles = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
-  return (
-    <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: Colors.textMuted }]}>
-      <Text style={styles.cardSectionLabel}>{t('product.personalScore.eyebrow')}</Text>
-      <View style={styles.unavailableRow}>
-        <Text style={styles.unavailableIcon}>⚠️</Text>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.unavailableTitle}>{t('product.personalScore.unavailable.title')}</Text>
-          <Text style={styles.unavailableSub}>
-            {t('product.personalScore.unavailable.message')}
-          </Text>
-        </View>
-      </View>
-      <TouchableOpacity style={styles.unavailableRetryBtn} onPress={onRetry} activeOpacity={0.85}>
-        <Text style={styles.unavailableRetryText}>{t('common.tryAgain')}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-// Shown instead of the real Personal Score for non-members — a locked shell
-// so people know the feature exists rather than it silently disappearing.
-function LockedPersonalScoreCard({ onUnlock }: { onUnlock: () => void }) {
-  const { t } = useTranslation();
-  const { rw, rh, rf, rr } = useResponsive();
-  const styles = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
-  return (
-    <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: Colors.textMuted }]}>
-      <Text style={styles.cardSectionLabel}>{t('product.personalScore.eyebrow')}</Text>
-      <View style={styles.unavailableRow}>
-        <Text style={styles.unavailableIcon}>🔒</Text>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.unavailableTitle}>{t('product.personalScore.locked.title')}</Text>
-          <Text style={styles.unavailableSub}>
-            {t('product.personalScore.locked.message')}
-          </Text>
-        </View>
-      </View>
-      <TouchableOpacity style={styles.unavailableRetryBtn} onPress={onUnlock} activeOpacity={0.85}>
-        <Text style={styles.unavailableRetryText}>{t('product.personalScore.locked.cta')}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
 function severityColor(sev: 'high' | 'medium' | 'low'): string {
   if (sev === 'high') return Colors.danger;
   if (sev === 'medium') return Colors.caution;
   return Colors.info;
 }
 
-// ─── Colour interpolation for the gauge's smooth gradient track ──────────
-// No gradient library in this project, so a smooth red→amber→green fill is
-// faked with ~28 thin adjacent segments, each one step along the blend.
-function hexToRgb(hex: string): [number, number, number] {
-  const h = hex.replace('#', '');
-  const n = parseInt(h, 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-function rgbToHex(r: number, g: number, b: number): string {
-  const c = (v: number) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, '0');
-  return `#${c(r)}${c(g)}${c(b)}`;
-}
-function lerpColor(c1: string, c2: string, t: number): string {
-  const [r1, g1, b1] = hexToRgb(c1);
-  const [r2, g2, b2] = hexToRgb(c2);
-  return rgbToHex(r1 + (r2 - r1) * t, g1 + (g2 - g1) * t, b1 + (b2 - b1) * t);
-}
-const GAUGE_STOPS = 28;
-const GAUGE_COLORS = [Colors.danger, Colors.caution, Colors.safe];
-const gaugeGradient: string[] = Array.from({ length: GAUGE_STOPS }, (_, i) => {
-  const t = i / (GAUGE_STOPS - 1);
-  const segT = t * (GAUGE_COLORS.length - 1);
-  const idx = Math.min(Math.floor(segT), GAUGE_COLORS.length - 2);
-  return lerpColor(GAUGE_COLORS[idx], GAUGE_COLORS[idx + 1], segT - idx);
-});
+export type PersonalScoreState =
+  | { status: 'off' }
+  | { status: 'locked'; onUnlock: () => void }
+  | { status: 'loading' }
+  | { status: 'unavailable'; onRetry: () => void }
+  | { status: 'ready'; analysis: AIHealthAnalysis };
 
-// A single 0-100 gauge with both scores marked as pins on it, instead of two
-// separate numbers the eye has to jump between. The track is a smooth red→
-// amber→green gradient so a pin's position alone tells you roughly how good
-// it is, even before reading the number. The hollow pin is the general
-// score; the filled, verdict-coloured pin is the personal one — it's the one
-// that matters, so it reads as primary.
-function ScoreGaugeComparison({ generalScore, personalScore, personalColor }: {
-  generalScore: number; personalScore: number; personalColor: string;
+// Product Score and Personal Score in one card: both numbers side by side at
+// the top so they can be compared at a glance, the AI's one-line summary
+// under them, and a single breakdown holding both the general positives/
+// negatives and the personal findings. The personal side shows its own
+// loading / unavailable / locked state in place of its score, and drops out
+// entirely when AI analysis is switched off in the app config.
+function ScoresCard({ product, healthProfile, personal }: {
+  product: ProductData; healthProfile?: HealthProfile; personal: PersonalScoreState;
 }) {
   const { t } = useTranslation();
   const { rw, rh, rf, rr } = useResponsive();
   const styles = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
-  const clamp = (n: number) => Math.max(2, Math.min(98, n));
-  const generalPct = clamp(generalScore);
-  const personalPct = clamp(personalScore);
-
-  return (
-    <View style={styles.gaugeSection}>
-      {/* Legend sits directly above the bar as its caption — not floating
-          over the gradient, so it always reads cleanly regardless of pin
-          position or the gradient colour underneath */}
-      <View style={styles.gaugeHeaderRow}>
-        <View style={styles.gaugeHeaderItem}>
-          <View style={styles.gaugeLegendDotOutline} />
-          <Text style={styles.gaugeHeaderText}>{t('product.personalScore.general')}</Text>
-          <Text style={styles.gaugeHeaderNum}>{generalScore}</Text>
-        </View>
-        <View style={styles.gaugeHeaderItem}>
-          <View style={[styles.gaugeLegendDotFilled, { backgroundColor: personalColor }]} />
-          <Text style={styles.gaugeHeaderText}>{t('product.personalScore.forYou')}</Text>
-          <Text style={[styles.gaugeHeaderNum, { color: personalColor }]}>{personalScore}</Text>
-        </View>
-      </View>
-
-      <View style={styles.gaugeWrap}>
-        <View style={styles.gaugeTrackShadow}>
-          <View style={styles.gaugeTrack}>
-            {gaugeGradient.map((color, i) => (
-              <View key={i} style={[styles.gaugeStop, { backgroundColor: color }]} />
-            ))}
-            <View style={styles.gaugeTrackSheen} pointerEvents="none" />
-          </View>
-        </View>
-        <View style={[styles.gaugePin, { left: `${generalPct}%` }]}>
-          <View style={styles.gaugePinOutline} />
-        </View>
-        <View style={[styles.gaugePin, { left: `${personalPct}%` }]}>
-          <View style={[styles.gaugePinFilled, { backgroundColor: personalColor }]} />
-        </View>
-      </View>
-      <View style={styles.gaugeScaleRow}>
-        <Text style={styles.gaugeScaleText}>0</Text>
-        <Text style={styles.gaugeScaleText}>50</Text>
-        <Text style={styles.gaugeScaleText}>100</Text>
-      </View>
-    </View>
-  );
-}
-
-// Full-width stacked rows (not a squeezed two-column grid) so nothing here
-// ever gets cut off. Each section mixes the AI's specific findings (allergy/
-// condition matches — things a nutrient number alone can't tell you) with a
-// personalised per-nutrient breakdown: what your day allows, what this
-// product (per 100g) has, and how far over/under that is.
-//
-// Leads with a General-vs-For-You comparison so the value of personalisation
-// is visible in one glance, not just implied by a lone number.
-function PersonalScoreCard({ analysis, product, healthProfile, generalScore }: {
-  analysis: AIHealthAnalysis; product: ProductData; healthProfile?: HealthProfile; generalScore: number;
-}) {
-  const { t } = useTranslation();
-  const { rw, rh, rf, rr } = useResponsive();
-  const styles = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
-  const [showInfo, setShowInfo] = useState(false);
+  const [showPersonalInfo, setShowPersonalInfo] = useState(false);
+  const [showGeneralInfo, setShowGeneralInfo] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const sc = StatusConfig[analysis.verdict];
-  const aiText = [analysis.summary, ...analysis.positives, ...analysis.warnings.map(w => w.message)].join(' ');
-  const nutrientRows = excludeAlreadyMentioned(buildPersonalNutrientRows(product, healthProfile), aiText);
+
+  const general = calculateProductScore(product);
+  const analysis = personal.status === 'ready' ? personal.analysis : null;
+  const sc = analysis ? StatusConfig[analysis.verdict] : null;
+
+  const aiText = analysis ? [analysis.summary, ...analysis.positives, ...analysis.warnings.map(w => w.message)].join(' ') : '';
+  const nutrientRows = analysis ? excludeAlreadyMentioned(buildPersonalNutrientRows(product, healthProfile), aiText) : [];
   const goodNutrients = nutrientRows.filter(r => r.status === 'good');
   const watchNutrients = nutrientRows.filter(r => r.status === 'bad');
-  const hasGood = analysis.positives.length > 0 || goodNutrients.length > 0;
-  const hasWatch = analysis.warnings.length > 0 || watchNutrients.length > 0;
-  const totalFindings = analysis.positives.length + analysis.warnings.length + goodNutrients.length + watchNutrients.length;
+  const hasGood = !!analysis && (analysis.positives.length > 0 || goodNutrients.length > 0);
+  const hasWatch = !!analysis && (analysis.warnings.length > 0 || watchNutrients.length > 0);
+  const generalFindings = general.positives.length + general.negatives.length;
+  const totalFindings = generalFindings + goodNutrients.length + watchNutrients.length
+    + (analysis ? analysis.positives.length + analysis.warnings.length : 0);
 
-  const diff = analysis.personalScore - generalScore;
+  const diff = analysis ? analysis.personalScore - general.score : 0;
   const diffColor = diff < 0 ? Colors.danger : diff > 0 ? Colors.safe : Colors.textMuted;
   const diffText = diff === 0
     ? t('product.personalScore.matchesGeneral')
@@ -501,51 +372,80 @@ function PersonalScoreCard({ analysis, product, healthProfile, generalScore }: {
       : t('product.personalScore.diffHigher', { diff: Math.abs(diff) });
 
   return (
-    <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: sc.color }]}>
+    <View style={[styles.card, { borderLeftWidth: 4, borderLeftColor: sc?.color ?? general.color }]}>
       <View style={styles.headerRow}>
-        <Text style={styles.cardSectionLabel}>{t('product.personalScore.eyebrow')}</Text>
-        <TouchableOpacity onPress={() => setShowInfo(true)} hitSlop={8}>
-          <Text style={styles.infoLink}>ⓘ {t('product.personalScore.infoLink')}</Text>
-        </TouchableOpacity>
+        <Text style={[styles.cardSectionLabel, { marginBottom: 0 }]}>{t('product.scores.eyebrow')}</Text>
+        {personal.status !== 'off' && (
+          <TouchableOpacity onPress={() => setShowPersonalInfo(true)} hitSlop={8}>
+            <Text style={styles.infoLink}>ⓘ {t('product.personalScore.infoLink')}</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
-      {/* Hero — the one premium "glance" moment: verdict icon + score in one
-          row, label under the score, summary below */}
-      <View style={styles.heroSection}>
-        <View style={styles.heroTopRow}>
-          <View style={[styles.heroIconCircle, { backgroundColor: sc.color }]}>
-            <Text style={styles.heroIconText}>{sc.icon}</Text>
-          </View>
-          <View style={styles.heroScoreCol}>
-            <View style={styles.heroScoreRow}>
-              <Text style={[styles.heroScoreNum, { color: sc.color }]}>{analysis.personalScore}</Text>
-              <Text style={styles.heroScoreDen}>/100</Text>
+      <View style={styles.scoreTilesRow}>
+        <ScoreTile label={t('product.scores.productLabel')} score={general.score} color={general.color} caption={general.label} />
+        {personal.status !== 'off' && <View style={styles.scoreTilesDivider} />}
+        {analysis && sc && (
+          <ScoreTile label={t('product.scores.forYouLabel')} score={analysis.personalScore} color={sc.color} caption={t(sc.labelKey)} />
+        )}
+        {personal.status === 'loading' && (
+          <View style={styles.scoreTile}>
+            <Text style={styles.scoreTileLabel}>{t('product.scores.forYouLabel')}</Text>
+            <View style={[styles.scoreTileBadge, styles.scoreTileBadgeEmpty]}>
+              <ActivityIndicator color={Colors.navyMid} />
             </View>
-            <Text style={[styles.heroVerdictLabel, { color: sc.color }]}>{t(sc.labelKey)}</Text>
+            <Text style={styles.scoreTileCaptionMuted} numberOfLines={2}>{t('product.scores.scoring')}</Text>
           </View>
+        )}
+        {personal.status === 'unavailable' && (
+          <View style={styles.scoreTile}>
+            <Text style={styles.scoreTileLabel}>{t('product.scores.forYouLabel')}</Text>
+            <View style={[styles.scoreTileBadge, styles.scoreTileBadgeEmpty]}>
+              <Text style={styles.scoreTileIcon}>⚠️</Text>
+            </View>
+            <TouchableOpacity onPress={personal.onRetry} hitSlop={8}>
+              <Text style={styles.scoreTileAction}>{t('common.tryAgain')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        {personal.status === 'locked' && (
+          <View style={styles.scoreTile}>
+            <Text style={styles.scoreTileLabel}>{t('product.scores.forYouLabel')}</Text>
+            <View style={[styles.scoreTileBadge, styles.scoreTileBadgeEmpty]}>
+              <Text style={styles.scoreTileIcon}>🔒</Text>
+            </View>
+            <TouchableOpacity onPress={personal.onUnlock} hitSlop={8}>
+              <Text style={styles.scoreTileAction} numberOfLines={1}>{t('product.personalScore.locked.cta')}</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      <Text style={styles.scoresSummary}>
+        {analysis
+          ? analysis.summary
+          : personal.status === 'unavailable'
+            ? t('product.personalScore.unavailable.message')
+            : blurbForProduct(product, t)}
+      </Text>
+      {analysis && (
+        <View style={styles.diffChip}>
+          <Text style={[styles.diffChipText, { color: diffColor }]}>{diffText}</Text>
         </View>
-        <Text style={styles.heroSummary}>{analysis.summary}</Text>
-      </View>
+      )}
 
-      {/* General vs For You — one 0-100 gauge with both scores marked on it,
-          rather than two separate numbers the eye has to compare manually */}
-      <ScoreGaugeComparison generalScore={generalScore} personalScore={analysis.personalScore} personalColor={sc.color} />
-      <View style={styles.diffChip}>
-        <Text style={[styles.diffChipText, { color: diffColor }]}>{diffText}</Text>
-      </View>
-
-      {analysis.suggestion ? (
+      {analysis?.suggestion ? (
         <View style={styles.personalSuggestionRow}>
           <Text style={styles.personalSuggestionIcon}>💡</Text>
           <Text style={styles.personalSuggestionText}>{analysis.suggestion}</Text>
         </View>
       ) : null}
 
-      {(hasGood || hasWatch) && (
+      {totalFindings > 0 && (
         <>
           <TouchableOpacity style={styles.breakdownToggle} onPress={() => setExpanded(e => !e)} activeOpacity={0.7}>
             <Text style={styles.breakdownToggleText}>{expanded ? t('product.personalScore.hideBreakdown') : t('product.personalScore.seeBreakdown')}</Text>
-            {!expanded && totalFindings > 0 ? (
+            {!expanded ? (
               <View style={styles.breakdownCountBadge}>
                 <Text style={styles.breakdownCountText}>{totalFindings}</Text>
               </View>
@@ -555,29 +455,46 @@ function PersonalScoreCard({ analysis, product, healthProfile, generalScore }: {
 
           {expanded && (
             <>
-              {hasGood && (
-                <View style={[styles.personalSection, styles.personalSectionFirst]}>
-                  <Text style={[styles.personalSectionTitle, { color: Colors.safe }]}>{t('product.personalScore.goodForYou')}</Text>
-                  {analysis.positives.map((p, i) => (
-                    <View key={`ai-${i}`} style={styles.personalItem}>
-                      <Text style={[styles.personalItemIcon, { color: Colors.safe }]}>✓</Text>
-                      <Text style={styles.personalItemText}>{p}</Text>
-                    </View>
-                  ))}
-                  {goodNutrients.map(row => <PersonalNutrientRowView key={row.key} row={row} />)}
+              {generalFindings > 0 && (
+                <View style={styles.breakdownGroup}>
+                  <View style={styles.breakdownGroupHeader}>
+                    <Text style={styles.breakdownGroupTitle}>{t('product.scores.productLabel')}</Text>
+                    <TouchableOpacity onPress={() => setShowGeneralInfo(true)} hitSlop={8}>
+                      <Text style={styles.infoLink}>ⓘ {t('productScoreCard.howCalculated')}</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <ProductScoreBreakdown product={product} />
                 </View>
               )}
 
-              {hasWatch && (
-                <View style={[styles.personalSection, !hasGood && styles.personalSectionFirst]}>
-                  <Text style={[styles.personalSectionTitle, { color: Colors.danger }]}>{t('product.personalScore.watchOut')}</Text>
-                  {analysis.warnings.map((w, i) => (
-                    <View key={`ai-${i}`} style={styles.personalItem}>
-                      <Text style={styles.personalItemIcon}>{w.icon}</Text>
-                      <Text style={[styles.personalItemText, { color: severityColor(w.severity) }]}>{w.message}</Text>
+              {(hasGood || hasWatch) && (
+                <View style={styles.breakdownGroup}>
+                  <Text style={styles.breakdownGroupTitle}>{t('product.scores.forYouLabel')}</Text>
+                  {hasGood && (
+                    <View style={[styles.personalSection, styles.personalSectionFirst]}>
+                      <Text style={[styles.personalSectionTitle, { color: Colors.safe }]}>{t('product.personalScore.goodForYou')}</Text>
+                      {analysis!.positives.map((p, i) => (
+                        <View key={`ai-${i}`} style={styles.personalItem}>
+                          <Text style={[styles.personalItemIcon, { color: Colors.safe }]}>✓</Text>
+                          <Text style={styles.personalItemText}>{p}</Text>
+                        </View>
+                      ))}
+                      {goodNutrients.map(row => <PersonalNutrientRowView key={row.key} row={row} />)}
                     </View>
-                  ))}
-                  {watchNutrients.map(row => <PersonalNutrientRowView key={row.key} row={row} />)}
+                  )}
+
+                  {hasWatch && (
+                    <View style={[styles.personalSection, !hasGood && styles.personalSectionFirst]}>
+                      <Text style={[styles.personalSectionTitle, { color: Colors.danger }]}>{t('product.personalScore.watchOut')}</Text>
+                      {analysis!.warnings.map((w, i) => (
+                        <View key={`ai-${i}`} style={styles.personalItem}>
+                          <Text style={styles.personalItemIcon}>{w.icon}</Text>
+                          <Text style={[styles.personalItemText, { color: severityColor(w.severity) }]}>{w.message}</Text>
+                        </View>
+                      ))}
+                      {watchNutrients.map(row => <PersonalNutrientRowView key={row.key} row={row} />)}
+                    </View>
+                  )}
                 </View>
               )}
             </>
@@ -585,11 +502,31 @@ function PersonalScoreCard({ analysis, product, healthProfile, generalScore }: {
         </>
       )}
 
-      <Modal visible={showInfo} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowInfo(false)}>
+      <Modal visible={showPersonalInfo} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowPersonalInfo(false)}>
         <SafeAreaProvider>
-          <PersonalScoringInfoModal onClose={() => setShowInfo(false)} />
+          <PersonalScoringInfoModal onClose={() => setShowPersonalInfo(false)} />
         </SafeAreaProvider>
       </Modal>
+      <Modal visible={showGeneralInfo} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowGeneralInfo(false)}>
+        <SafeAreaProvider>
+          <ScoringInfoModal onClose={() => setShowGeneralInfo(false)} />
+        </SafeAreaProvider>
+      </Modal>
+    </View>
+  );
+}
+
+function ScoreTile({ label, score, color, caption }: { label: string; score: number; color: string; caption: string }) {
+  const { rw, rh, rf, rr } = useResponsive();
+  const styles = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
+  return (
+    <View style={styles.scoreTile}>
+      <Text style={styles.scoreTileLabel}>{label}</Text>
+      <View style={[styles.scoreTileBadge, { backgroundColor: color }]}>
+        <Text style={styles.scoreTileNum}>{score}</Text>
+        <Text style={styles.scoreTileDen}>/100</Text>
+      </View>
+      <Text style={[styles.scoreTileCaption, { color }]} numberOfLines={1}>{caption}</Text>
     </View>
   );
 }
@@ -1107,16 +1044,6 @@ function createStyles(
   // two-column grid) tucked behind a toggle so long AI sentences and
   // nutrient rows both wrap instead of getting cut off, and the card doesn't
   // read as a wall of text by default.
-  heroSection:     { alignItems: 'center', paddingVertical: rh(6), marginBottom: rh(14) },
-  heroTopRow:      { flexDirection: 'row', alignItems: 'center', gap: rw(14), marginBottom: rh(10) },
-  heroIconCircle:  { width: rw(52), height: rw(52), borderRadius: rw(26), alignItems: 'center', justifyContent: 'center', ...Shadow.cardMd },
-  heroIconText:    { fontSize: rf(24), color: '#FFFFFF', fontWeight: '800' },
-  heroScoreCol:    { alignItems: 'flex-start' },
-  heroScoreRow:    { flexDirection: 'row', alignItems: 'flex-end' },
-  heroScoreNum:    { fontSize: rf(34), fontWeight: '800', lineHeight: rf(36) },
-  heroScoreDen:    { fontSize: rf(14), fontWeight: '700', color: Colors.textMuted, marginBottom: rh(4), marginLeft: rw(2) },
-  heroVerdictLabel:{ fontSize: rf(14), fontWeight: '800', letterSpacing: 0.3, marginTop: rh(2) },
-  heroSummary:     { fontSize: rf(13), color: Colors.textSecondary, textAlign: 'center', lineHeight: rf(19), paddingHorizontal: rw(6) },
 
   breakdownToggle:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: rw(8), paddingVertical: rh(13), marginTop: rh(6), borderTopWidth: 1, borderTopColor: Colors.border },
   breakdownToggleText:  { fontSize: rf(13), fontWeight: '700', color: Colors.navy },
@@ -1124,31 +1051,25 @@ function createStyles(
   breakdownCountBadge:  { backgroundColor: Colors.navyLight, borderRadius: rr(999), paddingHorizontal: rw(7), paddingVertical: rh(1), minWidth: rw(20), alignItems: 'center' },
   breakdownCountText:   { fontSize: rf(11), fontWeight: '800', color: Colors.navy },
 
-  // General (Product Score) vs For You (Personal Score) — single 0-100 gauge
-  // with both scores marked as pins, rather than two separate badges. The
-  // "General"/"For You" legend sits as a plain caption row directly above
-  // the bar (not floating over the gradient), so it always reads cleanly.
-  gaugeSection: { marginBottom: rh(6) },
-  gaugeHeaderRow:  { flexDirection: 'row', justifyContent: 'space-between', marginBottom: rh(8) },
-  gaugeHeaderItem: { flexDirection: 'row', alignItems: 'center', gap: rw(6) },
-  gaugeHeaderText: { fontSize: rf(12), color: Colors.textSecondary, fontWeight: '600' },
-  gaugeHeaderNum:  { fontSize: rf(13), fontWeight: '800', color: Colors.textPrimary },
-  gaugeLegendDotOutline: { width: rw(10), height: rw(10), borderRadius: rw(5), backgroundColor: Colors.surface, borderWidth: 2, borderColor: Colors.textPrimary },
-  gaugeLegendDotFilled:  { width: rw(10), height: rw(10), borderRadius: rw(5) },
+  // Combined Scores card — Product Score and Personal Score as two equal
+  // tiles side by side, so both numbers read at a glance
+  scoreTilesRow:     { flexDirection: 'row', alignItems: 'stretch', marginBottom: rh(14) },
+  scoreTilesDivider: { width: 1, backgroundColor: Colors.border, marginHorizontal: rw(10) },
+  scoreTile:         { flex: 1, alignItems: 'center' },
+  scoreTileLabel:    { fontSize: rf(10), fontWeight: '700', color: Colors.textMuted, letterSpacing: 1.2, marginBottom: rh(8), textAlign: 'center' },
+  scoreTileBadge:    { width: rw(68), height: rw(68), borderRadius: rw(34), alignItems: 'center', justifyContent: 'center', marginBottom: rh(8), ...Shadow.cardMd },
+  scoreTileBadgeEmpty: { backgroundColor: Colors.surfaceAlt, borderWidth: 1, borderColor: Colors.border },
+  scoreTileNum:      { fontSize: rf(24), fontWeight: '800', color: '#FFFFFF', lineHeight: rf(28) },
+  scoreTileDen:      { fontSize: rf(10), fontWeight: '700', color: 'rgba(255,255,255,0.85)' },
+  scoreTileIcon:     { fontSize: rf(24) },
+  scoreTileCaption:  { fontSize: rf(13), fontWeight: '800', textAlign: 'center' },
+  scoreTileCaptionMuted: { fontSize: rf(11), color: Colors.textMuted, textAlign: 'center' },
+  scoreTileAction:   { fontSize: rf(12), fontWeight: '700', color: Colors.navyMid, textAlign: 'center' },
+  scoresSummary:     { fontSize: rf(13), color: Colors.textSecondary, textAlign: 'center', lineHeight: rf(19), paddingHorizontal: rw(6), marginBottom: rh(10) },
+  breakdownGroup:       { marginTop: rh(14) },
+  breakdownGroupHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  breakdownGroupTitle:  { fontSize: rf(10), fontWeight: '800', color: Colors.textMuted, letterSpacing: 1.2, marginBottom: rh(6) },
 
-  gaugeWrap:    { height: rh(30), justifyContent: 'center', marginBottom: rh(6) },
-  gaugeTrackShadow: { borderRadius: rr(7), ...Shadow.card },
-  gaugeTrack:   { flexDirection: 'row', height: rh(14), borderRadius: rr(7), overflow: 'hidden' },
-  gaugeStop:    { flex: 1 },
-  gaugeTrackSheen: {
-    position: 'absolute', top: 0, left: 0, right: 0, height: '48%',
-    backgroundColor: 'rgba(255,255,255,0.28)', borderTopLeftRadius: rr(7), borderTopRightRadius: rr(7),
-  },
-  gaugePin: { position: 'absolute', top: 0, bottom: 0, width: rw(20), marginLeft: -rw(10), alignItems: 'center', justifyContent: 'center' },
-  gaugePinOutline: { width: rw(15), height: rw(15), borderRadius: rw(8), backgroundColor: Colors.surface, borderWidth: 3, borderColor: Colors.textPrimary, ...Shadow.cardMd },
-  gaugePinFilled:  { width: rw(20), height: rw(20), borderRadius: rw(10), borderWidth: 3, borderColor: Colors.surface, ...Shadow.cardMd },
-  gaugeScaleRow:  { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: rw(2) },
-  gaugeScaleText: { fontSize: rf(9.5), color: Colors.textMuted, fontWeight: '600' },
 
   diffChip: { alignSelf: 'center', marginBottom: rh(12) },
   diffChipText: { fontSize: rf(12), fontWeight: '700' },

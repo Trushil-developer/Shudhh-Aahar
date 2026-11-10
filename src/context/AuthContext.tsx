@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { getCurrentUser, signInWithGoogle, signInWithApple, signOut as authSignOut, UserProfile } from '../services/authService';
 import { createUserRecord, fetchUserProfile, HealthProfile, DEFAULT_HEALTH_PROFILE } from '../services/userDataService';
-import { getSubscriptionState, saveSubscriptionState, BillingPeriod } from '../services/subscriptionService';
+import { getSubscriptionState, saveSubscriptionState, BillingPeriod, MEMBERSHIP_ENABLED } from '../services/subscriptionService';
 import { DAILY_SCAN_LIMIT, fetchDailyScansRemaining, consumeDailyScan } from '../services/dailyAccessService';
 import { useAppConfig } from './AppConfigContext';
 import { AppError } from '../utils/AppError';
@@ -141,8 +141,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fails safe: appConfig.paymentsEnabled defaults to true, so a config-fetch
   // failure never accidentally grants free membership app-wide.
   const resolveEffectiveMembership = async (dbUser: any): Promise<boolean> => {
-    if (appConfig.paymentsEnabled === false) return true;
+    if (!MEMBERSHIP_ENABLED || appConfig.paymentsEnabled === false) return true;
     return resolveMembership(dbUser);
+  };
+
+  // Returning users already have a record, so read first and only create on
+  // a miss — calling createUserRecord unconditionally cost every launch an
+  // extra AppSync round trip that just came back "already exists".
+  const fetchOrCreateUser = async (currentUser: UserProfile) => {
+    const existing = await fetchUserProfile(currentUser.id);
+    if (existing) return existing;
+    await createUserRecord(currentUser.id, currentUser.email, currentUser.name);
+    return fetchUserProfile(currentUser.id);
   };
 
   const loadUser = async () => {
@@ -157,10 +167,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const currentUser = await getCurrentUser();
       if (currentUser) {
-        // Create record in DynamoDB if first time
-        await createUserRecord(currentUser.id, currentUser.email, currentUser.name);
-        // Fetch their health profile
-        const dbUser = await fetchUserProfile(currentUser.id);
+        // Fetch their health profile (creating the record if first time)
+        const dbUser = await fetchOrCreateUser(currentUser);
         if (dbUser?.banned) {
           // Banned since their last session — sign them out silently rather
           // than dropping them into the app.
@@ -177,7 +185,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         const member = await resolveEffectiveMembership(dbUser);
         setIsMember(member);
-        await refreshDailyScans(member);
+        // Not awaited — the remaining-scans count isn't needed to leave the
+        // splash screen, and fetchDailyScansRemaining never throws.
+        void refreshDailyScans(member);
       } else {
         setUser(null);
       }
@@ -191,8 +201,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Shared by both providers — everything past "we have a UserProfile" is
   // identical regardless of whether it came from Google or Apple.
   const completeSignIn = async (currentUser: UserProfile) => {
-    await createUserRecord(currentUser.id, currentUser.email, currentUser.name);
-    const dbUser = await fetchUserProfile(currentUser.id);
+    const dbUser = await fetchOrCreateUser(currentUser);
     if (dbUser?.banned) {
       await authSignOut();
       throw bannedError();

@@ -64,6 +64,13 @@ export interface PlanLimits {
   prioritySupport: boolean;
 }
 
+// Membership is switched off for now: every signed-in user gets full Member
+// access (unlimited scans, every feature) and no membership/purchase UI is
+// shown anywhere. Like the admin paymentsEnabled kill switch, but baked into
+// the build so it can't be flipped back on remotely. The IAP code below stays
+// intact for when this is turned back on.
+export const MEMBERSHIP_ENABLED = false;
+
 export const PLANS: Record<PlanId, Plan> = {
   free: {
     id: 'free',

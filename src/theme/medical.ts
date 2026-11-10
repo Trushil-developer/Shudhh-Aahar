@@ -141,6 +141,7 @@ export const RETAILER_ICONS: Record<string, string> = {
   Morrisons: '🟡',
   Aldi: '🔷',
   Lidl: '🔶',
+  Waitrose: '🟩',
 };
 export const DEFAULT_RETAILER_ICON = '🛍️';
 

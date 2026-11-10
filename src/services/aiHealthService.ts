@@ -4,7 +4,7 @@
 
 import { HealthProfile } from './userDataService';
 import { ProductData } from './foodApi';
-import Config from '../config/environment';
+import { isAIConfigured, postClaudeMessages } from './aiProxy';
 import { Colors } from '../theme/medical';
 import { AppError } from '../utils/AppError';
 
@@ -36,10 +36,8 @@ export async function analyseProductForUser(
   product: ProductData,
   profile: HealthProfile,
 ): Promise<AIHealthAnalysis | null> {
-  const anthropicApiKey = Config.anthropicApiKey;
-
-  if (!anthropicApiKey) {
-    console.error('AI analysis unavailable: no Anthropic API key configured');
+  if (!isAIConfigured()) {
+    console.error('AI analysis unavailable: no AI proxy URL configured');
     return null;
   }
 
@@ -47,19 +45,11 @@ export async function analyseProductForUser(
   const userPrompt = buildUserPrompt(product, profile);
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
+    const response = await postClaudeMessages({
+      model: MODEL,
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
     });
 
     if (!response.ok) {

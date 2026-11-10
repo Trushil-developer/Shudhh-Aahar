@@ -357,6 +357,12 @@
     "wishlist": {
       "add": "Add to Price Tracker"
     },
+    "scores": {
+      "eyebrow": "SCORES",
+      "productLabel": "PRODUCT",
+      "forYouLabel": "FOR YOU",
+      "scoring": "Checking your profile…"
+    },
     "personalScore": {
       "eyebrow": "PERSONAL SCORE",
       "scoringLabel": "Scoring against your health profile...",

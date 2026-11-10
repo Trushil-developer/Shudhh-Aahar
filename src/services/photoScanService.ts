@@ -3,8 +3,8 @@
 // Claude Vision identifies foods and estimates nutrition + health assessment
 
 import { AppError } from '../utils/AppError';
+import { isAIConfigured, postClaudeMessages } from './aiProxy';
 
-const ANTHROPIC_API_KEY = 'YOUR_ANTHROPIC_API_KEY';
 const MODEL = 'claude-haiku-4-5';
 
 export interface PhotoMealResult {
@@ -43,7 +43,7 @@ export async function analysePhotoMeal(
   mediaType: string,
   userProfile: any,
 ): Promise<PhotoMealResult> {
-  if (ANTHROPIC_API_KEY === 'YOUR_ANTHROPIC_API_KEY') {
+  if (!isAIConfigured()) {
     return getMockPhotoResult();
   }
 
@@ -54,24 +54,16 @@ export async function analysePhotoMeal(
   ].filter(Boolean).join(' | ');
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1024,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Image } },
-            { type: 'text', text: buildPhotoPrompt(healthCtx) },
-          ],
-        }],
-      }),
+    const response = await postClaudeMessages({
+      model: MODEL,
+      max_tokens: 1024,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64Image } },
+          { type: 'text', text: buildPhotoPrompt(healthCtx) },
+        ],
+      }],
     });
 
     const data = await response.json();
