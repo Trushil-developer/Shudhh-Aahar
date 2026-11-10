@@ -16,7 +16,8 @@ export type FeatureName =
   | 'documentUpload'
   | 'foodDiary'
   | 'wishlist'
-  | 'alternatives';
+  | 'alternatives'
+  | 'couponExchange';
 
 // Maps the short feature name used by callers to the actual AppConfig flag.
 const FEATURE_FLAG_KEYS: Record<FeatureName, keyof AppConfig> = {
@@ -27,6 +28,7 @@ const FEATURE_FLAG_KEYS: Record<FeatureName, keyof AppConfig> = {
   foodDiary: 'foodDiaryEnabled',
   wishlist: 'wishlistEnabled',
   alternatives: 'alternativesEnabled',
+  couponExchange: 'couponExchangeEnabled',
 };
 
 interface FeatureGateProps {

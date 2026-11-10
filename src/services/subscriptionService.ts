@@ -86,7 +86,7 @@ export const PLANS: Record<PlanId, Plan> = {
       { label: 'General product score', included: true },
       { label: 'Price comparison', included: true },
       { label: '3 free scans a day', included: true },
-      { label: 'Personal Score, lowest price & wishlist', included: true, note: 'on your 3 free scans' },
+      { label: 'Personal Score, lowest price & Price Tracker', included: true, note: 'on your 3 free scans' },
       { label: 'Unlimited scans', included: false },
     ],
   },
@@ -118,7 +118,7 @@ export const PLANS: Record<PlanId, Plan> = {
       { label: 'Personal Score for every product', included: true },
       { label: 'See the lowest price across supermarkets', included: true },
       { label: 'Unlimited scans', included: true },
-      { label: 'Add products to your wishlist', included: true },
+      { label: 'Add products to your Price Tracker', included: true },
       { label: 'AI health analysis', included: true },
       { label: 'Document upload (AI)', included: true },
       { label: 'Apple Health / Google Fit sync', included: true },
@@ -231,6 +231,9 @@ async function purchaseAppleIAP(plan: Plan, billingPeriod: BillingPeriod): Promi
       // approved, or Paid Applications Agreement not active) — surface that
       // clearly instead of letting requestPurchase fail with a native
       // "Invalid product ID" error that gives the user no useful signal.
+      await errorReporter.captureError(new Error(`App Store returned no product for ${pricing.appleProductId}`), {
+        type: 'api', severity: 'high', tags: { plan: 'member', billingPeriod },
+      });
       return { success: false, error: 'This plan is not currently available. Please try again shortly.' };
     }
     const purchase = await requestPurchase({ sku: pricing.appleProductId });

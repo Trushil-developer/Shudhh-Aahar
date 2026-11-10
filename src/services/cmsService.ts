@@ -289,8 +289,8 @@ export const DEFAULT_PAGES: Record<PageSlug, CMSPage> = {
     sections: [
       { id: '1', type: 'feature-list', heading: 'What\'s included in each plan',
         items: [
-          { icon: '🆓', title: 'Free', body: '3 free scans a day\nEvery feature unlocked on those scans — AI health analysis, price comparison, Personal Score, lowest price & wishlist\nMedical document upload' },
-          { icon: '⭐', title: 'Member — £3.99/month or £50/year', body: 'Unlimited scans\nAI health analysis\nPrice comparison, Personal Score & lowest-price reveal\nWishlist\nFood diary & macro tracking\nMedical document upload (AI reads your records)\nApple Health / Google Fit sync\n7-day free trial' },
+          { icon: '🆓', title: 'Free', body: '3 free scans a day\nEvery feature unlocked on those scans — AI health analysis, price comparison, Personal Score, lowest price & Price Tracker\nMedical document upload' },
+          { icon: '⭐', title: 'Member — £3.99/month or £50/year', body: 'Unlimited scans\nAI health analysis\nPrice comparison, Personal Score & lowest-price reveal\nPrice Tracker\nFood diary & macro tracking\nMedical document upload (AI reads your records)\nApple Health / Google Fit sync\n7-day free trial' },
         ],
       },
       { id: '2', type: 'callout', style: 'success', heading: 'Cancel anytime, no questions asked', body: 'The Member plan can be cancelled at any time from Profile → Manage Subscription. You\'ll retain access until the end of your current billing period. Annual plans may be refunded on a pro-rata basis within 14 days of purchase.' },

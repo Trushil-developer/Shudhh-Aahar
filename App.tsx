@@ -36,6 +36,7 @@ import ProductScreen from './src/screens/ProductScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
+import CouponExchangeScreen from './src/screens/CouponExchangeScreen';
 
 // Bootstrap production monitoring
 setupGlobalErrorHandler();
@@ -120,6 +121,11 @@ function HomeStack() {
 // ── Bottom tab navigator ────────────────────────────────────
 function MainTabs() {
   const { t } = useTranslation();
+  // Coupon Exchange only gets its own tab while the admin kill switch is on
+  // — see AppConfig.couponExchangeEnabled's comment in schema.graphql. This
+  // is the same on/off gate that used to just hide a row inside Profile;
+  // conditionally including/excluding a Tab.Screen works the same way.
+  const { config: appConfig } = useAppConfig();
   return (
     <Tab.Navigator
       screenOptions={{
@@ -132,6 +138,9 @@ function MainTabs() {
     >
       <Tab.Screen name="HomeTab"    component={HomeStack}          options={{ tabBarLabel: t('app.tabHome'),    tabBarIcon: ({ color, focused }) => <TabIcon emoji="🏠" color={color} focused={focused} /> }} />
       <Tab.Screen name="ListTab"    component={ShoppingListScreen} options={{ tabBarLabel: t('app.tabWishlist'), tabBarIcon: ({ color, focused }) => <TabIcon emoji="❤️" color={color} focused={focused} /> }} />
+      {appConfig.couponExchangeEnabled && (
+        <Tab.Screen name="CouponsTab" component={CouponExchangeScreen} options={{ tabBarLabel: t('app.tabCoupons'), tabBarIcon: ({ color, focused }) => <TabIcon emoji="🎟️" color={color} focused={focused} /> }} />
+      )}
       <Tab.Screen name="ProfileTab" component={ProfileScreen}      options={{ tabBarLabel: t('app.tabProfile'), tabBarIcon: ({ color, focused }) => <TabIcon emoji="👤" color={color} focused={focused} /> }} />
     </Tab.Navigator>
   );

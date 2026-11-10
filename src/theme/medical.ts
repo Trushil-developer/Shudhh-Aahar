@@ -120,6 +120,30 @@ export const StatusConfig = {
   },
 };
 
+// Coupon Exchange — same {color, bg, border, icon, labelKey} shape as
+// StatusConfig above, just keyed by the Coupon.status/validationResult
+// strings coming back from the API instead of a health-risk level.
+export const CouponStatusConfig: Record<string, { color: string; bg: string; border: string; icon: string; labelKey: string }> = {
+  AVAILABLE: { color: Colors.info, bg: Colors.infoBg, border: Colors.infoBorder, icon: '🎟️', labelKey: 'coupon.statusAvailable' },
+  CLAIMED: { color: Colors.caution, bg: Colors.cautionBg, border: Colors.cautionBorder, icon: '⏳', labelKey: 'coupon.statusClaimed' },
+  VALIDATED: { color: Colors.safe, bg: Colors.safeBg, border: Colors.safeBorder, icon: '✓', labelKey: 'coupon.statusValidated' },
+  SCAM_REPORTED: { color: Colors.danger, bg: Colors.dangerBg, border: Colors.dangerBorder, icon: '⚠', labelKey: 'coupon.statusScamReported' },
+  EXPIRED: { color: Colors.textMuted, bg: Colors.surfaceAlt, border: Colors.border, icon: '⏱', labelKey: 'coupon.statusExpired' },
+  REMOVED: { color: Colors.textMuted, bg: Colors.surfaceAlt, border: Colors.border, icon: '🗑', labelKey: 'coupon.statusRemoved' },
+};
+
+// A small personality touch on retailer chips/cards — falls back to a plain
+// shopping-bag icon for anything not in the list (including 'Other').
+export const RETAILER_ICONS: Record<string, string> = {
+  Tesco: '🔵',
+  "Sainsbury's": '🟠',
+  Asda: '🟢',
+  Morrisons: '🟡',
+  Aldi: '🔷',
+  Lidl: '🔶',
+};
+export const DEFAULT_RETAILER_ICON = '🛍️';
+
 export const NutriscoreColors: Record<string, string> = {
   a: Colors.nutriA,
   b: Colors.nutriB,

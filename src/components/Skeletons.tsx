@@ -110,6 +110,29 @@ export function HistorySkeleton() {
   );
 }
 
+// Coupon Exchange feed/my-coupons skeleton — a few "ticket" placeholders
+export function CouponListSkeleton() {
+  const { rw, rh, rr } = useResponsive();
+
+  return (
+    <View style={{ padding: rw(16) }}>
+      {[1, 2, 3].map((i) => (
+        <View key={i} style={{
+          backgroundColor: Colors.surface, borderRadius: rr(14), borderWidth: 1, borderColor: Colors.border,
+          padding: rw(16), marginBottom: rh(12),
+        }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: rh(10) }}>
+            <SkeletonBox w={rw(90)} h={rh(16)} radius={rr(6)} />
+            <SkeletonBox w={rw(60)} h={rh(16)} radius={rr(6)} />
+          </View>
+          <SkeletonBox w={rw(180)} h={rh(12)} radius={rr(6)} style={{ marginBottom: rh(16) }} />
+          <SkeletonBox w="100%" h={rh(44)} radius={rr(10)} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
 // AI analysis skeleton
 export function AISkeleton() {
   const { rw, rh, rr } = useResponsive();

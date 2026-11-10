@@ -129,9 +129,13 @@ export async function signInWithApple(): Promise<UserProfile> {
     throw new AppError('appleSignInFailed', 'Apple sign-in did not return an identity token');
   }
 
-  const credentialState = await appleAuth.getCredentialStateForUser(request.user);
-  if (credentialState !== appleAuth.State.AUTHORIZED) {
-    throw new AppError('appleSignInFailed', 'Apple did not authorize this sign-in');
+  // No getCredentialStateForUser() check here: apple-auth.js already verifies
+  // the identityToken's signature, issuer, audience and expiry against
+  // Apple's JWKS, so a second native round trip adds a failure point
+  // without adding any trust.
+
+  if (!Config.appleAuthUrl) {
+    throw new AppError('appleSignInFailed', 'Apple sign-in is not configured for this build');
   }
 
   // Only present on the very first authorization ever — apple-auth.js
@@ -148,8 +152,8 @@ export async function signInWithApple(): Promise<UserProfile> {
       name: name || undefined,
     }),
   });
-  const data = await res.json();
-  if (!data.token) {
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.token) {
     throw new AppError('appleSignInFailed', data.error || 'Apple sign-in failed');
   }
 

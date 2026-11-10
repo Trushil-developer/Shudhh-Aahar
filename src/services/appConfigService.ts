@@ -37,6 +37,13 @@ export interface AppConfig {
   // they already bought on the now-disabled period.
   monthlyPlanEnabled: boolean;
   yearlyPlanEnabled: boolean;
+  // Whole-feature kill switch for Coupon Exchange — not launched yet, so this
+  // defaults false (fail-closed), same reasoning as photoScanEnabled/
+  // alternativesEnabled above. See FeatureGate's 'couponExchange' mapping.
+  couponExchangeEnabled: boolean;
+  // Brands a voucher request can be made for (100 Coupon Exchange points =
+  // £5) — admin-editable, see VoucherRequest's comment in schema.graphql.
+  voucherBrands: string[];
 }
 
 // Kept in sync with dailyAccessService.ts's DAILY_SCAN_LIMIT (=3) — see the
@@ -66,6 +73,8 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   paymentsEnabled: true,
   monthlyPlanEnabled: true,
   yearlyPlanEnabled: true,
+  couponExchangeEnabled: false,
+  voucherBrands: ['Amazon', 'Tesco', 'Love2Shop', 'Argos'],
 };
 
 const FETCH_TIMEOUT_MS = 5000;

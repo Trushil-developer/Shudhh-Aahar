@@ -296,6 +296,8 @@ tr:hover td{background:rgba(20,28,36,0.025)}
     <button class="nav-item" onclick="showPage('health',this)"><span class="nav-icon">🩺</span>Health Overview</button>
     <button class="nav-item" onclick="showPage('revenue',this)"><span class="nav-icon">💰</span>Revenue</button>
     <button class="nav-item" onclick="showPage('membership',this)"><span class="nav-icon">💳</span>Membership</button>
+    <button class="nav-item" onclick="showPage('coupons',this)"><span class="nav-icon">🎟️</span>Coupon Exchange</button>
+    <button class="nav-item" onclick="showPage('vouchers',this)"><span class="nav-icon">🎁</span>Voucher Requests<span class="nav-badge" id="voucher-badge" style="display:none">0</span></button>
     <button class="nav-item" onclick="showPage('costs',this)"><span class="nav-icon">⚡</span>API Costs</button>
 
     <div class="nav-section-label">System</div>
@@ -375,6 +377,65 @@ tr:hover td{background:rgba(20,28,36,0.025)}
         <div class="table-wrap"><table>
           <thead><tr><th>User</th><th>Plan</th><th>Scans</th><th>Joined</th><th>Last Active</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="users-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══ COUPON EXCHANGE ═════════════════ -->
+    <div class="page" id="page-coupons">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Total Listings</div><div class="stat-value" id="co-total">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Available</div><div class="stat-value" id="co-available">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Awaiting Validation</div><div class="stat-value" id="co-claimed">—</div></div>
+        <div class="stat-card red"><div class="stat-label">Scam Reports</div><div class="stat-value" id="co-scam">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">All Coupons <span class="card-badge" id="coupon-count-label">— total</span></div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px">
+          Uploader/claimant are shown by email where the account is already loaded from the Users page — open Users first if any show as a raw ID.
+        </p>
+        <div class="filter-bar">
+          <select class="filter-select" onchange="filterCouponsByStatus(this.value)">
+            <option value="all">All Status</option>
+            <option value="AVAILABLE">Available</option>
+            <option value="CLAIMED">Claimed</option>
+            <option value="VALIDATED">Validated</option>
+            <option value="SCAM_REPORTED">Scam Reported</option>
+            <option value="EXPIRED">Expired</option>
+            <option value="REMOVED">Removed</option>
+          </select>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Retailer</th><th>Description</th><th>Uploader</th><th>Claimant</th><th>Status</th><th>Valid</th><th>Actions</th></tr></thead>
+          <tbody id="coupons-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══ VOUCHER REQUESTS ════════════════ -->
+    <div class="page" id="page-vouchers">
+      <div class="stats-grid">
+        <div class="stat-card blue"><div class="stat-label">Total Requests</div><div class="stat-value" id="vo-total">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">Pending</div><div class="stat-value" id="vo-pending">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Fulfilled</div><div class="stat-value" id="vo-fulfilled">—</div></div>
+        <div class="stat-card red"><div class="stat-label">Rejected</div><div class="stat-value" id="vo-rejected">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">All Voucher Requests <span class="card-badge" id="voucher-count-label">— total</span></div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px">
+          Fulfilling a request does not send anything automatically — buy/generate the real voucher first, then paste its code here so the user sees it in the app.
+        </p>
+        <div class="filter-bar">
+          <select class="filter-select" onchange="filterVoucherRequestsByStatus(this.value)">
+            <option value="all">All Status</option>
+            <option value="PENDING">Pending</option>
+            <option value="FULFILLED">Fulfilled</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>User</th><th>Brand</th><th>Points</th><th>Status</th><th>Requested</th><th>Code / Note</th><th>Actions</th></tr></thead>
+          <tbody id="vouchers-tbody"></tbody>
         </table></div>
       </div>
     </div>
@@ -735,6 +796,23 @@ tr:hover td{background:rgba(20,28,36,0.025)}
           </div>
         </div>
 
+        <div style="border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:20px">
+          <div style="font-size:13px;font-weight:800;margin-bottom:6px">🎟️ Coupon Exchange</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">
+            Whole-feature switch for peer-to-peer coupon sharing. Off by default since this hasn't launched yet — turning
+            it on immediately shows the entry point in the app; turning it off immediately hides it again (existing
+            claims/listings are left as-is in the database, just not reachable from the app while this is off).
+          </p>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <label class="switch"><input type="checkbox" id="ac-couponExchangeEnabled"/><span class="switch-slider"></span></label>
+            <span style="font-size:13px;font-weight:700">Coupon Exchange enabled</span>
+          </div>
+          <label style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;color:var(--muted);display:block;margin-bottom:6px">
+            VOUCHER BRANDS (100 points = £5 voucher — comma-separated)
+          </label>
+          <input class="search-input" id="ac-voucherBrands" style="width:100%" placeholder="e.g. Amazon, Tesco, Love2Shop, Argos"/>
+        </div>
+
         <button class="btn btn-primary" onclick="saveAppConfig()" id="appconfig-save-btn">Save Changes</button>
       </div>
     </div>
@@ -778,6 +856,16 @@ tr:hover td{background:rgba(20,28,36,0.025)}
       <div style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6">Switching on manually grants membership for the picked period (no charge is taken). Switching off cancels immediately.</div>
       <button class="btn btn-danger" id="m-refund-btn" style="display:none;margin-top:10px" onclick="refundMembership()">💸 Refund (revoke &amp; log)</button>
       <div id="m-refund-note" style="font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6;display:none">Revokes access immediately and logs the record here. This does <strong style="color:var(--text)">not</strong> move any money — you must still process the real refund in App Store Connect / Google Play Console.</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-section-title">Coupon Exchange</div>
+      <table style="width:100%;font-size:12px;margin-bottom:12px">
+        <tr><td style="color:var(--muted);padding:3px 0;width:100px">Points</td><td id="m-coupon-points" class="td-mono"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Scam Strikes</td><td id="m-coupon-strikes" class="td-mono"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Flake Count</td><td id="m-coupon-flakes" class="td-mono"></td></tr>
+        <tr><td style="color:var(--muted);padding:3px 0">Status</td><td id="m-coupon-banned"></td></tr>
+      </table>
+      <button class="btn btn-ghost" onclick="resetCouponPenalties()">↺ Reset Coupon Penalties</button>
     </div>
     <div class="modal-section">
       <div class="modal-section-title">Health Profile Tags (anonymised)</div>
@@ -969,6 +1057,8 @@ const PAGE_META = {
   health:   { title:'Health Overview', sub:'Aggregated anonymised health statistics' },
   revenue:  { title:'Revenue & Subscriptions', sub:'MRR, ARR, conversion and projections' },
   membership: { title:'Membership', sub:'Every purchase, renewal, grant, cancel and refund' },
+  coupons:  { title:'Coupon Exchange', sub:'Peer-to-peer coupon listings, claims and reputation' },
+  vouchers: { title:'Voucher Requests', sub:'Points-to-voucher redemption requests awaiting fulfillment' },
   costs:    { title:'API Costs', sub:'Claude AI and AWS spend tracking' },
   cms:    { title:'CMS Pages', sub:'Manage all content shown in the app' },
   tc:     { title:'Terms & Conditions', sub:'Manage T&C versions — users must accept before using the app' },
@@ -987,6 +1077,8 @@ const PAGE_LOADERS = {
   health: renderHealthOverview,
   revenue: renderRevenuePage,
   membership: loadAndRenderMembershipEvents,
+  coupons: loadAndRenderCoupons,
+  vouchers: loadAndRenderVoucherRequests,
   cms: loadAndRenderCMS,
   tc: loadAndRenderTC,
   audit: loadAndRenderAuditLog,
@@ -1347,6 +1439,7 @@ const LIST_USERS_QUERY = `
   query ListUsers($limit: Int, $nextToken: String) {
     listUsers(limit: $limit, nextToken: $nextToken) {
       items { id email name planId subscriptionStatus billingPeriod subscriptionPeriodEnd banned profileComplete createdAt updatedAt
+               couponPoints couponStrikes couponBanned couponFlakeCount
                healthProfile { allergies conditions dietType age healthGoals } }
       nextToken
     }
@@ -1428,7 +1521,19 @@ function mapUser(u) {
     subscriptionStatus: u.subscriptionStatus || null,
     billingPeriod: u.billingPeriod || null,
     subscriptionPeriodEnd: u.subscriptionPeriodEnd || null,
+    couponPoints: u.couponPoints || 0,
+    couponStrikes: u.couponStrikes || 0,
+    couponBanned: !!u.couponBanned,
+    couponFlakeCount: u.couponFlakeCount || 0,
   };
+}
+
+// Best-effort ID → email lookup for the Coupons page — USERS is populated
+// eagerly at login (see the login flow below), so this is normally already
+// warm by the time the Coupons page is opened.
+function emailForUserId(id) {
+  const u = USERS.find(x => x.id === id);
+  return u ? u.email : id;
 }
 
 // Fully paginates via nextToken — the earlier version silently truncated at
@@ -1523,6 +1628,242 @@ function filterUsers(q) { currentUsers = USERS.filter(u => u.name.toLowerCase().
 function filterByStatus(s) { currentUsers = s==='all' ? [...USERS] : USERS.filter(u=>u.status===s); renderUsers(currentUsers); }
 function filterByPlan(p) { currentUsers = p==='all' ? [...USERS] : USERS.filter(u=>u.plan===p); renderUsers(currentUsers); }
 
+// ═══════════════ COUPON EXCHANGE ══════════════════════════════════
+const ADMIN_LIST_COUPONS_QUERY = `
+  query AdminListCoupons($limit: Int, $nextToken: String) {
+    adminListCoupons(limit: $limit, nextToken: $nextToken) {
+      items { id uploaderId retailer title codeText validFrom expiryAt status claimedBy claimedAt claimExpiryAt validationResult validationReasonCode createdAt }
+      nextToken
+    }
+  }`;
+
+const GET_COUPON_IMAGE_URL_MUTATION = `
+  mutation GetCouponImageUrl($couponId: ID!) {
+    getCouponImageUrl(couponId: $couponId)
+  }`;
+
+const ADMIN_REMOVE_COUPON_MUTATION = `
+  mutation AdminRemoveCoupon($couponId: ID!) {
+    adminRemoveCoupon(couponId: $couponId)
+  }`;
+
+const ADMIN_RESET_COUPON_PENALTIES_MUTATION = `
+  mutation AdminResetCouponPenalties($userId: ID!) {
+    adminResetCouponPenalties(userId: $userId) { id couponPoints couponStrikes couponBanned couponFlakeCount }
+  }`;
+
+let COUPONS = [];
+let currentCoupons = [];
+
+async function loadAndRenderCoupons() {
+  let items = [];
+  let nextToken = null;
+  do {
+    const data = await adminGraphqlRequest(ADMIN_LIST_COUPONS_QUERY, { limit: 200, nextToken });
+    items = items.concat(data.adminListCoupons.items || []);
+    nextToken = data.adminListCoupons.nextToken;
+  } while (nextToken);
+  COUPONS = items;
+  currentCoupons = [...COUPONS];
+  renderCoupons(currentCoupons);
+  renderCouponStats(COUPONS);
+  return COUPONS;
+}
+
+function renderCouponStats(coupons) {
+  document.getElementById('co-total').textContent = coupons.length;
+  document.getElementById('co-available').textContent = coupons.filter(c => c.status === 'AVAILABLE').length;
+  document.getElementById('co-claimed').textContent = coupons.filter(c => c.status === 'CLAIMED').length;
+  document.getElementById('co-scam').textContent = coupons.filter(c => c.status === 'SCAM_REPORTED').length;
+}
+
+function couponStatusBadge(status) {
+  const m = { AVAILABLE:'badge-blue', CLAIMED:'badge-orange', VALIDATED:'badge-green', SCAM_REPORTED:'badge-red', EXPIRED:'badge-muted', REMOVED:'badge-muted' };
+  return `<span class="badge ${m[status]||'badge-muted'}">${status}</span>`;
+}
+
+function renderCoupons(coupons) {
+  document.getElementById('coupon-count-label').textContent = `${coupons.length} total`;
+  document.getElementById('coupons-tbody').innerHTML = coupons.map(c => `
+    <tr>
+      <td>${c.retailer}</td>
+      <td>${c.title || '<span style="color:var(--muted)">—</span>'}</td>
+      <td style="font-size:11px">${emailForUserId(c.uploaderId)}</td>
+      <td style="font-size:11px">${c.claimedBy ? emailForUserId(c.claimedBy) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${couponStatusBadge(c.status)}</td>
+      <td class="td-mono" style="font-size:10px">${c.validFrom ? new Date(c.validFrom).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) + ' – ' : ''}${c.expiryAt ? new Date(c.expiryAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-ghost" onclick="viewCouponImage('${c.id}')">🖼 Image</button>
+        <button class="btn btn-danger" ${c.status==='REMOVED'?'disabled':''} onclick="removeCoupon('${c.id}')">Remove</button>
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterCouponsByStatus(status) {
+  currentCoupons = status === 'all' ? [...COUPONS] : COUPONS.filter(c => c.status === status);
+  renderCoupons(currentCoupons);
+}
+
+async function viewCouponImage(couponId) {
+  try {
+    const data = await adminGraphqlRequest(GET_COUPON_IMAGE_URL_MUTATION, { couponId });
+    const url = data.getCouponImageUrl;
+    if (url) window.open(url, '_blank');
+    else alert('No image on file for this coupon.');
+  } catch (err) {
+    console.error('Failed to load coupon image:', err);
+    alert('Failed to load coupon image: ' + err.message);
+  }
+}
+
+async function removeCoupon(couponId) {
+  if (!confirm("Remove this coupon listing? It will no longer appear in anyone's feed or claims.")) return;
+  try {
+    await adminGraphqlRequest(ADMIN_REMOVE_COUPON_MUTATION, { couponId });
+    logAudit('coupon_removed', `Coupon ${couponId} removed by admin`, 'orange', '🎟️');
+    await loadAndRenderCoupons();
+  } catch (err) {
+    console.error('Failed to remove coupon:', err);
+    alert('Failed to remove coupon: ' + err.message);
+  }
+}
+
+// Called from the user modal's "Reset Coupon Penalties" button.
+async function resetCouponPenalties() {
+  if (!modalUserId) return;
+  if (!confirm("Clear this user's coupon strikes, ban and flake count?")) return;
+  try {
+    const data = await adminGraphqlRequest(ADMIN_RESET_COUPON_PENALTIES_MUTATION, { userId: modalUserId });
+    const u = USERS.find(x => x.id === modalUserId);
+    if (u) {
+      u.couponPoints = data.adminResetCouponPenalties.couponPoints || 0;
+      u.couponStrikes = data.adminResetCouponPenalties.couponStrikes || 0;
+      u.couponBanned = !!data.adminResetCouponPenalties.couponBanned;
+      u.couponFlakeCount = data.adminResetCouponPenalties.couponFlakeCount || 0;
+      renderCouponModalSection(u);
+    }
+    logAudit('coupon_penalties_reset', `Coupon penalties reset for ${u ? u.email : modalUserId}`, 'blue', '🎟️');
+  } catch (err) {
+    console.error('Failed to reset coupon penalties:', err);
+    alert('Failed to reset coupon penalties: ' + err.message);
+  }
+}
+
+function renderCouponModalSection(u) {
+  document.getElementById('m-coupon-points').textContent = u.couponPoints;
+  document.getElementById('m-coupon-strikes').textContent = u.couponStrikes;
+  document.getElementById('m-coupon-flakes').textContent = u.couponFlakeCount;
+  document.getElementById('m-coupon-banned').innerHTML = u.couponBanned
+    ? '<span class="badge badge-red">Banned</span>'
+    : '<span class="badge badge-green">Not banned</span>';
+}
+
+// ═══════════════ VOUCHER REQUESTS ══════════════════════════════════
+const ADMIN_LIST_VOUCHER_REQUESTS_QUERY = `
+  query AdminListVoucherRequests($limit: Int, $nextToken: String) {
+    adminListVoucherRequests(limit: $limit, nextToken: $nextToken) {
+      items { id userId brand pointsSpent status voucherCode adminNote createdAt updatedAt fulfilledAt }
+      nextToken
+    }
+  }`;
+
+const ADMIN_FULFILL_VOUCHER_REQUEST_MUTATION = `
+  mutation AdminFulfillVoucherRequest($requestId: ID!, $voucherCode: String!) {
+    adminFulfillVoucherRequest(requestId: $requestId, voucherCode: $voucherCode) { id status voucherCode }
+  }`;
+
+const ADMIN_REJECT_VOUCHER_REQUEST_MUTATION = `
+  mutation AdminRejectVoucherRequest($requestId: ID!, $note: String) {
+    adminRejectVoucherRequest(requestId: $requestId, note: $note) { id status adminNote }
+  }`;
+
+let VOUCHER_REQUESTS = [];
+let currentVoucherRequests = [];
+
+async function loadAndRenderVoucherRequests() {
+  let items = [];
+  let nextToken = null;
+  do {
+    const data = await adminGraphqlRequest(ADMIN_LIST_VOUCHER_REQUESTS_QUERY, { limit: 200, nextToken });
+    items = items.concat(data.adminListVoucherRequests.items || []);
+    nextToken = data.adminListVoucherRequests.nextToken;
+  } while (nextToken);
+  VOUCHER_REQUESTS = items;
+  currentVoucherRequests = [...VOUCHER_REQUESTS];
+  renderVoucherRequests(currentVoucherRequests);
+  renderVoucherRequestStats(VOUCHER_REQUESTS);
+  return VOUCHER_REQUESTS;
+}
+
+function renderVoucherRequestStats(requests) {
+  document.getElementById('vo-total').textContent = requests.length;
+  const pending = requests.filter(r => r.status === 'PENDING').length;
+  document.getElementById('vo-pending').textContent = pending;
+  document.getElementById('vo-fulfilled').textContent = requests.filter(r => r.status === 'FULFILLED').length;
+  document.getElementById('vo-rejected').textContent = requests.filter(r => r.status === 'REJECTED').length;
+
+  const badge = document.getElementById('voucher-badge');
+  badge.textContent = pending;
+  badge.style.display = pending > 0 ? '' : 'none';
+}
+
+function voucherStatusBadge(status) {
+  const m = { PENDING:'badge-orange', FULFILLED:'badge-green', REJECTED:'badge-red' };
+  return `<span class="badge ${m[status]||'badge-muted'}">${status}</span>`;
+}
+
+function renderVoucherRequests(requests) {
+  document.getElementById('voucher-count-label').textContent = `${requests.length} total`;
+  document.getElementById('vouchers-tbody').innerHTML = requests.map(r => `
+    <tr>
+      <td style="font-size:11px">${emailForUserId(r.userId)}</td>
+      <td>${r.brand}</td>
+      <td>${r.pointsSpent}</td>
+      <td>${voucherStatusBadge(r.status)}</td>
+      <td class="td-mono" style="font-size:10px">${r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+      <td style="font-size:11px">${r.voucherCode || r.adminNote || '<span style="color:var(--muted)">—</span>'}</td>
+      <td><div style="display:flex;gap:5px">
+        ${r.status === 'PENDING' ? `
+          <button class="btn btn-green" onclick="fulfillVoucherRequest('${r.id}')">✓ Fulfill</button>
+          <button class="btn btn-danger" onclick="rejectVoucherRequest('${r.id}')">✕ Reject</button>
+        ` : '<span style="color:var(--muted);font-size:11px">—</span>'}
+      </div></td>
+    </tr>
+  `).join('');
+}
+
+function filterVoucherRequestsByStatus(status) {
+  currentVoucherRequests = status === 'all' ? [...VOUCHER_REQUESTS] : VOUCHER_REQUESTS.filter(r => r.status === status);
+  renderVoucherRequests(currentVoucherRequests);
+}
+
+async function fulfillVoucherRequest(requestId) {
+  const code = prompt('Paste the real voucher code/link you just bought or generated for this user:');
+  if (!code || !code.trim()) return;
+  try {
+    await adminGraphqlRequest(ADMIN_FULFILL_VOUCHER_REQUEST_MUTATION, { requestId, voucherCode: code.trim() });
+    logAudit('voucher_fulfilled', `Voucher request ${requestId} fulfilled`, 'green', '🎁');
+    await loadAndRenderVoucherRequests();
+  } catch (err) {
+    console.error('Failed to fulfill voucher request:', err);
+    alert('Failed to fulfill voucher request: ' + err.message);
+  }
+}
+
+async function rejectVoucherRequest(requestId) {
+  const note = prompt('Optional reason (the user’s points will be refunded automatically):') || '';
+  if (!confirm('Reject this request and refund the points?')) return;
+  try {
+    await adminGraphqlRequest(ADMIN_REJECT_VOUCHER_REQUEST_MUTATION, { requestId, note });
+    logAudit('voucher_rejected', `Voucher request ${requestId} rejected (points refunded)`, 'orange', '🎁');
+    await loadAndRenderVoucherRequests();
+  } catch (err) {
+    console.error('Failed to reject voucher request:', err);
+    alert('Failed to reject voucher request: ' + err.message);
+  }
+}
+
 let modalUserId = null;
 async function openModal(id) {
   const u = USERS.find(x=>x.id===id); if(!u)return;
@@ -1538,6 +1879,7 @@ async function openModal(id) {
     ? u.health.map(h=>`<span class="modal-chip">${h}</span>`).join('')
     : '<span style="color:var(--muted);font-size:12px">No health profile</span>';
   renderMembershipModalSection(u);
+  renderCouponModalSection(u);
   document.getElementById('user-modal').classList.add('open');
 
   try {
@@ -2095,7 +2437,7 @@ const APP_CONFIG_PUBLIC_URL = 'https://fszsrlwn0l.execute-api.eu-west-2.amazonaw
 const ADMIN_UPDATE_APP_CONFIG_MUTATION = `
   mutation AdminUpdateAppConfig($input: AdminUpdateAppConfigInput!) {
     adminUpdateAppConfig(input: $input) {
-      minVersionIOS minVersionAndroid dailyScanLimit priceComparisonEnabled aiAnalysisEnabled photoScanEnabled documentUploadEnabled foodDiaryEnabled wishlistEnabled alternativesEnabled paymentsEnabled monthlyPlanEnabled yearlyPlanEnabled
+      minVersionIOS minVersionAndroid dailyScanLimit priceComparisonEnabled aiAnalysisEnabled photoScanEnabled documentUploadEnabled foodDiaryEnabled wishlistEnabled alternativesEnabled paymentsEnabled monthlyPlanEnabled yearlyPlanEnabled couponExchangeEnabled voucherBrands
     }
   }`;
 
@@ -2120,6 +2462,10 @@ function populateAppConfigForm(cfg) {
   // Same fail-open-to-true reasoning as paymentsEnabled above.
   document.getElementById('ac-monthlyPlanEnabled').checked = cfg.monthlyPlanEnabled !== false;
   document.getElementById('ac-yearlyPlanEnabled').checked = cfg.yearlyPlanEnabled !== false;
+  // Fails closed (unchecked) when unset — matches the backend DEFAULTS'
+  // couponExchangeEnabled: false (unlaunched feature).
+  document.getElementById('ac-couponExchangeEnabled').checked = !!cfg.couponExchangeEnabled;
+  document.getElementById('ac-voucherBrands').value = (cfg.voucherBrands || []).join(', ');
 }
 
 // Deliberately plain fetch() against the public endpoint, not adminGraphqlRequest
@@ -2152,6 +2498,8 @@ async function saveAppConfig() {
     paymentsEnabled: document.getElementById('ac-paymentsEnabled').checked,
     monthlyPlanEnabled: document.getElementById('ac-monthlyPlanEnabled').checked,
     yearlyPlanEnabled: document.getElementById('ac-yearlyPlanEnabled').checked,
+    couponExchangeEnabled: document.getElementById('ac-couponExchangeEnabled').checked,
+    voucherBrands: document.getElementById('ac-voucherBrands').value.split(',').map(s => s.trim()).filter(Boolean),
   };
 
   if (!input.monthlyPlanEnabled && !input.yearlyPlanEnabled) {

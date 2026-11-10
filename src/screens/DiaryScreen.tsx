@@ -2,7 +2,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  StatusBar, Image, Alert,
+  StatusBar, Image, Alert, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +38,10 @@ export default function DiaryScreen() {
   const styles = useDiaryStyles(rw, rh, rf, rr);
   const [summary, setSummary] = useState<DaySummary | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null); // null = not connected
+  // True until the user taps Connect on the Apple Health / Health Connect
+  // card — App Store guideline 2.5.1 wants HealthKit use clearly identified
+  // in the UI, so the system permission sheet only ever follows that tap.
+  const [healthConnectPending, setHealthConnectPending] = useState(false);
   const [selectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const load = async () => {
@@ -49,17 +53,28 @@ export default function DiaryScreen() {
 
   const fetchHealth = async () => {
     try {
-      // Ask for permissions only once ever — subsequent visits skip the dialog
+      // Permissions are only requested from the Connect card (connectHealth
+      // below) — subsequent visits just read whatever access was granted
       const permAsked = await AsyncStorage.getItem('health_permission_asked');
       if (!permAsked) {
-        await requestHealthPermissions();
-        await AsyncStorage.setItem('health_permission_asked', 'true');
+        setHealthConnectPending(true);
+        return;
       }
       const hd = await readHealthData();
       setHealth(hd);
     } catch {
       // Health data is optional — never crash the diary over it
       setHealth(null);
+    }
+  };
+
+  const connectHealth = async () => {
+    try {
+      await requestHealthPermissions();
+    } finally {
+      await AsyncStorage.setItem('health_permission_asked', 'true');
+      setHealthConnectPending(false);
+      fetchHealth();
     }
   };
 
@@ -105,6 +120,10 @@ export default function DiaryScreen() {
         {/* ── Activity card from HealthKit ── */}
         {health && (
           <View style={styles.activityCard}>
+            <View style={styles.activitySourceRow}>
+              <Text style={styles.activitySourceIcon}>{Platform.OS === 'ios' ? '🍎' : '❤️'}</Text>
+              <Text style={styles.activitySource}>{Platform.OS === 'ios' ? t('diary.sourceAppleHealth') : t('diary.sourceHealthConnect')}</Text>
+            </View>
             <View style={styles.activityRow}>
               <ActivityStat styles={styles} icon="👟" value={health.stepsToday.toLocaleString()} label={t('diary.steps')} />
               <View style={styles.activityDivider} />
@@ -113,6 +132,22 @@ export default function DiaryScreen() {
               {health.sleepHours && <><View style={styles.activityDivider} /><ActivityStat styles={styles} icon="😴" value={`${health.sleepHours}h`} label={t('diary.sleep')} /></>}
             </View>
             <Text style={styles.activityLabel}>{getActivityLabel(health.stepsToday)} · {health.activeCaloriesToday > 0 ? t('diary.calAddedToGoal', { cals: Math.round(health.activeCaloriesToday * 0.5) }) : ''}</Text>
+            <Text style={styles.healthManageHint}>{Platform.OS === 'ios' ? t('diary.manageAppleHealth') : t('diary.manageHealthConnect')}</Text>
+          </View>
+        )}
+
+        {/* ── Connect card — identifies the HealthKit / Health Connect
+            integration before any system permission sheet appears ── */}
+        {!health && healthConnectPending && (
+          <View style={styles.activityCard}>
+            <View style={styles.activitySourceRow}>
+              <Text style={styles.activitySourceIcon}>{Platform.OS === 'ios' ? '🍎' : '❤️'}</Text>
+              <Text style={styles.activitySource}>{Platform.OS === 'ios' ? t('diary.connectAppleHealthTitle') : t('diary.connectHealthConnectTitle')}</Text>
+            </View>
+            <Text style={styles.healthConnectBody}>{t('diary.connectHealthBody', { source: Platform.OS === 'ios' ? 'Apple Health' : 'Health Connect' })}</Text>
+            <TouchableOpacity style={styles.healthConnectBtn} onPress={connectHealth} accessibilityRole="button">
+              <Text style={styles.healthConnectBtnText}>{t('diary.connectHealthButton')}</Text>
+            </TouchableOpacity>
           </View>
         )}
 
@@ -233,6 +268,9 @@ function useDiaryStyles(rw: (n: number) => number, rh: (n: number) => number, rf
   topBarDate: { fontSize: rf(12), color: Colors.textMuted, fontWeight: '500' },
 
   activityCard: { backgroundColor: Colors.navyLight, marginHorizontal: rw(16), marginTop: rh(16), marginBottom: rh(8), borderRadius: rr(12), padding: rw(14), borderWidth: 1, borderColor: Colors.border },
+  activitySourceRow: { flexDirection: 'row', alignItems: 'center', marginBottom: rh(8) },
+  activitySourceIcon: { fontSize: rf(12), marginRight: rw(4) },
+  activitySource: { fontSize: rf(11), color: Colors.navyMid, fontWeight: '600' },
   activityRow: { flexDirection: 'row', alignItems: 'center', marginBottom: rh(6) },
   activityStat: { flex: 1, alignItems: 'center' },
   activityStatIcon: { fontSize: rf(18), marginBottom: rh(2) },
@@ -240,6 +278,10 @@ function useDiaryStyles(rw: (n: number) => number, rh: (n: number) => number, rf
   activityStatLabel: { fontSize: rf(10), color: Colors.textMuted, letterSpacing: 0.5 },
   activityDivider: { width: 1, height: rh(40), backgroundColor: Colors.border },
   activityLabel: { fontSize: rf(11), color: Colors.navyMid, fontWeight: '500', textAlign: 'center' },
+  healthManageHint: { fontSize: rf(10), color: Colors.textMuted, textAlign: 'center', marginTop: rh(6) },
+  healthConnectBody: { fontSize: rf(12), color: Colors.textPrimary, lineHeight: rf(17), marginBottom: rh(10) },
+  healthConnectBtn: { backgroundColor: Colors.navyMid, borderRadius: rr(10), paddingVertical: rh(10), alignItems: 'center' },
+  healthConnectBtnText: { fontSize: rf(13), color: '#fff', fontWeight: '700' },
 
   calCard: { backgroundColor: Colors.surface, marginHorizontal: rw(16), marginVertical: rh(8), borderRadius: rr(12), padding: rw(16), borderWidth: 1, borderColor: Colors.border, ...Shadow.card },
   calHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: rh(8) },

@@ -645,7 +645,7 @@ describe('In-App Guide System', () => {
     { id: 'product_score', screen: 'Product', title: 'Your Personalised Score' },
     { id: 'product_price', screen: 'Product', title: 'Price Comparison' },
     { id: 'diary_log',     screen: 'Diary',   title: 'Log Your Meals' },
-    { id: 'list_add',      screen: 'List',    title: 'Wishlist' },
+    { id: 'list_add',      screen: 'List',    title: 'Price Tracker' },
     { id: 'profile_setup', screen: 'Profile', title: 'Complete Your Profile' },
   ];
 
