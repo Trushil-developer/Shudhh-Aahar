@@ -291,6 +291,10 @@ tr:hover td{background:rgba(20,28,36,0.025)}
     <button class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">📊</span>Dashboard</button>
     <button class="nav-item" onclick="showPage('users',this)"><span class="nav-icon">👥</span>Users<span class="nav-badge" id="new-badge" style="display:none">0</span></button>
 
+    <div class="nav-section-label">Shop</div>
+    <button class="nav-item" onclick="showPage('orders',this)"><span class="nav-icon">📦</span>Orders<span class="nav-badge" id="orders-badge" style="display:none">0</span></button>
+    <button class="nav-item" onclick="showPage('delivery',this)"><span class="nav-icon">🚚</span>Delivery Settings</button>
+
     <div class="nav-section-label">Analytics</div>
     <button class="nav-item" onclick="showPage('scans',this)"><span class="nav-icon">▦</span>Scan Activity</button>
     <button class="nav-item" onclick="showPage('health',this)"><span class="nav-icon">🩺</span>Health Overview</button>
@@ -378,6 +382,122 @@ tr:hover td{background:rgba(20,28,36,0.025)}
           <thead><tr><th>User</th><th>Plan</th><th>Scans</th><th>Joined</th><th>Last Active</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="users-tbody"></tbody>
         </table></div>
+      </div>
+    </div>
+
+    <!-- ══ ORDERS ════════════════════════════ -->
+    <div class="page" id="page-orders">
+      <div class="stats-grid">
+        <div class="stat-card orange"><div class="stat-label">New — Go Shop</div><div class="stat-value" id="ord-placed">—</div></div>
+        <div class="stat-card blue"><div class="stat-label">Shopped — Bill Entered</div><div class="stat-value" id="ord-priced">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Out For Delivery</div><div class="stat-value" id="ord-approved">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Delivered Today</div><div class="stat-value" id="ord-delivered-today">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Orders <span class="card-badge" id="orders-count-label">—</span></div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px">
+          1) <b>Go shopping</b> for each new order and enter the shop prices — that's the bill the customer pays on delivery →
+          2) mark <b>Out for delivery</b> → 3) <b>Delivered</b>. Customers don't approve anything: we promise delivery within
+          24 hours, every day between 5pm and 8pm. Customers pay on delivery (cash or card).
+        </p>
+        <div class="filter-bar">
+          <select class="filter-select" id="orders-status-filter" onchange="loadAndRenderOrders()">
+            <option value="">All Status</option>
+            <option value="PLACED">New — go shop</option>
+            <option value="PRICED">Bill entered</option>
+            <option value="APPROVED">Approved (older orders)</option>
+            <option value="OUT_FOR_DELIVERY">Out for delivery</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+          <button class="btn btn-ghost" onclick="loadAndRenderOrders()">↻ Reload</button>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Order</th><th>Placed</th><th>Customer</th><th>Postcode</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="orders-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══ PRODUCTS ══════════════════════════ -->
+    <div class="page" id="page-products">
+      <div class="card">
+        <div class="card-title">Add / Edit Product <span class="card-badge">Enter a barcode — name and photo fill in from Open Food Facts</span></div>
+        <div style="display:grid;grid-template-columns:110px 1fr;gap:18px;align-items:start">
+          <div id="pf-image-preview" style="width:110px;height:110px;border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--surface2,#f6f8fa);overflow:hidden;font-size:32px">📦</div>
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+            <div style="grid-column:span 2"><label class="form-label">BARCODE</label>
+              <div style="display:flex;gap:8px"><input class="form-input" id="pf-barcode" placeholder="e.g. 5000112548167" onkeydown="if(event.key==='Enter')lookupProductBarcode()"/><button class="btn btn-ghost" onclick="lookupProductBarcode()">🔎 Look up</button></div>
+            </div>
+            <div style="grid-column:span 2"><label class="form-label">NAME</label><input class="form-input" id="pf-name" placeholder="Product name"/></div>
+            <div><label class="form-label">BRAND</label><input class="form-input" id="pf-brand"/></div>
+            <div><label class="form-label">SIZE</label><input class="form-input" id="pf-quantity" placeholder="e.g. 1L, 500g"/></div>
+            <div><label class="form-label">CATEGORY</label><input class="form-input" id="pf-category" list="pf-category-list" placeholder="e.g. Dairy & Eggs"/>
+              <datalist id="pf-category-list"></datalist></div>
+            <div><label class="form-label">PRICE (£)</label><input class="form-input" id="pf-price" type="number" min="0" step="0.01" placeholder="1.25"/></div>
+            <div style="grid-column:span 2"><label class="form-label">PHOTO URL</label><input class="form-input" id="pf-image" placeholder="https://…" oninput="previewProductImage()"/></div>
+            <div><label class="form-label">SORT ORDER</label><input class="form-input" id="pf-sort" type="number" placeholder="optional"/></div>
+            <div style="display:flex;flex-direction:column;gap:8px;justify-content:flex-end">
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600"><input type="checkbox" id="pf-instock" checked/> In stock</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600"><input type="checkbox" id="pf-essential"/> Everyday essential</label>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:16px">
+          <button class="btn btn-primary" id="pf-save-btn" onclick="saveCatalogProduct()">💾 Save Product</button>
+          <button class="btn btn-ghost" onclick="resetProductForm()">Clear</button>
+          <span id="pf-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Starter Essentials <span class="card-badge">Everyday items most households buy — check prices, then add in one go</span></div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px">
+          Real UK products with photos from Open Food Facts. Prices are only suggestions — change any of them before adding.
+          Everything added here is marked <b>Everyday essential</b> and <b>In stock</b>, so it shows on the app and website home screen straight away.
+        </p>
+        <div class="table-wrap"><table>
+          <thead><tr><th><input type="checkbox" id="starter-all" checked onchange="toggleAllStarter(this.checked)"/></th><th></th><th>Product</th><th>Category</th><th>Price (£)</th><th></th></tr></thead>
+          <tbody id="starter-tbody"></tbody>
+        </table></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:14px">
+          <button class="btn btn-primary" id="starter-add-btn" onclick="addStarterEssentials()">➕ Add selected to shop</button>
+          <span id="starter-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Catalogue <span class="card-badge" id="products-count-label">—</span></div>
+        <div class="filter-bar">
+          <input class="form-input" style="max-width:280px" placeholder="Search name, brand, barcode…" oninput="renderCatalogTable(this.value)"/>
+          <button class="btn btn-ghost" onclick="loadAndRenderProducts()">↻ Reload</button>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th></th><th>Product</th><th>Barcode</th><th>Category</th><th>Price</th><th>Essential</th><th>Stock</th><th>Actions</th></tr></thead>
+          <tbody id="products-tbody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ══ DELIVERY SETTINGS ═════════════════ -->
+    <div class="page" id="page-delivery">
+      <div class="card">
+        <div class="card-title">Delivery Settings <span class="card-badge">Live — the app and checkout use these immediately</span></div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+          <label class="switch"><input type="checkbox" id="ds-shopOpen"/><span class="switch-slider"></span></label>
+          <span style="font-size:13px;font-weight:700">Shop open — taking orders</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:14px">
+          <div><label class="form-label">SHOP POSTCODE</label><input class="form-input" id="ds-storePostcode" placeholder="e.g. HA1 2AB" style="text-transform:uppercase"/></div>
+          <div><label class="form-label">DELIVERY RADIUS (MILES)</label><input class="form-input" id="ds-radius" type="number" min="0.5" max="50" step="0.5"/></div>
+          <div><label class="form-label">DELIVERY FEE (£)</label><input class="form-input" id="ds-fee" type="number" min="0" step="0.01"/></div>
+          <div><label class="form-label">FREE DELIVERY FROM (£)</label><input class="form-input" id="ds-free" type="number" min="0" step="0.01" placeholder="0 = never free"/></div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin:8px 0 0">Customers can order to any postcode within the radius of your shop postcode (checked with postcodes.io).
+          The website shows "We deliver within N miles of <span id="ds-area">your area</span>". Your exact shop postcode is never shown publicly.</p>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:18px">
+          <button class="btn btn-primary" onclick="saveShopSettings()">💾 Save Delivery Settings</button>
+          <span id="ds-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
       </div>
     </div>
 
@@ -823,6 +943,13 @@ tr:hover td{background:rgba(20,28,36,0.025)}
 </div><!-- app -->
 
 <!-- User modal -->
+<div class="modal-overlay" id="order-modal" onclick="if(event.target.id==='order-modal')this.classList.remove('open')">
+  <div class="modal" style="width:560px">
+    <button class="btn btn-ghost" style="position:absolute;top:16px;right:16px" onclick="document.getElementById('order-modal').classList.remove('open')">✕</button>
+    <div id="order-modal-body"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="user-modal" onclick="closeModal(event)">
   <div class="modal">
     <button class="modal-close" onclick="document.getElementById('user-modal').classList.remove('open')">✕</button>
@@ -953,6 +1080,7 @@ async function restoreSession() {
     console.error('Failed to load users on session restore:', err);
   }
   renderDashboard();
+  startOrdersPolling();
 }
 
 async function adminGraphqlRequest(query, variables) {
@@ -1023,6 +1151,7 @@ async function attemptLogin() {
     adminIdToken = data.token;
     sessionStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, data.token);
     await loadAndRenderUsers();
+    startOrdersPolling();
   } catch (e) {
     err.textContent = '❌ ' + e.message;
     err.style.display = 'block';
@@ -1052,6 +1181,9 @@ function logout() {
 // ═══════════════ NAVIGATION ═════════════════════════════════════
 const PAGE_META = {
   dashboard:{ title:'Dashboard', sub:'Platform overview · Real-time data' },
+  orders:   { title:'Orders', sub:'Customer orders — confirm, dispatch and mark delivered' },
+  products: { title:'Products', sub:'What the shop sells — prices, stock and everyday essentials' },
+  delivery: { title:'Delivery Settings', sub:'Postcodes, minimum order and delivery fees' },
   users:    { title:'User Management', sub:'View, search and manage all users' },
   scans:    { title:'Scan Activity', sub:'Real-time scan feed and analytics' },
   health:   { title:'Health Overview', sub:'Aggregated anonymised health statistics' },
@@ -1073,6 +1205,9 @@ const PAGE_META = {
 // in memory, which is cheap). Users has its own eager load at login instead.
 const PAGE_LOADERS = {
   dashboard: renderDashboard,
+  orders: loadAndRenderOrders,
+  products: loadAndRenderProducts,
+  delivery: loadShopSettings,
   scans: renderScanActivity,
   health: renderHealthOverview,
   revenue: renderRevenuePage,
@@ -2560,6 +2695,756 @@ function renderCostsChart() {
 // Runs immediately — this script tag is at the end of <body>, so every
 // element it touches (#login-overlay, #app) already exists in the DOM.
 restoreSession();
+
+// ═══════════════ SHOP: ORDERS / PRODUCTS / DELIVERY ═════════════
+// Catalogue + settings are read from the same public endpoint the app uses
+// (catalog-get.js); every write goes through AppSync → shop-actions.js.
+// Money is integer pence on the wire, shown/entered here in pounds.
+const SHOP_CONFIG = {
+  // `terraform output catalog_url`
+  catalogUrl: 'https://v36cyuprlc.execute-api.eu-west-2.amazonaws.com',
+};
+const SHOP_CATEGORIES = ['Fruit & Veg', 'Dairy & Eggs', 'Bakery', 'Meat & Fish', 'Cupboard', 'Drinks', 'Snacks', 'Frozen', 'Household', 'Personal Care', 'Baby'];
+const ORDER_STATUS_META = {
+  PLACED:           { label: 'New — go shop',     badge: 'badge-orange' },
+  PRICED:           { label: 'Bill entered',      badge: 'badge-blue' },
+  APPROVED:         { label: 'Approved (old)',    badge: 'badge-green' },
+  OUT_FOR_DELIVERY: { label: 'Out for delivery',  badge: 'badge-blue' },
+  DELIVERED:        { label: 'Delivered',         badge: 'badge-green' },
+  CANCELLED:        { label: 'Cancelled',         badge: 'badge-muted' },
+};
+// Admin moves an order on with these; entering prices uses the modal.
+// No customer approval: an order can go out as soon as it's shopped.
+const NEXT_ORDER_STATUS = { PLACED: 'OUT_FOR_DELIVERY', PRICED: 'OUT_FOR_DELIVERY', APPROVED: 'OUT_FOR_DELIVERY', OUT_FOR_DELIVERY: 'DELIVERED' };
+const NEXT_ORDER_LABEL = { PLACED: '🚚 Out for delivery', PRICED: '🚚 Out for delivery', APPROVED: '🚚 Out for delivery', OUT_FOR_DELIVERY: '✅ Delivered' };
+// Prices can be entered or corrected until the order is delivered.
+const PRICE_EDITABLE = ['PLACED', 'PRICED', 'APPROVED', 'OUT_FOR_DELIVERY'];
+
+const ORDER_FIELDS = `id orderNumber userId subtotalPence deliveryFeePence totalPence note paymentMethod status createdAt updatedAt pricedAt
+  mode storeId storeName estimatedSubtotalPence
+  items { barcode name brand image quantity qty estimatedUnitPence buyFromStore available unitPricePence lineTotalPence }
+  address { fullName line1 line2 city postcode phone }`;
+const ADMIN_LIST_ORDERS_QUERY = `query AdminListOrders($status: String, $limit: Int, $nextToken: String) {
+  adminListOrders(status: $status, limit: $limit, nextToken: $nextToken) { items { ${ORDER_FIELDS} } nextToken } }`;
+const ADMIN_UPDATE_ORDER_STATUS_MUTATION = `mutation AdminUpdateOrderStatus($orderId: ID!, $status: String!) {
+  adminUpdateOrderStatus(orderId: $orderId, status: $status) { ${ORDER_FIELDS} } }`;
+const ADMIN_UPSERT_PRODUCT_MUTATION = `mutation AdminUpsertCatalogProduct($input: AdminUpsertCatalogProductInput!) {
+  adminUpsertCatalogProduct(input: $input) { barcode name brand image quantity category pricePence inStock essential sortOrder updatedAt } }`;
+const ADMIN_DELETE_PRODUCT_MUTATION = `mutation AdminDeleteCatalogProduct($barcode: ID!) { adminDeleteCatalogProduct(barcode: $barcode) }`;
+const SHOP_SETTINGS_FIELDS = 'storePostcode radiusMiles areaName deliveryFeePence freeDeliveryOverPence shopOpen';
+const ADMIN_UPDATE_SHOP_SETTINGS_MUTATION = `mutation AdminUpdateShopSettings($input: AdminUpdateShopSettingsInput!) {
+  adminUpdateShopSettings(input: $input) { ${SHOP_SETTINGS_FIELDS} } }`;
+const ADMIN_GET_SHOP_SETTINGS_QUERY = `query { adminGetShopSettings { ${SHOP_SETTINGS_FIELDS} } }`;
+const ADMIN_PRICE_ORDER_MUTATION = `mutation AdminPriceOrder($orderId: ID!, $prices: [OrderItemPriceInput!]!) {
+  adminPriceOrder(orderId: $orderId, prices: $prices) { ${ORDER_FIELDS} } }`;
+
+let ORDERS = [];
+let CATALOG = [];
+
+function gbp(pence) { return '£' + ((pence || 0) / 100).toFixed(2); }
+function toPence(value) {
+  const n = Math.round(parseFloat(String(value).replace(/[£,\s]/g, '')) * 100);
+  return Number.isFinite(n) ? n : NaN;
+}
+
+async function fetchCatalog() {
+  const res = await fetch(SHOP_CONFIG.catalogUrl, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Could not load the catalogue (HTTP ' + res.status + ')');
+  return res.json();
+}
+
+// ── Orders ──
+async function fetchOrders(status) {
+  let items = [];
+  let nextToken = null;
+  do {
+    const data = await adminGraphqlRequest(ADMIN_LIST_ORDERS_QUERY, { status: status || null, limit: 200, nextToken });
+    items = items.concat(data.adminListOrders.items || []);
+    nextToken = data.adminListOrders.nextToken;
+  } while (nextToken && items.length < 1000);
+  return items;
+}
+
+async function loadAndRenderOrders() {
+  const status = document.getElementById('orders-status-filter').value;
+  try {
+    ORDERS = await fetchOrders(status);
+  } catch (err) {
+    document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="8" style="color:var(--red)">${escapeHtml(err.message)}</td></tr>`;
+    return;
+  }
+  renderOrders();
+  if (!status) renderOrderStats(ORDERS);
+}
+
+function renderOrderStats(orders) {
+  const today = new Date().toDateString();
+  document.getElementById('ord-placed').textContent = orders.filter(o => o.status === 'PLACED').length;
+  document.getElementById('ord-priced').textContent = orders.filter(o => o.status === 'PRICED').length;
+  document.getElementById('ord-approved').textContent = orders.filter(o => o.status === 'OUT_FOR_DELIVERY').length;
+  document.getElementById('ord-delivered-today').textContent = orders.filter(o => o.status === 'DELIVERED' && new Date(o.updatedAt).toDateString() === today).length;
+  updateOrdersBadge(orders.filter(o => o.status === 'PLACED').length);
+}
+
+function orderStatusBadge(status) {
+  const m = ORDER_STATUS_META[status] || { label: status, badge: 'badge-muted' };
+  return `<span class="badge ${m.badge}">${m.label}</span>`;
+}
+
+function renderOrders() {
+  document.getElementById('orders-count-label').textContent = `${ORDERS.length} shown`;
+  document.getElementById('orders-tbody').innerHTML = ORDERS.length ? ORDERS.map(o => `
+    <tr>
+      <td class="td-mono">${escapeHtml(o.orderNumber)}</td>
+      <td style="font-size:11px">${new Date(o.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
+      <td>${escapeHtml(o.address.fullName)}<div style="font-size:11px;color:var(--muted)">${escapeHtml(o.address.phone)}</div></td>
+      <td class="td-mono">${escapeHtml(o.address.postcode)}</td>
+      <td>${o.items.reduce((n, i) => n + i.qty, 0)}<div style="font-size:10px;color:var(--muted)">${o.mode === 'STORE' ? '🏪 ' + escapeHtml(o.storeName || '') : '🔀 Shop around'}</div></td>
+      <td><b>${o.totalPence != null ? gbp(o.totalPence) : `<span style="color:var(--muted)">~${gbp((o.estimatedSubtotalPence || 0) + (o.deliveryFeePence || 0))}</span>`}</b></td>
+      <td>${orderStatusBadge(o.status)}</td>
+      <td><div style="display:flex;gap:5px">
+        ${PRICE_EDITABLE.includes(o.status) ? `<button class="btn ${o.totalPence == null ? 'btn-primary' : 'btn-ghost'}" onclick="openOrder('${o.id}')">💷 ${o.totalPence == null ? 'Enter prices' : 'Edit prices'}</button>` : `<button class="btn btn-ghost" onclick="openOrder('${o.id}')">View</button>`}
+        ${NEXT_ORDER_STATUS[o.status] ? `<button class="btn btn-primary" onclick="setOrderStatus('${o.id}','${NEXT_ORDER_STATUS[o.status]}')">${NEXT_ORDER_LABEL[o.status]}</button>` : ''}
+      </div></td>
+    </tr>`).join('') : '<tr><td colspan="8" style="color:var(--muted)">No orders yet.</td></tr>';
+}
+
+let SHOP_SETTINGS_CACHE = null;
+function trolleySearchUrl(item) {
+  return 'https://www.trolley.co.uk/search/?q=' + encodeURIComponent([item.brand, item.name, item.quantity].filter(Boolean).join(' '));
+}
+
+function openOrder(id) {
+  const o = ORDERS.find(x => x.id === id);
+  if (!o) return;
+  const a = o.address;
+  const editable = PRICE_EDITABLE.includes(o.status);
+  if (editable && !SHOP_SETTINGS_CACHE) adminGraphqlRequest(ADMIN_GET_SHOP_SETTINGS_QUERY, {}).then(d => { SHOP_SETTINGS_CACHE = d.adminGetShopSettings; updateOrderTotal(id); }).catch(() => {});
+  const itemRows = o.items.map((i, idx) => `
+      <tr>
+        <td style="padding:6px 0;width:44px">${i.image ? `<img src="${escapeHtml(i.image)}" style="width:40px;height:40px;object-fit:contain"/>` : '🛒'}</td>
+        <td style="padding:6px 8px">${i.qty} × ${escapeHtml([i.brand, i.name].filter(Boolean).join(' '))}${i.quantity ? ` <span style="color:var(--muted)">${escapeHtml(i.quantity)}</span>` : ''}
+          ${i.buyFromStore ? `<div style="font-size:11px;font-weight:700;color:var(--green,#1a7f37)">🏪 Buy at ${escapeHtml(i.buyFromStore)}${i.estimatedUnitPence ? ` · ~${gbp(i.estimatedUnitPence)} each` : ''}</div>` : ''}
+          <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${escapeHtml(i.barcode)} · <a href="${trolleySearchUrl(i)}" target="_blank" rel="noopener">Check on Trolley ↗</a></div></td>
+        ${editable ? `
+        <td style="white-space:nowrap">£<input class="form-input op-price" data-idx="${idx}" type="number" min="0" step="0.01" style="width:80px;padding:5px 7px;display:inline-block" placeholder="each"
+            value="${(i.unitPricePence || i.estimatedUnitPence) ? ((i.unitPricePence || i.estimatedUnitPence) / 100).toFixed(2) : ''}" ${i.available === false ? 'disabled' : ''} oninput="updateOrderTotal('${o.id}')"/></td>
+        <td style="white-space:nowrap;font-size:11px"><label><input type="checkbox" class="op-na" data-idx="${idx}" ${i.available === false ? 'checked' : ''} onchange="this.closest('tr').querySelector('.op-price').disabled=this.checked;updateOrderTotal('${o.id}')"/> Not available</label></td>`
+        : `<td style="text-align:right">${i.available === false ? '<span style="color:var(--red)">Not available</span>' : gbp(i.lineTotalPence)}</td>`}
+      </tr>`).join('');
+  document.getElementById('order-modal-body').innerHTML = `
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">ORDER ${escapeHtml(o.orderNumber)}</div>
+    <div style="display:flex;align-items:center;gap:10px;margin:6px 0 4px"><div style="font-size:20px;font-weight:800" id="op-total">${o.totalPence != null ? gbp(o.totalPence) : 'Not priced yet'}</div>${orderStatusBadge(o.status)}<span style="font-size:11px;color:var(--muted)">pay on delivery</span></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Placed ${new Date(o.createdAt).toLocaleString('en-GB')}${o.totalPence == null ? ' · enter the shop prices after shopping' : ''}</div>
+    <div style="border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:13px;font-weight:700;background:${o.mode === 'STORE' ? 'var(--orange-bg,#FEF3CD)' : 'var(--green-bg)'}">
+      ${o.mode === 'STORE' ? `🏪 Customer wants everything from <b>${escapeHtml(o.storeName || '')}</b> at ${escapeHtml(o.storeName || '')}'s shelf prices.`
+        : `🔀 Shop around — buy each item wherever it's cheapest. (Customer's usual store: ${escapeHtml(o.storeName || '—')}.)`}
+      ${o.estimatedSubtotalPence ? `<div style="font-weight:500;font-size:12px;margin-top:4px">Customer saw an estimated ${gbp(o.estimatedSubtotalPence)} for items. Price boxes start from those estimates — correct any that differ.</div>` : ''}
+    </div>
+    <div class="form-label">ITEMS${editable ? ' — CONFIRM YOUR PRICE PER ITEM' : ''}</div>
+    <table style="width:100%;font-size:12px;margin-bottom:6px">${itemRows}</table>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Delivery: worked out from the final items total (your Delivery Settings) when you send the bill.</div>
+    ${editable ? `<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px"><button class="btn btn-primary" id="op-save" onclick="saveOrderPrices('${o.id}')">💷 ${o.totalPence == null ? 'Save bill' : 'Update bill'}</button><span id="op-status" style="font-size:12px"></span></div>` : ''}
+    <div class="form-label">DELIVER TO</div>
+    <div style="font-size:13px;line-height:1.6;margin-bottom:16px">${escapeHtml(a.fullName)}<br>${escapeHtml(a.line1)}${a.line2 ? '<br>' + escapeHtml(a.line2) : ''}<br>${escapeHtml(a.city)} ${escapeHtml(a.postcode)}<br>📞 <a href="tel:${escapeHtml(a.phone)}">${escapeHtml(a.phone)}</a></div>
+    ${o.note ? `<div class="form-label">NOTE</div><div style="font-size:13px;margin-bottom:16px">${escapeHtml(o.note)}</div>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+      ${NEXT_ORDER_STATUS[o.status] ? `<button class="btn btn-primary" onclick="setOrderStatus('${o.id}','${NEXT_ORDER_STATUS[o.status]}',true)">${NEXT_ORDER_LABEL[o.status]}</button>` : ''}
+      ${['DELIVERED', 'CANCELLED'].includes(o.status) ? '' : `<button class="btn btn-danger" onclick="setOrderStatus('${o.id}','CANCELLED',true)">Cancel order</button>`}
+    </div>`;
+  document.getElementById('order-modal').classList.add('open');
+  if (editable) updateOrderTotal(o.id);
+}
+
+function readOrderPrices(o) {
+  return o.items.map((item, idx) => {
+    const na = document.querySelector(`.op-na[data-idx="${idx}"]`).checked;
+    const pence = toPence(document.querySelector(`.op-price[data-idx="${idx}"]`).value);
+    return { item, available: !na, pence };
+  });
+}
+
+function updateOrderTotal(id) {
+  const o = ORDERS.find(x => x.id === id);
+  const rows = readOrderPrices(o);
+  const done = rows.every(r => !r.available || (Number.isInteger(r.pence) && r.pence > 0));
+  const subtotal = rows.reduce((s, r) => s + (r.available && Number.isInteger(r.pence) ? r.pence * r.item.qty : 0), 0);
+  const fee = SHOP_SETTINGS_CACHE ? (subtotal >= SHOP_SETTINGS_CACHE.freeDeliveryOverPence ? 0 : SHOP_SETTINGS_CACHE.deliveryFeePence) : (o.deliveryFeePence || 0);
+  document.getElementById('op-total').textContent = `${gbp(subtotal + fee)}${done ? '' : ' so far'} (items ${gbp(subtotal)} + delivery ${fee ? gbp(fee) : 'free'})`;
+}
+
+async function saveOrderPrices(id) {
+  const o = ORDERS.find(x => x.id === id);
+  const rows = readOrderPrices(o);
+  const status = document.getElementById('op-status');
+  const missing = rows.filter(r => r.available && !(Number.isInteger(r.pence) && r.pence > 0)).map(r => r.item.name);
+  if (missing.length) { status.style.color = 'var(--red)'; status.textContent = 'Enter a price (or tick Not available) for: ' + missing.join(', '); return; }
+  const btn = document.getElementById('op-save');
+  btn.disabled = true;
+  try {
+    const data = await adminGraphqlRequest(ADMIN_PRICE_ORDER_MUTATION, {
+      orderId: id,
+      prices: rows.map(r => ({ barcode: r.item.barcode, available: r.available, unitPricePence: r.available ? r.pence : null })),
+    });
+    ORDERS = ORDERS.map(x => x.id === id ? data.adminPriceOrder : x);
+    renderOrders();
+    if (!document.getElementById('orders-status-filter').value) renderOrderStats(ORDERS);
+    openOrder(id);
+  } catch (err) {
+    status.style.color = 'var(--red)';
+    status.textContent = err.message;
+    btn.disabled = false;
+  }
+}
+
+async function setOrderStatus(id, status, fromModal) {
+  if (status === 'CANCELLED' && !confirm('Cancel this order? The customer will see it as cancelled.')) return;
+  const ord = ORDERS.find(o => o.id === id);
+  if (status === 'OUT_FOR_DELIVERY' && ord && ord.totalPence == null
+    && !confirm("You haven't entered the shop prices yet, so the customer won't see a bill. Send it out for delivery anyway?")) return;
+  try {
+    const data = await adminGraphqlRequest(ADMIN_UPDATE_ORDER_STATUS_MUTATION, { orderId: id, status });
+    const updated = data.adminUpdateOrderStatus;
+    ORDERS = ORDERS.map(o => o.id === id ? updated : o);
+    renderOrders();
+    if (!document.getElementById('orders-status-filter').value) renderOrderStats(ORDERS);
+    if (fromModal) openOrder(id);
+  } catch (err) {
+    alert('Could not update the order: ' + err.message);
+  }
+}
+
+function updateOrdersBadge(count) {
+  const b = document.getElementById('orders-badge');
+  b.textContent = count;
+  b.style.display = count > 0 ? '' : 'none';
+}
+
+let ordersPollTimer = null;
+function startOrdersPolling() {
+  const poll = () => fetchOrders('PLACED').then(o => updateOrdersBadge(o.length)).catch(() => {});
+  poll();
+  clearInterval(ordersPollTimer);
+  ordersPollTimer = setInterval(poll, 60000);
+}
+
+// ── Products ──
+async function loadAndRenderProducts() {
+  const list = document.getElementById('pf-category-list');
+  list.innerHTML = SHOP_CATEGORIES.map(c => `<option value="${escapeHtml(c)}">`).join('');
+  try {
+    CATALOG = (await fetchCatalog()).products || [];
+  } catch (err) {
+    document.getElementById('products-tbody').innerHTML = `<tr><td colspan="8" style="color:var(--red)">${escapeHtml(err.message)}</td></tr>`;
+    return;
+  }
+  renderCatalogTable('');
+  renderStarterEssentials();
+}
+
+function renderCatalogTable(filter) {
+  const q = (filter || '').toLowerCase().trim();
+  const rows = q ? CATALOG.filter(p => [p.name, p.brand, p.barcode, p.category].some(v => (v || '').toLowerCase().includes(q))) : CATALOG;
+  document.getElementById('products-count-label').textContent = `${CATALOG.length} products`;
+  document.getElementById('products-tbody').innerHTML = rows.length ? rows.map(p => `
+    <tr>
+      <td>${p.image ? `<img src="${escapeHtml(p.image)}" style="width:36px;height:36px;object-fit:contain;border-radius:6px"/>` : '📦'}</td>
+      <td>${escapeHtml(p.name)}<div style="font-size:11px;color:var(--muted)">${escapeHtml([p.brand, p.quantity].filter(Boolean).join(' · '))}</div></td>
+      <td class="td-mono" style="font-size:11px">${escapeHtml(p.barcode)}</td>
+      <td style="font-size:12px">${escapeHtml(p.category || '—')}</td>
+      <td><b>${gbp(p.pricePence)}</b></td>
+      <td>${p.essential ? '⭐' : ''}</td>
+      <td><label class="switch"><input type="checkbox" ${p.inStock ? 'checked' : ''} onchange="toggleProductStock('${escapeHtml(p.barcode)}', this.checked)"/><span class="switch-slider"></span></label></td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-ghost" onclick="editCatalogProduct('${escapeHtml(p.barcode)}')">Edit</button>
+        <button class="btn btn-danger" onclick="deleteCatalogProduct('${escapeHtml(p.barcode)}')">Delete</button>
+      </div></td>
+    </tr>`).join('') : '<tr><td colspan="8" style="color:var(--muted)">No products yet — add one above.</td></tr>';
+}
+
+function setProductStatus(text, isError) {
+  const el = document.getElementById('pf-status');
+  el.textContent = text;
+  el.style.color = isError ? 'var(--red)' : 'var(--muted)';
+}
+
+function previewProductImage() {
+  const url = document.getElementById('pf-image').value.trim();
+  document.getElementById('pf-image-preview').innerHTML = url ? `<img src="${escapeHtml(url)}" style="width:100%;height:100%;object-fit:contain"/>` : '📦';
+}
+
+async function lookupProductBarcode() {
+  const barcode = document.getElementById('pf-barcode').value.trim();
+  if (!barcode) return;
+  const existing = CATALOG.find(p => p.barcode === barcode);
+  if (existing) { editCatalogProduct(barcode); setProductStatus('Already in your catalogue — editing it.'); return; }
+  setProductStatus('Looking up…');
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}?fields=product_name,product_name_en,brands,image_front_url,image_url,quantity`);
+    const data = await res.json();
+    if (data.status !== 1 || !data.product) { setProductStatus('Not found on Open Food Facts — fill in the details by hand.', true); return; }
+    const p = data.product;
+    document.getElementById('pf-name').value = p.product_name_en || p.product_name || '';
+    document.getElementById('pf-brand').value = (p.brands || '').split(',')[0].trim();
+    document.getElementById('pf-quantity').value = p.quantity || '';
+    document.getElementById('pf-image').value = p.image_front_url || p.image_url || '';
+    previewProductImage();
+    setProductStatus('Found — now set the price, category and stock.');
+    document.getElementById('pf-price').focus();
+  } catch (err) {
+    setProductStatus('Lookup failed: ' + err.message, true);
+  }
+}
+
+function editCatalogProduct(barcode) {
+  const p = CATALOG.find(x => x.barcode === barcode);
+  if (!p) return;
+  document.getElementById('pf-barcode').value = p.barcode;
+  document.getElementById('pf-name').value = p.name || '';
+  document.getElementById('pf-brand').value = p.brand || '';
+  document.getElementById('pf-quantity').value = p.quantity || '';
+  document.getElementById('pf-category').value = p.category || '';
+  document.getElementById('pf-price').value = (p.pricePence / 100).toFixed(2);
+  document.getElementById('pf-image').value = p.image || '';
+  document.getElementById('pf-sort').value = p.sortOrder ?? '';
+  document.getElementById('pf-instock').checked = !!p.inStock;
+  document.getElementById('pf-essential').checked = !!p.essential;
+  previewProductImage();
+  setProductStatus('Editing ' + p.name);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetProductForm() {
+  ['pf-barcode', 'pf-name', 'pf-brand', 'pf-quantity', 'pf-category', 'pf-price', 'pf-image', 'pf-sort'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('pf-instock').checked = true;
+  document.getElementById('pf-essential').checked = false;
+  previewProductImage();
+  setProductStatus('');
+}
+
+function productInputFrom(p) {
+  return {
+    barcode: p.barcode, name: p.name, brand: p.brand || null, image: p.image || null, quantity: p.quantity || null,
+    category: p.category || null, pricePence: p.pricePence, inStock: !!p.inStock, essential: !!p.essential,
+    sortOrder: Number.isInteger(p.sortOrder) ? p.sortOrder : null,
+  };
+}
+
+async function upsertProduct(input) {
+  const data = await adminGraphqlRequest(ADMIN_UPSERT_PRODUCT_MUTATION, { input });
+  const saved = data.adminUpsertCatalogProduct;
+  CATALOG = [saved, ...CATALOG.filter(p => p.barcode !== saved.barcode)];
+  return saved;
+}
+
+async function saveCatalogProduct() {
+  const sortRaw = document.getElementById('pf-sort').value.trim();
+  const input = productInputFrom({
+    barcode: document.getElementById('pf-barcode').value.trim(),
+    name: document.getElementById('pf-name').value.trim(),
+    brand: document.getElementById('pf-brand').value.trim(),
+    quantity: document.getElementById('pf-quantity').value.trim(),
+    category: document.getElementById('pf-category').value.trim(),
+    image: document.getElementById('pf-image').value.trim(),
+    pricePence: toPence(document.getElementById('pf-price').value),
+    sortOrder: sortRaw ? parseInt(sortRaw, 10) : null,
+    inStock: document.getElementById('pf-instock').checked,
+    essential: document.getElementById('pf-essential').checked,
+  });
+  if (!input.barcode || !input.name) { setProductStatus('Barcode and name are required.', true); return; }
+  if (!Number.isInteger(input.pricePence)) { setProductStatus('Enter a price, e.g. 1.25', true); return; }
+  const btn = document.getElementById('pf-save-btn');
+  btn.disabled = true;
+  try {
+    const saved = await upsertProduct(input);
+    renderCatalogTable('');
+    resetProductForm();
+    setProductStatus(`Saved ${saved.name} at ${gbp(saved.pricePence)}.`);
+    document.getElementById('pf-barcode').focus();
+  } catch (err) {
+    setProductStatus('Save failed: ' + err.message, true);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function toggleProductStock(barcode, inStock) {
+  const p = CATALOG.find(x => x.barcode === barcode);
+  if (!p) return;
+  try {
+    await upsertProduct(productInputFrom({ ...p, inStock }));
+    renderCatalogTable('');
+  } catch (err) {
+    alert('Could not update stock: ' + err.message);
+    renderCatalogTable('');
+  }
+}
+
+async function deleteCatalogProduct(barcode) {
+  const p = CATALOG.find(x => x.barcode === barcode);
+  if (!p || !confirm(`Delete ${p.name} from the shop? (To hide it temporarily, switch Stock off instead.)`)) return;
+  try {
+    await adminGraphqlRequest(ADMIN_DELETE_PRODUCT_MUTATION, { barcode });
+    CATALOG = CATALOG.filter(x => x.barcode !== barcode);
+    renderCatalogTable('');
+  } catch (err) {
+    alert('Could not delete: ' + err.message);
+  }
+}
+
+// ── Starter essentials ──
+// A ready-made list of everyday products (real barcodes, verified on Open
+// Food Facts) so the shop isn't empty on day one. Prices are suggestions the
+// admin edits before adding; nothing is added without clicking the button.
+const STARTER_ESSENTIALS = [
+ {
+  "barcode": "5000436589457",
+  "name": "Semi Skimmed Milk",
+  "brand": "Tesco",
+  "quantity": "4 pints (2.272L)",
+  "category": "Dairy & Eggs",
+  "image": "https://images.openfoodfacts.org/images/products/500/043/658/9457/front_en.94.400.jpg",
+  "pricePence": 165,
+  "sortOrder": 10
+ },
+ {
+  "barcode": "50378265",
+  "name": "Free Range Medium Eggs",
+  "brand": "The Happy Egg Co",
+  "quantity": "6 eggs",
+  "category": "Dairy & Eggs",
+  "image": "https://images.openfoodfacts.org/images/products/000/005/037/8265/front_en.18.400.jpg",
+  "pricePence": 210,
+  "sortOrder": 20
+ },
+ {
+  "barcode": "5740900404465",
+  "name": "Lurpak Spreadable",
+  "brand": "Lurpak",
+  "quantity": "400g",
+  "category": "Dairy & Eggs",
+  "image": "https://images.openfoodfacts.org/images/products/574/090/040/4465/front_en.30.400.jpg",
+  "pricePence": 375,
+  "sortOrder": 30
+ },
+ {
+  "barcode": "5000295142893",
+  "name": "Mature Cheddar",
+  "brand": "Cathedral City",
+  "quantity": "350g",
+  "category": "Dairy & Eggs",
+  "image": "https://images.openfoodfacts.org/images/products/500/029/514/2893/front_en.45.400.jpg",
+  "pricePence": 350,
+  "sortOrder": 40
+ },
+ {
+  "barcode": "8719200300514",
+  "name": "Flora Original Spread",
+  "brand": "Flora",
+  "quantity": "450g",
+  "category": "Dairy & Eggs",
+  "image": "https://images.openfoodfacts.org/images/products/871/920/030/0514/front_en.3.400.jpg",
+  "pricePence": 200,
+  "sortOrder": 50
+ },
+ {
+  "barcode": "5760466923927",
+  "name": "Paneer",
+  "brand": "Arla",
+  "quantity": "225g",
+  "category": "Dairy & Eggs",
+  "image": "https://images.openfoodfacts.org/images/products/576/046/692/3927/front_en.16.400.jpg",
+  "pricePence": 250,
+  "sortOrder": 60
+ },
+ {
+  "barcode": "5010003000339",
+  "name": "Tasty Wholemeal Bread",
+  "brand": "Hovis",
+  "quantity": "800g",
+  "category": "Bakery",
+  "image": "https://images.openfoodfacts.org/images/products/501/000/300/0339/front_en.23.400.jpg",
+  "pricePence": 145,
+  "sortOrder": 70
+ },
+ {
+  "barcode": "5010092093441",
+  "name": "50/50 Bread",
+  "brand": "Kingsmill",
+  "quantity": "800g",
+  "category": "Bakery",
+  "image": "https://images.openfoodfacts.org/images/products/501/009/209/3441/front_en.61.400.jpg",
+  "pricePence": 140,
+  "sortOrder": 80
+ },
+ {
+  "barcode": "5000157024671",
+  "name": "Baked Beanz",
+  "brand": "Heinz",
+  "quantity": "415g",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/500/015/702/4671/front_en.459.400.jpg",
+  "pricePence": 140,
+  "sortOrder": 90
+ },
+ {
+  "barcode": "5010061001613",
+  "name": "Chopped Tomatoes",
+  "brand": "Napolina",
+  "quantity": "400g",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/501/006/100/1613/front_en.52.400.jpg",
+  "pricePence": 85,
+  "sortOrder": 100
+ },
+ {
+  "barcode": "5011157888101",
+  "name": "Pure Basmati Rice",
+  "brand": "Tilda",
+  "quantity": "250g",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/501/115/788/8101/front_en.94.400.jpg",
+  "pricePence": 120,
+  "sortOrder": 110
+ },
+ {
+  "barcode": "8001250120120",
+  "name": "Spaghetti No. 12",
+  "brand": "De Cecco",
+  "quantity": "500g",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/800/125/012/0120/front_nl.163.400.jpg",
+  "pricePence": 180,
+  "sortOrder": 120
+ },
+ {
+  "barcode": "5000119004000",
+  "name": "Plain Flour",
+  "brand": "Tesco",
+  "quantity": "1.5kg",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/500/011/900/4000/front_en.31.400.jpg",
+  "pricePence": 95,
+  "sortOrder": 130
+ },
+ {
+  "barcode": "5010115926404",
+  "name": "Granulated Sugar",
+  "brand": "Tate & Lyle",
+  "quantity": "1kg",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/501/011/592/6404/front_en.12.400.jpg",
+  "pricePence": 145,
+  "sortOrder": 140
+ },
+ {
+  "barcode": "5015821156817",
+  "name": "Medium Chapatti Flour (Atta)",
+  "brand": "Elephant Atta",
+  "quantity": "",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/501/582/115/6817/front_en.13.400.jpg",
+  "pricePence": null,
+  "sortOrder": 150
+ },
+ {
+  "barcode": "5013635101061",
+  "name": "Pure Butter Ghee",
+  "brand": "KTC",
+  "quantity": "1kg",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/501/363/510/1061/front_fr.11.400.jpg",
+  "pricePence": 999,
+  "sortOrder": 160
+ },
+ {
+  "barcode": "5018605007466",
+  "name": "Chickpeas",
+  "brand": "East End",
+  "quantity": "400g",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/501/860/500/7466/front_en.3.400.jpg",
+  "pricePence": 85,
+  "sortOrder": 170
+ },
+ {
+  "barcode": "5010029000016",
+  "name": "Weetabix",
+  "brand": "Weetabix",
+  "quantity": "430g",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/501/002/900/0016/front_en.44.400.jpg",
+  "pricePence": 300,
+  "sortOrder": 180
+ },
+ {
+  "barcode": "5059319033501",
+  "name": "Corn Flakes",
+  "brand": "Kellogg's",
+  "quantity": "",
+  "category": "Cupboard",
+  "image": "https://images.openfoodfacts.org/images/products/505/931/903/3501/front_en.4.400.jpg",
+  "pricePence": 250,
+  "sortOrder": 190
+ },
+ {
+  "barcode": "8720608036707",
+  "name": "PG Tips Tea Bags",
+  "brand": "PG Tips",
+  "quantity": "232g",
+  "category": "Drinks",
+  "image": "https://images.openfoodfacts.org/images/products/872/060/803/6707/front_en.44.400.jpg",
+  "pricePence": 350,
+  "sortOrder": 200
+ },
+ {
+  "barcode": "5011546415482",
+  "name": "Original Instant Coffee",
+  "brand": "Nescafé",
+  "quantity": "200g",
+  "category": "Drinks",
+  "image": "https://images.openfoodfacts.org/images/products/501/154/641/5482/front_en.26.400.jpg",
+  "pricePence": 650,
+  "sortOrder": 210
+ },
+ {
+  "barcode": "5022313000282",
+  "name": "Orange Juice with Bits",
+  "brand": "Tropicana",
+  "quantity": "900ml",
+  "category": "Drinks",
+  "image": "https://images.openfoodfacts.org/images/products/502/231/300/0282/front_en.26.400.jpg",
+  "pricePence": 285,
+  "sortOrder": 220
+ },
+ {
+  "barcode": "7613031214839",
+  "name": "Still Water",
+  "brand": "Buxton",
+  "quantity": "1L",
+  "category": "Drinks",
+  "image": "https://images.openfoodfacts.org/images/products/761/303/121/4839/front_en.25.400.jpg",
+  "pricePence": 95,
+  "sortOrder": 230
+ },
+ {
+  "barcode": "5000168036755",
+  "name": "Digestives",
+  "brand": "McVitie's",
+  "quantity": "360g",
+  "category": "Snacks",
+  "image": "https://images.openfoodfacts.org/images/products/500/016/803/6755/front_en.72.400.jpg",
+  "pricePence": 160,
+  "sortOrder": 240
+ },
+ {
+  "barcode": "5000328376677",
+  "name": "Ready Salted Crisps",
+  "brand": "Walkers",
+  "quantity": "6 × 25g",
+  "category": "Snacks",
+  "image": "https://images.openfoodfacts.org/images/products/500/032/837/6677/front_en.41.400.jpg",
+  "pricePence": 200,
+  "sortOrder": 250
+ }
+];
+
+function renderStarterEssentials() {
+  const inShop = new Set(CATALOG.map(p => p.barcode));
+  document.getElementById('starter-tbody').innerHTML = STARTER_ESSENTIALS.map((p, i) => {
+    const added = inShop.has(p.barcode);
+    return `<tr${added ? ' style="opacity:0.55"' : ''}>
+      <td><input type="checkbox" class="starter-check" data-i="${i}" ${added ? 'disabled' : 'checked'}/></td>
+      <td><img src="${escapeHtml(p.image)}" style="width:36px;height:36px;object-fit:contain;border-radius:6px"/></td>
+      <td>${escapeHtml(p.name)}<div style="font-size:11px;color:var(--muted)">${escapeHtml([p.brand, p.quantity].filter(Boolean).join(' · '))}</div></td>
+      <td style="font-size:12px">${escapeHtml(p.category)}</td>
+      <td><input class="form-input starter-price" data-i="${i}" type="number" min="0" step="0.01" style="width:90px;padding:6px 8px" ${added ? 'disabled' : ''}
+        value="${p.pricePence ? (p.pricePence / 100).toFixed(2) : ''}" placeholder="set price"/></td>
+      <td style="font-size:11px">${added ? '<span class="badge badge-green">In shop</span>' : (!p.quantity ? '<span style="color:var(--muted)">check pack size</span>' : '')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleAllStarter(checked) {
+  document.querySelectorAll('.starter-check:not(:disabled)').forEach(cb => { cb.checked = checked; });
+}
+
+async function addStarterEssentials() {
+  const status = document.getElementById('starter-status');
+  const selected = [...document.querySelectorAll('.starter-check:checked:not(:disabled)')].map(cb => Number(cb.dataset.i));
+  if (!selected.length) { status.textContent = 'Nothing selected.'; status.style.color = 'var(--muted)'; return; }
+  const priceOf = i => toPence(document.querySelector(`.starter-price[data-i="${i}"]`).value);
+  const missing = selected.filter(i => !Number.isInteger(priceOf(i)) || priceOf(i) <= 0).map(i => STARTER_ESSENTIALS[i].name);
+  if (missing.length) {
+    status.textContent = 'Set a price for: ' + missing.join(', ');
+    status.style.color = 'var(--red)';
+    return;
+  }
+  const btn = document.getElementById('starter-add-btn');
+  btn.disabled = true;
+  let done = 0;
+  const failed = [];
+  for (const i of selected) {
+    const p = STARTER_ESSENTIALS[i];
+    status.textContent = `Adding ${done + 1} of ${selected.length}…`;
+    status.style.color = 'var(--muted)';
+    try {
+      await upsertProduct(productInputFrom({ ...p, pricePence: priceOf(i), inStock: true, essential: true }));
+      done++;
+    } catch (err) {
+      failed.push(`${p.name} (${err.message})`);
+    }
+  }
+  btn.disabled = false;
+  renderCatalogTable('');
+  renderStarterEssentials();
+  status.textContent = failed.length ? `Added ${done}. Failed: ${failed.join('; ')}` : `✓ Added ${done} products — they're on the home screen now.`;
+  status.style.color = failed.length ? 'var(--red)' : 'var(--green)';
+}
+
+// ── Delivery settings ──
+async function loadShopSettings() {
+  const status = document.getElementById('ds-status');
+  try {
+    const st = (await adminGraphqlRequest(ADMIN_GET_SHOP_SETTINGS_QUERY, {})).adminGetShopSettings || {};
+    document.getElementById('ds-shopOpen').checked = st.shopOpen !== false;
+    document.getElementById('ds-storePostcode').value = st.storePostcode || '';
+    document.getElementById('ds-radius').value = st.radiusMiles ?? 5;
+    document.getElementById('ds-fee').value = ((st.deliveryFeePence ?? 300) / 100).toFixed(2);
+    document.getElementById('ds-free').value = ((st.freeDeliveryOverPence ?? 3000) / 100).toFixed(2);
+    document.getElementById('ds-area').textContent = st.areaName || 'your area';
+    status.textContent = st.storePostcode ? '' : 'Set your shop postcode — until then nobody can check out.';
+    status.style.color = st.storePostcode ? 'var(--muted)' : 'var(--red)';
+  } catch (err) {
+    status.textContent = err.message;
+    status.style.color = 'var(--red)';
+  }
+}
+
+async function saveShopSettings() {
+  const status = document.getElementById('ds-status');
+  const input = {
+    shopOpen: document.getElementById('ds-shopOpen').checked,
+    storePostcode: document.getElementById('ds-storePostcode').value.trim() || null,
+    radiusMiles: parseFloat(document.getElementById('ds-radius').value),
+    deliveryFeePence: toPence(document.getElementById('ds-fee').value || 0),
+    freeDeliveryOverPence: toPence(document.getElementById('ds-free').value || 0),
+  };
+  if (!input.storePostcode) { status.textContent = 'Enter your shop postcode.'; status.style.color = 'var(--red)'; return; }
+  if (!(input.radiusMiles > 0)) { status.textContent = 'Enter a delivery radius, e.g. 5'; status.style.color = 'var(--red)'; return; }
+  if (!Number.isInteger(input.deliveryFeePence) || input.deliveryFeePence < 0) { status.textContent = 'Delivery fee must be a number like 2.50'; status.style.color = 'var(--red)'; return; }
+  try {
+    const st = (await adminGraphqlRequest(ADMIN_UPDATE_SHOP_SETTINGS_MUTATION, { input })).adminUpdateShopSettings;
+    document.getElementById('ds-storePostcode').value = st.storePostcode || '';
+    document.getElementById('ds-area').textContent = st.areaName || 'your area';
+    SHOP_SETTINGS_CACHE = st;
+    status.textContent = `✓ Saved — delivering within ${st.radiusMiles} miles of ${st.areaName}; ${gbp(st.deliveryFeePence)} delivery, free from ${gbp(st.freeDeliveryOverPence)}.`;
+    status.style.color = 'var(--green)';
+  } catch (err) {
+    status.textContent = 'Save failed: ' + err.message;
+    status.style.color = 'var(--red)';
+  }
+}
 </script>
 </body>
 </html>

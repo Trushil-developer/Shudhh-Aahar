@@ -2,317 +2,1652 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Shuddh Aahar — Clinical Nutrition Intelligence</title>
-<meta name="description" content="Shuddh Aahar gives you a personalised health verdict on every UK supermarket product — scan a barcode and see, in seconds, whether it's right for your allergies, conditions and medications, plus where to buy it cheapest."/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#0A3B70"/>
+<title>Shuddh Aahar | Everyday groceries delivered</title>
+<meta name="description" content="Everyday essentials from your favourite UK supermarket, with full ingredients for every product. We shop for you and deliver. Pay on delivery."/>
 <link rel="icon" type="image/png" href="/favicon-32.png"/>
 <link rel="apple-touch-icon" href="/favicon-180.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  color-scheme:light;
-  --bg:#FFFFFF;--surface:#FFFFFF;--surface2:#F3F8FD;--border:#E3EAF1;--border2:#CBD8E4;
-  --navy:#0A3B70;--accent:#0468C4;--accent-dark:#034E96;--accent-glow:rgba(4,104,196,0.09);
-  --hero-1:#062B57;--hero-2:#0468C4;
-  --text:#101823;--text2:#4C5B6B;--muted:#7C8A99;
+  --bg:#F7F8FA;--surface:#FFFFFF;--surface2:#F2F5F8;--border:#E4E8ED;--border2:#CDD5DE;
+  --navy:#0A3B70;--accent:#0468C4;--accent-glow:rgba(4,104,196,0.09);
+  --text:#111827;--text2:#4B5563;--muted:#6B7280;
   --safe:#0F8A4B;--safe-bg:#E9F7EF;
   --caution:#B45309;--caution-bg:#FEF3CD;
+  --danger:#C53030;--danger-bg:#FDECEC;
+  --info:#0468C4;--info-bg:#E7F1FB;
   --shadow-sm:0 1px 2px rgba(10,30,60,0.05),0 1px 1px rgba(10,30,60,0.04);
   --shadow-md:0 10px 30px rgba(6,43,87,0.10);
-  --shadow-lg:0 20px 50px rgba(6,43,87,0.18);
+  --shadow-hover:0 6px 18px rgba(16,24,40,0.08);
   --radius:16px;
-  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 }
-html{scroll-behavior:smooth}
-body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
-a{color:inherit}
-img{max-width:100%;display:block}
-button{font-family:inherit}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+button,input,textarea{font-family:inherit;font-size:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
 
 /* ── Header ── */
-header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.85);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--border)}
-.header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
-.header-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,0.92);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--border)}
+.header-inner{display:flex;align-items:center;gap:16px;padding-top:12px;padding-bottom:12px}
+.header-brand{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
 .logo-mark{width:34px;height:34px;border-radius:9px;display:block;object-fit:cover;box-shadow:0 3px 10px rgba(4,104,196,0.28)}
 .logo-name{font-size:15px;font-weight:800;color:var(--text);letter-spacing:-0.01em}
 .logo-sub{font-size:9px;color:var(--accent);font-family:var(--mono);letter-spacing:1.4px;text-transform:uppercase;font-weight:700}
-.header-nav{display:flex;align-items:center;gap:28px}
-.header-nav a{font-size:13px;font-weight:600;color:var(--text2);text-decoration:none}
-.header-nav a:hover{color:var(--accent)}
-.header-cta{background:var(--navy);color:#fff;font-size:13px;font-weight:700;padding:9px 18px;border-radius:99px;text-decoration:none;white-space:nowrap;box-shadow:var(--shadow-sm)}
-.header-cta:hover{background:var(--accent-dark)}
-.nav-links-desktop{display:flex}
-
-/* ── Hero ── */
-.hero{position:relative;padding:76px 0 0;background:linear-gradient(150deg,var(--hero-1),var(--hero-2) 78%);color:#fff;overflow:hidden}
-.hero::after{content:'';position:absolute;inset:0;background:radial-gradient(560px 320px at 85% 10%,rgba(255,255,255,0.12),transparent 60%)}
-.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr 0.95fr;gap:48px;align-items:center;padding-bottom:64px}
-.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.13);color:#fff;border:1px solid rgba(255,255,255,0.28);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:0.4px;margin-bottom:20px}
-.hero h1{font-size:clamp(32px,4.4vw,50px);font-weight:800;letter-spacing:-0.02em;line-height:1.1;margin:0 0 18px;color:#fff}
-.hero h1 em{font-style:normal;color:#8FD0FF}
-.hero p{font-size:17px;color:rgba(255,255,255,0.86);max-width:480px;margin:0 0 30px}
-.store-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-.store-badge{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:12px;padding:11px 18px;font-size:13px;color:var(--muted);cursor:default;user-select:none;box-shadow:var(--shadow-md)}
-.store-badge .glyph{font-size:19px}
-.store-badge .label{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25}
-.store-badge .label small{font-size:9.5px;font-family:var(--mono);letter-spacing:0.5px;color:var(--accent);font-weight:700}
-.store-badge .label strong{font-size:13px;color:var(--navy)}
-.hero-note{font-size:12.5px;color:rgba(255,255,255,0.7)}
-
-/* ── Hero visual — a self-drawn "scan result" preview card, no real
-   screenshot needed; also doubles as a concrete illustration of what the
-   product actually does, not just a decorative graphic. ── */
-.hero-visual{position:relative;display:flex;justify-content:center}
-.phone{width:270px;background:#0C1420;border-radius:34px;padding:12px;box-shadow:var(--shadow-lg);transform:rotate(2deg)}
-.phone-screen{background:var(--bg);border-radius:24px;overflow:hidden;padding-bottom:14px}
-.phone-notch{height:22px;display:flex;align-items:center;justify-content:center}
-.phone-notch::before{content:'';width:56px;height:5px;border-radius:99px;background:#1c2530}
-.phone-card{margin:0 12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow-sm)}
-.phone-product{display:flex;gap:10px;align-items:center;margin-bottom:12px}
-.phone-thumb{width:40px;height:40px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.phone-product strong{display:block;font-size:12.5px;color:var(--text)}
-.phone-product span{display:block;font-size:10px;color:var(--muted);font-family:var(--mono)}
-.phone-verdict{display:flex;align-items:center;gap:8px;background:var(--caution-bg);border:1px solid rgba(180,83,9,0.25);border-radius:10px;padding:9px 11px;margin-bottom:10px}
-.phone-verdict .dot{width:8px;height:8px;border-radius:99px;background:var(--caution);flex-shrink:0}
-.phone-verdict span{font-size:11px;font-weight:700;color:var(--caution)}
-.phone-reason{font-size:10.5px;color:var(--text2);line-height:1.5;margin-bottom:12px}
-.phone-price-row{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--border2);padding-top:10px}
-.phone-price-row .store{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
-.phone-price-row .price{font-size:15px;font-weight:800;color:var(--safe)}
-.phone-mini-card{margin:10px 12px 0;background:var(--safe-bg);border:1px solid rgba(15,138,75,0.22);border-radius:12px;padding:10px 12px;display:flex;align-items:center;gap:8px}
-.phone-mini-card span{font-size:10.5px;font-weight:700;color:var(--safe)}
-.float-chip{position:absolute;background:#fff;border-radius:12px;box-shadow:var(--shadow-md);padding:9px 13px;font-size:11.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px}
-.float-chip.c1{top:6%;left:-6%}
-.float-chip.c2{bottom:10%;right:-8%}
-
-/* ── How it works ── */
-.how{padding:72px 0}
-.section-label{text-align:center;font-size:11px;font-family:var(--mono);color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700}
-.section-title{text-align:center;font-size:clamp(22px,3vw,30px);font-weight:800;margin-bottom:14px;color:var(--navy);letter-spacing:-0.01em}
-.section-sub{text-align:center;font-size:15px;color:var(--text2);max-width:520px;margin:0 auto 44px}
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.step{position:relative;padding:28px 22px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border)}
-.step-num{width:32px;height:32px;border-radius:10px;background:var(--navy);color:#fff;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-.step h3{font-size:16px;font-weight:800;margin-bottom:8px;color:var(--navy)}
-.step p{font-size:13.5px;color:var(--text2)}
-
-/* ── Features ── */
-.features{padding:20px 0 72px}
-.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
-.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;transition:transform 0.15s,box-shadow 0.15s}
-.feature-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
-.feature-icon{width:44px;height:44px;border-radius:12px;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
-.feature-card h3{font-size:15.5px;font-weight:800;margin-bottom:7px;color:var(--navy)}
-.feature-card p{font-size:13.5px;color:var(--text2)}
-
-/* ── Why us — confident comparison strip ── */
-.why{background:var(--navy);padding:64px 0;color:#fff}
-.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:40px}
-.why-item{text-align:center;padding:0 12px}
-.why-item .num{font-size:34px;font-weight:900;color:#8FD0FF;margin-bottom:6px;letter-spacing:-0.02em}
-.why-item p{font-size:13px;color:rgba(255,255,255,0.78);line-height:1.5}
-.why .section-title,.why .section-sub{color:#fff}
-.why .section-sub{color:rgba(255,255,255,0.8)}
-.why .section-label{color:#8FD0FF}
-
-/* ── Trust strip ── */
-.trust{background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:24px 0}
-.trust-row{display:flex;gap:32px;justify-content:center;flex-wrap:wrap}
-.trust-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);font-weight:600}
-.trust-item .dot{width:6px;height:6px;border-radius:99px;background:var(--accent)}
-
-/* ── Final CTA ── */
-.final-cta{padding:72px 0;text-align:center}
-.final-cta h2{font-size:clamp(24px,3.4vw,34px);font-weight:800;color:var(--navy);margin-bottom:12px;letter-spacing:-0.01em}
-.final-cta p{font-size:15px;color:var(--text2);max-width:460px;margin:0 auto 30px}
-
-/* ── Footer ── */
-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
-footer p{font-size:12px;color:var(--muted)}
-footer a{color:var(--accent);text-decoration:none;font-weight:600}
-footer a:hover{text-decoration:underline}
-.footer-links{margin-top:8px}
-
-/* ── Responsive ── */
-@media (max-width:880px){
-  .hero-grid{grid-template-columns:1fr;text-align:center;padding-bottom:48px}
-  .hero p{margin-left:auto;margin-right:auto}
-  .store-row{justify-content:center}
-  .hero-visual{margin-top:8px}
-  .float-chip{display:none}
-  .steps,.why-grid{grid-template-columns:1fr}
-  .header-nav{display:none}
+.header-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:0 12px;height:42px;min-width:0}
+.header-search input{flex:1;border:0;background:transparent;outline:none;min-width:0;color:var(--text)}
+.header-nav{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.nav-btn{position:relative;display:flex;align-items:center;gap:6px;padding:9px 12px;border-radius:10px;text-decoration:none;color:var(--text2);font-size:14px;font-weight:700;background:none;border:0;cursor:pointer}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{color:var(--navy);background:var(--accent-glow)}
+.ico{width:20px;height:20px;flex-shrink:0;display:block}
+.header-search .ico{color:var(--muted);width:18px;height:18px}
+.badge{position:absolute;top:2px;right:2px;background:var(--danger);color:#fff;font-size:10px;font-weight:800;border-radius:99px;min-width:17px;height:17px;padding:0 5px;display:flex;align-items:center;justify-content:center}
+@media (max-width:899px){
+  .header-inner{flex-wrap:wrap}
+  .header-search{order:3;flex-basis:100%}
+  .logo-sub,.nav-label{display:none}
+  .header-nav{margin-left:auto}
 }
-@media (max-width:520px){
-  .wrap{padding:0 18px}
-  .hero{padding-top:64px}
-  .phone{width:230px}
-  .header-cta{padding:8px 14px;font-size:12px}
+/* Tablets landscape / small laptops: icons-only top navigation */
+@media (min-width:900px) and (max-width:1099px){
+  .nav-label{display:none}
+  .nav-btn{padding:9px 10px}
+  .logo-sub{display:none}
 }
+/* Large monitors: use more of the screen */
+@media (min-width:1400px){
+  .wrap{max-width:1280px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+  .row{grid-auto-columns:minmax(180px,200px)}
+}
+
+main{min-height:70vh;padding:20px 0 48px}
+h1{font-size:26px;font-weight:800;letter-spacing:-0.01em;margin:0 0 14px}
+h2{font-size:19px;font-weight:800;margin:0}
+
+/* ── Home: scan card, your items, history ── */
+.scan-card{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--navy),var(--accent));color:#fff;border-radius:20px;padding:22px 24px;margin-bottom:28px;text-decoration:none;box-shadow:var(--shadow-md);transition:transform .15s}
+.scan-card:hover{transform:translateY(-1px)}
+.scan-card .big{width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,0.16);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.scan-card .big .ico{width:30px;height:30px}
+.scan-card b{display:block;font-size:20px;font-weight:800}
+.scan-card span{font-size:14px;color:rgba(255,255,255,0.88)}
+.scan-card .go{margin-left:auto;background:#fff;color:var(--navy);border-radius:12px;padding:10px 18px;font-weight:800;font-size:15px;flex-shrink:0}
+@media (max-width:560px){.scan-card{padding:18px;gap:14px}.scan-card .go{display:none}.scan-card b{font-size:18px}}
+/* Home: "How to order" guide */
+.howto{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 22px;margin-bottom:28px;box-shadow:var(--shadow-md)}
+.howto h2{margin:0 0 4px;font-size:20px}
+.howto .lead{margin:0 0 16px;color:var(--text2);font-size:14px}
+.howto-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.howto-btn{display:flex;align-items:center;gap:12px;border:0;border-radius:16px;padding:16px;font:inherit;text-align:left;cursor:pointer;text-decoration:none;background:linear-gradient(135deg,var(--navy),var(--accent));color:#fff}
+.howto-btn.alt{background:var(--accent-glow);color:var(--navy);border:2px solid var(--navy)}
+.howto-btn .ico{width:28px;height:28px;flex-shrink:0}
+.howto-btn b{display:block;font-size:16px;font-weight:800}
+.howto-btn span{font-size:12.5px;opacity:.9}
+#header-q.pulse{box-shadow:0 0 0 4px var(--accent-glow)}
+.howto ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.howto li{display:flex;gap:12px;align-items:flex-start;font-size:14px}
+.howto li .n{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+@media (max-width:560px){.howto{padding:16px}.howto-actions{grid-template-columns:1fr}}
+.section-head button.link{background:none;border:0;color:var(--accent);font-weight:700;font-size:14px;cursor:pointer;padding:0}
+.home-empty{background:var(--surface);border:1px dashed var(--border2);border-radius:var(--radius);padding:20px;color:var(--text2);font-size:14px;text-align:center}
+.pc-check{background:#fff;border-radius:14px;padding:14px;color:var(--text)}
+.pc-check label{font-size:13px;font-weight:700}
+.pc-row{display:flex;gap:8px;margin-top:8px}
+.pc-row input{flex:1;min-width:0;border:1px solid var(--border2);border-radius:10px;padding:10px 12px;text-transform:uppercase;outline:none}
+.pc-result{font-size:13px;font-weight:600;margin-top:8px;min-height:20px}
+.notice{border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;margin-bottom:14px}
+.notice.warn{background:var(--caution-bg);color:var(--caution)}
+.notice.ok{background:var(--safe-bg);color:var(--safe)}
+.notice.err{background:var(--danger-bg);color:var(--danger)}
+.notice.info{background:var(--info-bg);color:var(--navy)}
+
+/* ── Sections / grids ── */
+.section{margin-bottom:26px}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
+.section-head a{font-size:14px;font-weight:700;text-decoration:none}
+.row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(160px,180px);gap:12px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:box-shadow .15s,border-color .15s,transform .15s}
+.tile:hover{border-color:var(--border2);box-shadow:var(--shadow-hover);transform:translateY(-1px)}
+.tile:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tile-img{aspect-ratio:1/1;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:8px;background:#fff;border-radius:10px;padding:10px;overflow:hidden}
+/* Product photos are volunteer phone shots, so present them as tidy packshots:
+   same white square everywhere, centred, padded, never stretched. multiply +
+   a small brightness lift blends off-white/grey photo backgrounds into the
+   white tile. */
+.pic{width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;filter:brightness(1.06) contrast(1.04) saturate(1.05)}
+.pic{opacity:0;transition:opacity .25s ease}
+.pic.ok{opacity:1}
+/* Shimmer in the photo spot until the photo has loaded */
+.tile-img:has(> .pic:not(.ok)),.product-img:has(> .pic:not(.ok)),.thumb:has(> .pic:not(.ok)){background:linear-gradient(90deg,var(--surface2),#E9EDF2,var(--surface2));background-size:200% 100%;animation:shimmer 1.2s infinite}
+@supports not selector(:has(*)){.pic{opacity:1}}
+.ph{color:var(--border2)}
+.ph .ico{width:40px;height:40px}
+.tile-brand{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;min-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile-name{font-size:14px;font-weight:600;line-height:1.3;min-height:36px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile-size{font-size:12px;color:var(--muted);min-height:18px}
+.tile-ing{font-size:12px;line-height:1.4;color:var(--text2);margin-top:6px;min-height:34px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tile-ing b{font-weight:600;color:var(--text)}
+.tile-ing.none{color:var(--muted);font-style:italic}
+.skel{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--surface2),#E9EDF2,var(--surface2));background-size:200% 100%;animation:shimmer 1.2s infinite;margin-top:6px}
+.skel+.skel{width:70%}
+@keyframes shimmer{to{background-position:-200% 0}}
+.sk{background:linear-gradient(90deg,var(--surface2),#E9EDF2,var(--surface2));background-size:200% 100%;animation:shimmer 1.2s infinite}
+.sk-tile{pointer-events:none}
+.skel.sk-btn{height:36px;width:100%;border-radius:12px;margin-top:12px}
+/* Price on its own line; below it a full-width Add button that turns into a
+   full-width − qty + bar, so the control never overflows a narrow card. */
+.tile-foot{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:auto;padding-top:8px}
+.tile-foot .btn.small{width:100%;border-radius:10px;min-height:38px}
+.tile-foot .stepper{width:100%;justify-content:space-between;border-radius:10px;height:38px}
+.tile-foot .stepper button{width:44px;height:38px}
+.tile-foot .stepper span{flex:1}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none}
+.chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+button.chip{cursor:pointer;font:inherit;font-size:13px;font-weight:600}
+.store-chips{flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:0}
+.store-chips .chip{padding:6px 11px;font-size:12px}
+.chip{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:99px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--text);text-decoration:none}
+
+.btn{border:0;border-radius:12px;background:var(--navy);color:#fff;font-weight:800;font-size:15px;padding:13px 20px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:disabled{background:var(--border2);cursor:not-allowed}
+.btn.small{font-size:13px;padding:7px 14px;border-radius:99px}
+.btn.ghost{background:var(--surface);color:var(--navy);border:1px solid var(--border2)}
+.btn.danger{background:var(--danger-bg);color:var(--danger);border:1px solid rgba(197,48,48,0.3)}
+.btn.safe{background:var(--safe)}
+.btn.block{width:100%}
+.stepper{display:inline-flex;align-items:center;background:var(--accent-glow);border-radius:99px;height:32px}
+.stepper button{width:32px;height:32px;border:0;background:none;font-size:18px;font-weight:800;color:var(--navy);cursor:pointer}
+.stepper span{min-width:20px;text-align:center;font-weight:800;color:var(--navy)}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow-sm);margin-bottom:14px}
+.section-label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:1.2px;font-family:var(--mono);margin-bottom:10px}
+.two-col{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:860px){.two-col{grid-template-columns:1fr}}
+.line{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.line:last-child{border-bottom:0}
+.line .thumb{width:56px;height:56px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:4px}
+.line-info{flex:1;min-width:0}
+.line-name{font-weight:600;font-size:14px}
+/* Basket: tap the photo or name to open the product */
+.line-link{display:block;color:inherit;text-decoration:none;padding:2px 0}
+.line-link:hover .line-name{text-decoration:underline}
+.line-go{color:var(--muted);font-weight:700}
+/* Product page: sold by only one of our supermarkets */
+.only-at{display:inline-block;margin-top:14px;background:var(--caution-bg);color:var(--caution);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:600}
+a.thumb{text-decoration:none;cursor:pointer}
+.line-meta{font-size:12px;color:var(--muted)}
+.line-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.sum-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;font-size:14px;color:var(--text2)}
+.sum-row.total{font-size:18px;font-weight:800;color:var(--text);margin-top:4px}
+.sum-row.strike span:first-child{text-decoration:line-through;color:var(--muted)}
+.hint{font-size:12px;color:var(--text2);margin:6px 0}
+.steps{margin:0;padding-left:18px;font-size:13px;color:var(--text2)}
+.steps li{margin-bottom:4px}
+label.f{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px}
+input.f,textarea.f{width:100%;border:1px solid var(--border2);border-radius:10px;padding:10px 12px;margin-bottom:12px;background:#fff;color:var(--text);outline:none}
+input.f:focus,textarea.f:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+input.f:disabled{background:var(--surface2);color:var(--text2)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-msg{font-size:12px;font-weight:600;margin:-6px 0 10px}
+
+.product{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px}
+@media (max-width:720px){.product{grid-template-columns:1fr}}
+.product-img{background:#fff;border:1px solid var(--border);border-radius:18px;aspect-ratio:1/1;max-height:420px;display:flex;align-items:center;justify-content:center;padding:28px;overflow:hidden}
+.brand-label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:1px}
+.crumbs{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);margin-bottom:14px;flex-wrap:wrap}
+.crumbs a{color:var(--text2);text-decoration:none;font-weight:600}
+.crumbs a:hover{color:var(--navy)}
+.ing-text{font-size:14px;line-height:1.6;color:var(--text);margin:0}
+.allergens{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;align-items:center}
+.allergens .lbl{font-size:13px;font-weight:700;color:var(--text)}
+.allergen{background:var(--caution-bg);color:var(--caution);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700}
+
+.status-pill{display:inline-block;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+.st-PLACED{background:var(--caution-bg);color:var(--caution)}
+.st-PRICED{background:var(--info-bg);color:var(--info)}
+.st-APPROVED,.st-OUT_FOR_DELIVERY{background:var(--info-bg);color:var(--info)}
+.st-DELIVERED{background:var(--safe-bg);color:var(--safe)}
+.st-CANCELLED{background:var(--surface2);color:var(--muted)}
+.order-card{display:block;text-decoration:none;color:inherit}
+.order-card:hover{border-color:var(--border2)}
+.step{display:flex;align-items:center;gap:12px;padding:6px 0;font-weight:600}
+.dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;background:var(--border)}
+.dot.done{background:var(--safe)}
+.empty{text-align:center;padding:48px 16px;color:var(--text2)}
+.empty .icon{width:64px;height:64px;border-radius:50%;background:var(--accent-glow);color:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.empty .icon .ico{width:28px;height:28px}
+.empty h2{margin:0 0 6px;color:var(--text)}
+.signin-box{display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 16px;text-align:center}
+.back{display:inline-block;margin-bottom:12px;font-weight:700;text-decoration:none;color:var(--navy)}
+.spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:40px auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Phone & tablet-portrait layout: bottom tab bar (≤899px) ── */
+.tabbar{display:none}
+@media (max-width:899px){
+  .desk-only{display:none !important}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+  header{padding-top:env(safe-area-inset-top)}
+  .header-inner{gap:8px;padding-top:8px;padding-bottom:8px}
+  .logo-mark{width:30px;height:30px}
+  main{padding:14px 0 24px}
+  h1{font-size:22px}
+  /* iOS zooms into any field under 16px — keep every input at 16px */
+  input,textarea,select{font-size:16px !important}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);
+    border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:11px;font-weight:700;padding:4px 0;min-height:44px;justify-content:center}
+  .tabbar a.active{color:var(--navy)}
+  .tabbar .ti{position:relative;line-height:1}
+  .tabbar .ico{width:22px;height:22px}
+  .tabbar .badge{top:-6px;right:-12px}
+  .tab-scan .ti{background:var(--navy);color:#fff;border-radius:14px;padding:8px 12px;margin-top:-16px;box-shadow:var(--shadow-md)}
+  .search-scan span{display:none}
+  footer{padding-bottom:calc(22px + 64px + env(safe-area-inset-bottom));margin-bottom:calc(-64px - env(safe-area-inset-bottom))}
+}
+/* Tablet portrait: phone navigation, but roomier content */
+@media (min-width:721px) and (max-width:899px){
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .row{grid-auto-columns:minmax(170px,31%)}
+}
+/* Phones: compact */
+@media (max-width:720px){
+  .welcome{gap:12px;margin-bottom:10px}
+  .welcome .pc-check{max-width:none}
+  .pc-check{padding:10px}
+  .pc-row input{padding:9px 10px}
+  .notice{font-size:13px;padding:10px 12px}
+  .section{margin-bottom:20px}
+  .row{grid-auto-columns:minmax(150px,46%)}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .tile{padding:10px}
+  .tile-name{font-size:13px}
+  .card{padding:14px;border-radius:14px}
+  /* bigger tap targets (Apple's minimum is 44px) */
+  .stepper{height:40px}
+  .stepper button{width:40px;height:40px;font-size:20px}
+  .btn.small{min-height:38px;padding:8px 14px}
+  .btn{min-height:46px}
+  .product{gap:16px}
+  .product-img{padding:18px;max-height:340px}
+  .two-col{gap:12px}
+  .modes .mode{padding:12px 10px}
+}
+footer{border-top:1px solid var(--border);padding:22px 0;font-size:12px;color:var(--muted);background:var(--surface)}
+footer p{margin:4px 0}
+footer a{color:var(--text2);text-decoration:none}
+.store-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.store-btn{background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:18px 12px;font-size:16px;font-weight:800;color:var(--text);cursor:pointer;text-align:center}
+.store-btn:hover{border-color:var(--accent)}
+.store-btn.active{border-color:var(--navy);background:var(--accent-glow)}
+.price{font-size:16px;font-weight:800}
+.est{font-size:10px;font-weight:700;color:var(--muted);margin-left:3px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;max-width:min(92vw,420px);background:var(--text);color:#fff;border-radius:12px;padding:12px 16px;font-size:14px;font-weight:600;box-shadow:var(--shadow-md);text-align:center}
+@media (max-width:899px){.toast{bottom:calc(80px + env(safe-area-inset-bottom))}}
+.cant{color:var(--danger);font-weight:700}
+.modes{display:grid;gap:10px;margin:10px 0}
+.mode{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;background:#fff}
+.mode.active{border-color:var(--navy);background:var(--accent-glow)}
+.mode input{margin-top:3px}
+.mode b{display:block}
+.save{color:var(--safe);font-weight:800;font-size:13px}
+.addr-card{border:1px solid var(--border2);border-radius:12px;padding:12px;white-space:pre-line;font-size:14px;margin-bottom:10px}
+.header-search{padding-right:4px}
+.search-scan .ico{width:16px;height:16px}
+.search-scan{flex-shrink:0;display:flex;align-items:center;gap:5px;height:34px;padding:0 12px;border-radius:9px;background:var(--navy);color:#fff;text-decoration:none;font-weight:800;font-size:13px}
+.scan-box{position:relative;background:#000;border-radius:18px;overflow:hidden;aspect-ratio:3/4;max-height:70vh;max-width:480px;margin:0 auto 14px}
+.scan-box video{width:100%;height:100%;object-fit:cover;display:block}
+.scan-frame{position:absolute;left:12%;right:12%;top:38%;height:24%;border:3px solid rgba(255,255,255,0.9);border-radius:14px;box-shadow:0 0 0 999px rgba(0,0,0,0.35)}
+.scan-status{position:absolute;left:0;right:0;bottom:14px;text-align:center;color:#fff;font-weight:700;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,0.6)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
 </style>
 </head>
 <body>
-
 <header>
   <div class="wrap header-inner">
-    <a class="header-brand" href="/">
-      <img class="logo-mark" src="/favicon-180.png" alt="Shuddh Aahar"/>
+    <a class="header-brand" href="#/">
+      <img class="logo-mark" src="/favicon-180.png" alt=""/>
       <div>
         <div class="logo-name">Shuddh Aahar</div>
-        <div class="logo-sub">Clinical Nutrition Intelligence</div>
+        <div class="logo-sub">Everyday essentials</div>
       </div>
     </a>
-    <nav class="header-nav nav-links-desktop">
-      <a href="#how">How it works</a>
-      <a href="#features">Features</a>
-      <a href="#why">Why Shuddh Aahar</a>
-      <a href="/contact">Contact</a>
+    <form class="header-search" role="search" onsubmit="event.preventDefault();goSearch(this.q.value)">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <label class="sr-only" for="header-q">Search all UK groceries</label>
+      <input id="header-q" name="q" type="search" placeholder="Search groceries, e.g. milk, atta, Heinz beans" autocomplete="off" oninput="liveSearch(this.value)"/>
+      <a class="search-scan" href="#/scan" aria-label="Scan a barcode with your camera" title="Scan a barcode"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M8 8v8M11 8v8M14 8v8M17 8v8"/></svg><span>Scan</span></a>
+    </form>
+    <nav class="header-nav">
+      <a class="nav-btn desk-only" data-nav="" href="#/"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg><span class="nav-label">Home</span></a>
+      <a class="nav-btn desk-only" data-nav="store" href="#/store"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.2-4.2A1 1 0 0 0 17.8 4H6.2a1 1 0 0 0-1 .8z"/><path d="M5 9v11h14V9M9 20v-6h6v6"/></svg><span class="nav-label" id="store-label">Store</span></a>
+      <a class="nav-btn desk-only" data-nav="basket" href="#/basket"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6"/><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg><span class="nav-label">Basket</span><span class="badge basket-badge" hidden>0</span></a>
+      <a class="nav-btn desk-only" data-nav="account" href="#/account" aria-label="Your profile"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="nav-label" id="account-label">Sign in</span><span class="badge orders-badge" hidden>!</span></a>
     </nav>
-    <a class="header-cta" href="#download">Get the app</a>
   </div>
 </header>
 
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div>
-      <span class="hero-badge">🇬🇧 Launching soon in the UK</span>
-      <h1>Know if it's <em>actually</em> right for you<br/>before it's in your basket</h1>
-      <p>Scan any UK supermarket barcode and get an instant, personal verdict — checked against your own allergies, conditions and medications — plus where to buy it cheapest.</p>
-      <div class="store-row" id="download">
-        <span class="store-badge"><span class="glyph">🍎</span><span class="label"><small>COMING SOON ON THE</small><strong>App Store</strong></span></span>
-        <span class="store-badge"><span class="glyph">▶</span><span class="label"><small>COMING SOON ON</small><strong>Google Play</strong></span></span>
-      </div>
-      <p class="hero-note">In closed testing now — public UK release coming shortly.</p>
-    </div>
-    <div class="hero-visual">
-      <span class="float-chip c1">🎯 Matched to you</span>
-      <span class="float-chip c2">💰 Cheapest nearby</span>
-      <div class="phone">
-        <div class="phone-screen">
-          <div class="phone-notch"></div>
-          <div class="phone-card">
-            <div class="phone-product">
-              <div class="phone-thumb">🥣</div>
-              <div>
-                <strong>Oat & Honey Granola</strong>
-                <span>Scanned just now</span>
-              </div>
-            </div>
-            <div class="phone-verdict"><span class="dot"></span><span>⚠ High sugar for your goals</span></div>
-            <p class="phone-reason">18g sugar per serving — above your daily target. Contains oats: safe against your allergy profile.</p>
-            <div class="phone-price-row"><span class="store">Cheapest nearby</span><span class="price">£2.10</span></div>
-          </div>
-          <div class="phone-mini-card"><span>✓ Checked against your health profile</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<main><div class="wrap" id="view"><div class="spinner"></div></div></main>
 
-<section class="how" id="how">
-  <div class="wrap">
-    <div class="section-label">How it works</div>
-    <h2 class="section-title">Three steps, every time</h2>
-    <p class="section-sub">No generic traffic-light score. Every verdict is built fresh, from your own health profile.</p>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <h3>Scan a barcode</h3>
-        <p>Point your camera at any product barcode for an instant lookup against a live UK product database.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <h3>Get your verdict</h3>
-        <p>AI checks the product against your allergies, conditions, medications and goals, and explains the "why" in plain English.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <h3>See the best price</h3>
-        <p>Real-time price comparison across UK supermarkets shows exactly where to buy it for less.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="features" id="features">
-  <div class="wrap">
-    <div class="section-label">What's inside</div>
-    <h2 class="section-title">Built for your health, not a generic diet</h2>
-    <p class="section-sub">Everything is scored against you specifically — not an average shopper.</p>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🩺</div>
-        <h3>AI health verdicts</h3>
-        <p>Claude-powered analysis weighs every scanned product against your own allergies, conditions and medications — not a one-size-fits-all score.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">✚</div>
-        <h3>Clinically-grounded guidance</h3>
-        <p>Warnings are grounded in established nutritional science, so the advice reads like a clinician's, not a diet fad.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📷</div>
-        <h3>Instant barcode scanning</h3>
-        <p>Point your camera at any product for an instant lookup against a live UK product database.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🛒</div>
-        <h3>Cheapest store, instantly</h3>
-        <p>Real-time UK supermarket price comparison shows where the same product costs least, right alongside the health verdict.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="why" id="why">
-  <div class="wrap">
-    <div class="section-label">Why Shuddh Aahar</div>
-    <h2 class="section-title">A genuinely better way to shop</h2>
-    <p class="section-sub">Not another traffic-light label or generic diet score — a verdict built around you, every time.</p>
-    <div class="why-grid">
-      <div class="why-item">
-        <div class="num">1:1</div>
-        <p>Every verdict is scored against your own allergies, conditions and medications — never a generic average shopper.</p>
-      </div>
-      <div class="why-item">
-        <div class="num">2-in-1</div>
-        <p>Health verdict and cheapest price, together, in one scan — no switching between a diet app and a price comparison site.</p>
-      </div>
-      <div class="why-item">
-        <div class="num">0</div>
-        <p>Your health data is never sold, shared or monetised — full stop.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="trust">
-  <div class="wrap trust-row">
-    <span class="trust-item"><span class="dot"></span>UK GDPR compliant</span>
-    <span class="trust-item"><span class="dot"></span>Data stored in the UK (AWS London)</span>
-    <span class="trust-item"><span class="dot"></span>Your health data is never sold</span>
-  </div>
-</div>
-
-<section class="final-cta">
-  <div class="wrap">
-    <h2>Be first to know when we launch</h2>
-    <p>Shuddh Aahar is in closed testing now, with a public UK release coming shortly.</p>
-    <div class="store-row" style="justify-content:center">
-      <span class="store-badge"><span class="glyph">🍎</span><span class="label"><small>COMING SOON ON THE</small><strong>App Store</strong></span></span>
-      <span class="store-badge"><span class="glyph">▶</span><span class="label"><small>COMING SOON ON</small><strong>Google Play</strong></span></span>
-    </div>
-  </div>
-</section>
+<!-- Phone navigation: within thumb reach, like a shopping app -->
+<nav class="tabbar" aria-label="Main">
+  <a data-nav="" href="#/"><span class="ti"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/></svg></span>Home</a>
+  <a data-nav="store" href="#/store"><span class="ti"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.2-4.2A1 1 0 0 0 17.8 4H6.2a1 1 0 0 0-1 .8z"/><path d="M5 9v11h14V9M9 20v-6h6v6"/></svg></span><span id="store-label-m">Store</span></a>
+  <a data-nav="scan" href="#/scan" class="tab-scan"><span class="ti"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M8 8v8M11 8v8M14 8v8M17 8v8"/></svg></span>Scan</a>
+  <a data-nav="basket" href="#/basket"><span class="ti"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6"/><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg><span class="badge basket-badge" hidden>0</span></span>Basket</a>
+  <a data-nav="account" href="#/account"><span class="ti"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="badge orders-badge" hidden>!</span></span>Profile</a>
+</nav>
 
 <footer>
   <div class="wrap">
-    <p>© 2026 Shuddh Aahar · Informational guidance only, not medical advice</p>
-    <p class="footer-links"><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/contact">Contact & Support</a> · <a href="/delete-data">Delete My Data</a></p>
+    <p>© 2026 Shuddh Aahar · We shop any UK grocery for you and deliver it · Pay on delivery</p>
+    <p><a href="/privacy">Privacy Policy</a> · <a href="/terms">Terms of Service</a> · <a href="/contact">Contact & Support</a> · <a href="/delete-data">Delete My Data</a></p>
   </div>
 </footer>
 
+<script>
+// Shuddh Aahar web shop. There's no product list of our own: customers
+// search every UK grocery live (via our shop-info endpoint, catalog-get.js,
+// which proxies Open Food Facts), order anything, and we price each item
+// after we've shopped. There's no approval step: we deliver within 24 hours,
+// every day 5pm–8pm, and the customer pays the shop prices on delivery.
+// Orders go through AppSync (shop-actions.js); signing in uses
+// Google Identity Services. Money is integer pence throughout.
+const SHOP = {
+  infoUrl: 'https://v36cyuprlc.execute-api.eu-west-2.amazonaws.com',   // terraform output catalog_url
+  appsyncEndpoint: 'https://mt6klwidgjfqbkn3pun4bu4lv4.appsync-api.eu-west-2.amazonaws.com/graphql',
+  googleClientId: '592286927972-ponp7dqv3j5dkg98filk8me2jef05a8n.apps.googleusercontent.com',
+};
+
+const ICONS = {
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  scan: '<path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M8 8v8M11 8v8M14 8v8M17 8v8"/>',
+  home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-6h4v6"/>',
+  store: '<path d="M4 9h16l-1.2-4.2A1 1 0 0 0 17.8 4H6.2a1 1 0 0 0-1 .8z"/><path d="M5 9v11h14V9M9 20v-6h6v6"/>',
+  basket: '<path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6"/><circle cx="9" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  truck: '<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/>',
+  pound: '<path d="M17 6.5A4 4 0 0 0 9.5 8v9.5M6 12h8M6 18h11"/>',
+  leaf: '<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/>',
+  box: '<path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
+  pin: '<path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  wifi: '<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r=".8"/>',
+  star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+};
+const ICONS_PH = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">' + '<path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6"/></svg>';
+function icon(n) { return `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`; }
+
+// ─── State ───────────────────────────────────────────────────────
+let SETTINGS = null;              // { shopOpen, deliveryFeePence, radiusMiles, areaName, deliveryConfigured }
+let HISTORY = load('shop_history', []); // products the customer scanned or opened, newest first (this device only)
+const INGREDIENTS = new Map();    // barcode → 'loading' | { ingredients: string|null, allergens: [] }
+const SEARCHES = new Map();       // query → { products, page, pages, total, loading, error }
+const PRODUCTS = new Map();       // barcode → product (from search results or product lookups)
+let CART = load('shop_cart_v2', {});   // barcode → { qty, name, brand, image, quantity }
+let MY_ITEMS = load('shop_my_items', []); // products the customer pinned to their home screen (kept on their account when signed in)
+let STORE_ID = load('shop_store', null);   // the customer's supermarket (this device only — never stored on our side)
+let MODE = load('shop_mode', 'SHOP_AROUND'); // basket choice: 'STORE' (buy at their supermarket) or 'SHOP_AROUND'
+// Prices (TESTING): the chosen supermarket's shelf price from Trolley.co.uk,
+// looked up per product + pack size by catalog-get.js (?price=). Only shown on
+// the product page, basket and checkout — never on home/search tiles — and
+// always as an estimate: we confirm the exact price before the customer pays.
+const PRICES = new Map();         // `${store}|${barcode}|${size}` → 'loading' | { storePence|null, sizes, offer, loyaltyPence, loyaltyLabel }
+const SIZE_PICK = new Map();      // barcode → pack size the customer picked on the product page
+let SESSION = load('shop_session', null);
+let ORDERS_CACHE = null;
+let afterSignIn = null;
+
+function load(key, fallback) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; } catch { return fallback; } }
+function store(key, value) { try { value === null ? localStorage.removeItem(key) : localStorage.setItem(key, JSON.stringify(value)); } catch {} }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function gbp(p) { return '£' + ((p || 0) / 100).toFixed(2); }
+function plural(n, one, many) { return `${n} ${n === 1 ? one : many}`; }
+const $view = document.getElementById('view');
+
+// Customers never see which supermarket an own-brand product comes from —
+// we choose where to buy. The full name is still sent with the order, so the
+// admin knows exactly what to buy.
+const STORE_NAMES = ["sainsbury's", 'sainsburys', 'sainsbury', 'tesco', 'asda', 'morrisons', 'aldi', 'lidl', 'waitrose & partners', 'waitrose',
+  'the co-operative', 'the co-op', 'co-operative', 'cooperative', 'co-op', 'coop', 'marks & spencer', 'marks and spencer', 'm&s', 'iceland', 'ocado', 'booths', 'spar',
+  'costco', 'farmfoods', 'budgens', 'londis', 'nisa', 'heron foods', 'b&m', 'poundland'];
+const STORE_RE = new RegExp('(^|[^a-z])(by\\s+)?(' + STORE_NAMES.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace("'", "['’]?")).join('|') + ')(?=$|[^a-z])', 'gi');
+function cleanBrand(brand) {
+  const b = String(brand || '').trim();
+  return !b || b.replace(STORE_RE, ' ').replace(/[\s,.\-&]+/g, '') === '' ? '' : b.replace(STORE_RE, '$1').replace(/\s{2,}/g, ' ').trim();
+}
+function cleanName(name) {
+  const n = String(name || '').replace(STORE_RE, '$1').replace(/\s{2,}/g, ' ').replace(/^[\s\-–,.:]+|[\s\-–,.:]+$/g, '').trim();
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : String(name || '');
+}
+function title(p) { return [cleanBrand(p.brand), cleanName(p.name)].filter(Boolean).join(' '); }
+
+// ─── Supermarket choice & prices ─────────────────────────────────
+function stores() { return (SETTINGS && SETTINGS.stores) || []; }
+// Our supermarkets' names, for before the shop settings have loaded.
+const STORE_DISPLAY_NAMES = { tesco: 'Tesco', sainsburys: "Sainsbury's", asda: 'Asda', morrisons: 'Morrisons', aldi: 'Aldi', lidl: 'Lidl', waitrose: 'Waitrose', ms: 'Marks & Spencer' };
+function storeName(id = STORE_ID) { const s = stores().find(x => x.id === id); return s ? s.name : STORE_DISPLAY_NAMES[id] || 'your supermarket'; }
+function applyStore(id) {
+  const changed = id !== STORE_ID;
+  STORE_ID = id; store('shop_store', id);
+  updateStoreLabel();
+  if (changed) {
+    SEARCHES.clear(); PRODUCTS.clear();
+    refreshCartPrices();
+  }
+}
+function chooseStore(id) {
+  applyStore(id);
+  if (signedIn()) saveStoreToAccount(id).catch(err => console.warn('Could not save supermarket to account', err));
+  location.hash = '#/';
+}
+// Basket: pick the supermarket to buy everything at, without leaving the basket.
+function basketStore(id) {
+  MODE = 'STORE'; store('shop_mode', MODE);
+  applyStore(id);
+  if (signedIn()) saveStoreToAccount(id).catch(err => console.warn('Could not save supermarket to account', err));
+  render();
+}
+function updateStoreLabel() {
+  const label = STORE_ID ? storeName() : 'Store';
+  document.getElementById('store-label').textContent = label;
+  document.getElementById('store-label-m').textContent = label.length > 9 ? label.split(/[\s']/)[0] : label;
+}
+// ─── Prices (product page + basket only) ─────────────────────────
+const priceQueue = [];
+let priceActive = 0;
+function priceKey(p) { return `${STORE_ID}|${p.barcode}|${p.quantity || ''}`; }
+// Current price state for a product at a pack size; starts a lookup if needed.
+function priceFor(p) {
+  const key = priceKey(p);
+  if (!PRICES.has(key)) { PRICES.set(key, 'loading'); priceQueue.push({ key, p }); pumpPrices(); }
+  return PRICES.get(key);
+}
+function pumpPrices() {
+  while (priceActive < 3 && priceQueue.length) {
+    const { key, p } = priceQueue.shift();
+    priceActive++;
+    info({ price: p.barcode, name: p.name || '', brand: p.brand || '', quantity: p.quantity || '' })
+      .catch(() => ({ storePence: null, sizes: [], unavailable: true }))
+      .then(r => { PRICES.set(key, r); notePhoto(p.barcode, r); priceActive--; pumpPrices(); priceChanged(); });
+  }
+}
+// Re-render once a batch of prices lands — but never under a form being filled in.
+let priceRenderTimer = null;
+function priceChanged() {
+  clearTimeout(priceRenderTimer);
+  priceRenderTimer = setTimeout(() => { if (!location.hash.startsWith('#/checkout')) render(); }, 120);
+}
+// Price for a line in a basket mode: the chosen store's shelf price, or — when
+// shopping around — the cheapest of our supermarkets (and which one).
+function modePrice(r, mode = MODE) {
+  if (!r || r === 'loading') return null;
+  return mode === 'SHOP_AROUND' ? (r.cheapest ? r.cheapest.pence : null) : r.storePence;
+}
+function unitPrice(l, mode = MODE) { return modePrice(priceFor(l), mode); }
+function buyFrom(l) { const r = priceFor(l); return r && r !== 'loading' && r.cheapest ? r.cheapest.storeName : null; }
+// 'loading' | 'ok' (priced) | 'none' (not sold — we can't deliver it) | 'failed' (lookup error, retryable)
+function priceState(r, mode = MODE) { return !r || r === 'loading' ? 'loading' : modePrice(r, mode) ? 'ok' : r.unavailable ? 'failed' : 'none'; }
+function priceReady(p) {
+  return new Promise(resolve => { const tick = () => { const r = priceFor(p); if (r !== 'loading') resolve(r); else setTimeout(tick, 150); }; tick(); });
+}
+function retryPrices() { for (const [k, r] of PRICES) if (priceState(r) === 'failed') PRICES.delete(k); render(); }
+let toastTimer = null;
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.className = 'toast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+  el.textContent = msg; el.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
+}
+function priceTag(pence) { return pence ? `<span class="price">${gbp(pence)}</span><span class="est">est.</span>` : ''; }
+function linePrice(l) {
+  const r = priceFor(l), st = priceState(r);
+  if (st === 'loading') return '<span class="hint" style="margin:0">Checking price…</span>';
+  if (st === 'ok') return gbp(unitPrice(l) * l.qty) + (MODE === 'SHOP_AROUND' ? ` <span class="hint" style="margin:0;font-weight:600">· from ${esc(buyFrom(l))}</span>` : '');
+  if (st === 'failed') return `<span class="hint" style="margin:0">Couldn't check the price · <a href="javascript:retryPrices()">Try again</a></span>`;
+  // Buying at one store, but another of ours sells it: say so, not "can't deliver".
+  if (MODE === 'STORE' && r.cheapest) return `<span class="cant">${esc(storeName())} doesn't sell this</span> · <a href="javascript:void 0" onclick="setMode('SHOP_AROUND')">Switch to Best price</a> · <a href="javascript:void 0" onclick="setQty(${esc(JSON.stringify(l.barcode))},0)">Remove</a>`;
+  return `<span class="cant">Sorry, we can't deliver this item</span> · <a href="javascript:void 0" onclick="setQty(${esc(JSON.stringify(l.barcode))},0)">Remove</a>`;
+}
+// Checkout needs every line priced: nothing we can't deliver, nothing still loading.
+function basketBlocker() {
+  const states = cartLines().map(l => priceState(priceFor(l)));
+  if (states.includes('none')) {
+    const elsewhere = MODE === 'STORE' && cartLines().some(l => { const r = priceFor(l); return priceState(r) === 'none' && r.cheapest; });
+    return elsewhere ? `${storeName()} doesn't sell some of your items (marked in red). Choose a different supermarket, switch to Best price, or remove them.` : "Remove the items we can't deliver to continue.";
+  }
+  if (states.includes('failed')) return "We couldn't check some prices — tap Try again.";
+  if (states.includes('loading')) return 'Checking prices…';
+  return '';
+}
+function basketTotals(mode = MODE) {
+  const lines = cartLines();
+  const subtotal = lines.reduce((s, l) => s + (unitPrice(l, mode) || 0) * l.qty, 0);
+  const fee = SETTINGS ? SETTINGS.deliveryFeePence : 300;
+  const freeOver = SETTINGS ? SETTINGS.freeDeliveryOverPence : 3000;
+  const delivery = lines.length && !(freeOver > 0 && subtotal >= freeOver) ? fee : 0;
+  const unpriced = lines.filter(l => !unitPrice(l, mode)).length;
+  return { subtotal, delivery, total: subtotal + delivery, freeOver, toFree: freeOver > 0 ? Math.max(0, freeOver - subtotal) : 0, unpriced };
+}
+// Prices are keyed by store, so a store change just needs a redraw.
+function refreshCartPrices() { render(); }
+
+// ─── "Your items" on the home screen ─────────────────────────────
+function isMyItem(barcode) { return MY_ITEMS.some(i => i.barcode === barcode); }
+function toggleMyItem(barcode) {
+  if (isMyItem(barcode)) MY_ITEMS = MY_ITEMS.filter(i => i.barcode !== barcode);
+  else {
+    const p = PRODUCTS.get(barcode);
+    if (!p) return;
+    MY_ITEMS = [{ barcode, name: p.name, brand: p.brand, image: p.image, quantity: p.quantity }, ...MY_ITEMS].slice(0, 40);
+  }
+  store('shop_my_items', MY_ITEMS);
+  saveListsSoon();
+  render();
+}
+
+// Retries briefly when the server is busy (429/5xx or a dropped connection),
+// so a moment of heavy traffic doesn't show the customer an error.
+async function info(params) {
+  const url = `${SHOP.infoUrl}/?${new URLSearchParams({ ...params, ...(STORE_ID ? { store: STORE_ID } : {}) })}`;
+  let lastError;
+  for (const wait of [0, 600, 1500, 3000]) {
+    if (wait) await new Promise(r => setTimeout(r, wait));
+    try {
+      const res = await fetch(url);
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) return json;
+      lastError = new Error(json.error || 'Something went wrong. Please try again.');
+      if (res.status < 500 && res.status !== 429) break; // e.g. 404 — retrying won't help
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+function dedupe(products) { const seen = new Set(); return products.filter(p => !seen.has(p.barcode) && seen.add(p.barcode)); }
+function remember(products) { for (const p of products) if (!PRODUCTS.has(p.barcode)) PRODUCTS.set(p.barcode, p); }
+// Listings arrive already price-checked (only products our supermarkets sell
+// are listed) — keep those checks so product pages open with prices.
+function seedPrices(products) {
+  for (const p of products) {
+    if (p.price) { const k = priceKey(p); if (PRICES.get(k) === undefined || PRICES.get(k) === 'loading') PRICES.set(k, p.price); notePhoto(p.barcode, p.price); }
+    delete p.price;
+  }
+}
+
+// ─── Shop data ───────────────────────────────────────────────────
+let settingsLoading = false;
+async function loadSettings() {
+  if (settingsLoading) return;
+  settingsLoading = true;
+  try { SETTINGS = (await info({})).settings; } catch { SETTINGS = { shopOpen: true, deliveryFeePence: 0 }; }
+  settingsLoading = false;
+  render();
+}
+// History: every product the customer scans or opens, newest first.
+function addHistory(p) {
+  if (!p || !p.barcode || !p.name || (HISTORY[0] && HISTORY[0].barcode === p.barcode)) return;
+  HISTORY = [{ barcode: p.barcode, name: p.name, brand: p.brand, image: p.image, quantity: p.quantity },
+    ...HISTORY.filter(h => h.barcode !== p.barcode)].slice(0, 30);
+  store('shop_history', HISTORY);
+}
+function clearHistory() { if (confirm('Clear your history?')) { HISTORY = []; store('shop_history', HISTORY); render(); } }
+
+// Ingredients and allergens (Open Food Facts) for every product we show,
+// fetched in one batch per moment rather than one request per tile.
+let ingredientTimer = null;
+const ingredientQueue = new Set();
+function wantIngredients(barcode) {
+  if (!barcode || INGREDIENTS.has(barcode)) return;
+  INGREDIENTS.set(barcode, 'loading');
+  ingredientQueue.add(barcode);
+  clearTimeout(ingredientTimer);
+  ingredientTimer = setTimeout(flushIngredients, 250);
+}
+async function flushIngredients() {
+  const all = [...ingredientQueue];
+  ingredientQueue.clear();
+  for (let i = 0; i < all.length; i += 50) {
+    const batch = all.slice(i, i + 50);
+    try {
+      const r = await info({ ingredients: batch.join(',') });
+      for (const b of batch) INGREDIENTS.set(b, (r.items && r.items[b]) || { ingredients: null, allergens: [] });
+    } catch {
+      for (const b of batch) INGREDIENTS.delete(b); // try again next time it's shown
+    }
+  }
+  render();
+}
+function ingredientsOf(p) {
+  if (p && p.full && p.ingredients !== undefined) return { ingredients: p.ingredients, allergens: p.allergens || [] };
+  return INGREDIENTS.get(p.barcode);
+}
+async function runSearch(query, more) {
+  const key = query.toLowerCase();
+  const prev = SEARCHES.get(key);
+  if (prev && (prev.loading || (!more && prev.products))) return;
+  const page = more && prev ? prev.page + 1 : 1;
+  SEARCHES.set(key, { ...(prev || {}), loading: true, error: null });
+  render();
+  try {
+    const r = await info({ search: query, page, storeOnly: 1 }); // only the customer's supermarket
+    r.products = dedupe(r.products);
+    seedPrices(r.products);
+    remember(r.products);
+    const products = more && prev ? [...prev.products, ...r.products.filter(p => !prev.products.some(x => x.barcode === p.barcode))] : r.products;
+    SEARCHES.set(key, { products, page: r.page, pages: r.pages, total: r.total, loading: false });
+  } catch (err) {
+    SEARCHES.set(key, { ...(prev || {}), loading: false, error: err.message });
+  }
+  render();
+}
+async function loadProduct(barcode) {
+  try {
+    const r = await info({ product: barcode });
+    PRODUCTS.set(barcode, { ...PRODUCTS.get(barcode), ...r.product, full: true });
+    if (r.product.ingredients !== undefined) INGREDIENTS.set(barcode, { ingredients: r.product.ingredients, allergens: r.product.allergens || [] });
+  }
+  catch {
+    const prev = PRODUCTS.get(barcode) || {};
+    // Only "missing" if we have no details at all (a loading placeholder doesn't count).
+    PRODUCTS.set(barcode, { ...prev, barcode, loading: false, missing: !prev.name, full: true });
+  }
+  render();
+}
+
+// ─── Account address ─────────────────────────────────────────────
+// A full delivery address (phone optional) is required — and saved to the
+// customer's account — at checkout. Browsing and filling the basket are open
+// to everyone.
+let ACCOUNT = { synced: false, hasAddress: false, error: false };
+function fullAddress(a) { return !!(a && a.fullName && a.line1 && a.city && a.postcode); }
+
+// ─── Cart (stores what the customer picked — we have no product list) ──
+const MAX_QTY = 20;
+// One basket line per product (orders are priced per barcode). `quantity`
+// is the pack size — the one picked on the product page, if any.
+function setQty(barcode, qty) {
+  qty = Math.max(0, Math.min(MAX_QTY, Math.floor(qty)));
+  const p = CART[barcode] || PRODUCTS.get(barcode);
+  if (qty === 0 || !p) delete CART[barcode];
+  else CART[barcode] = { barcode, qty, name: p.name, brand: p.brand, image: p.image, quantity: CART[barcode] ? p.quantity : (SIZE_PICK.get(barcode) || matchedSize(p) || p.quantity) };
+  store('shop_cart_v2', CART);
+  saveListsSoon();
+  updateBadges();
+  render();
+}
+// The pack size Trolley priced for this product (if no size was picked).
+function matchedSize(p) { const r = PRICES.get(priceKey(p)); return r && r !== 'loading' && r.storePence ? r.matchedSize : undefined; }
+// A product only goes in the basket once we have its price at the customer's
+// store — anything the store doesn't stock, we can't deliver.
+const ADDING = new Set();
+async function addToCart(barcode) {
+  if (CART[barcode]) return setQty(barcode, CART[barcode].qty + 1);
+  const p = PRODUCTS.get(barcode);
+  if (!p || ADDING.has(barcode)) return;
+  const picked = SIZE_PICK.get(barcode);
+  ADDING.add(barcode); render();
+  const st = priceState(await priceReady(picked && picked !== p.quantity ? { ...p, quantity: picked } : p));
+  ADDING.delete(barcode);
+  if (st === 'ok') return setQty(barcode, 1);
+  if (st === 'failed') { PRICES.forEach((r, k) => priceState(r) === 'failed' && PRICES.delete(k)); toast("We couldn't check the price just now. Please try again."); }
+  else toast(MODE === 'STORE'
+    ? `Sorry, ${storeName()} doesn't stock ${title(p) || 'this item'}, so we can't deliver it from there.`
+    : `Sorry, we can't deliver ${title(p) || 'this item'} — none of the supermarkets we shop at stocks it.`);
+  render();
+}
+function cartLines() { return Object.entries(CART).map(([barcode, c]) => ({ ...c, barcode })); }
+function cartCount() { return Object.values(CART).reduce((n, c) => n + c.qty, 0); }
+function updateBadges() {
+  const n = cartCount();
+  document.querySelectorAll('.basket-badge').forEach(b => { b.textContent = n; b.hidden = n === 0; });
+  document.querySelectorAll('.orders-badge').forEach(b => { b.hidden = true; }); // nothing for the customer to act on
+}
+
+// ─── Auth (Google Identity Services) ─────────────────────────────
+function decodeJwt(token) {
+  const b64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(decodeURIComponent(atob(b64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+}
+function signedIn() { return SESSION && SESSION.exp * 1000 > Date.now() + 30000; }
+function initGoogle() {
+  if (!window.google || !google.accounts) { setTimeout(initGoogle, 200); return; }
+  google.accounts.id.initialize({ client_id: SHOP.googleClientId, callback: onGoogleCredential, auto_select: true, cancel_on_tap_outside: true });
+  // Google ID tokens last an hour — quietly offer returning customers a fresh one.
+  if (!signedIn() && load('shop_signed_in_before', false)) google.accounts.id.prompt();
+  render();
+}
+async function onGoogleCredential(resp) {
+  const c = decodeJwt(resp.credential);
+  SESSION = { token: resp.credential, exp: c.exp, sub: c.sub, name: c.name || '', email: c.email || '' };
+  store('shop_session', SESSION);
+  store('shop_signed_in_before', true);
+  ORDERS_CACHE = null;
+  updateAccount();
+  fetchOrders().then(updateBadges).catch(() => {});
+  await syncStoreWithAccount();
+  const next = afterSignIn; afterSignIn = null;
+  if (next && next !== location.hash) location.hash = next; else render();
+}
+function renderGoogleButton(el) {
+  if (!window.google || !google.accounts) { el.innerHTML = '<div class="spinner"></div>'; return; }
+  google.accounts.id.renderButton(el, { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'continue_with' });
+}
+function signOut() {
+  if (listsTimer) { clearTimeout(listsTimer); saveLists(); } // send a change still waiting to save
+  SESSION = null; store('shop_session', null); store('shop_signed_in_before', null); ORDERS_CACHE = null;
+  ACCOUNT = { synced: false, hasAddress: false, error: false };
+  // The basket and "Your items" are kept on the account — don't leave them on a shared device.
+  listsTimer = null;
+  CART = {}; MY_ITEMS = []; store('shop_cart_v2', CART); store('shop_my_items', MY_ITEMS); store('shop_lists_owner', null); store('shop_lists_dirty', null);
+  if (window.google && google.accounts) google.accounts.id.disableAutoSelect();
+  updateAccount(); updateBadges(); location.hash = '#/';
+}
+function accountClick() {
+  if (signedIn()) { if (confirm(`Signed in as ${SESSION.email}.\n\nSign out?`)) signOut(); }
+  else { afterSignIn = location.hash || '#/'; location.hash = '#/signin'; }
+}
+function updateAccount() {
+  document.getElementById('account-label').textContent = signedIn() ? (SESSION.name.split(' ')[0] || 'Account') : 'Sign in';
+}
+
+// ─── GraphQL ─────────────────────────────────────────────────────
+async function gql(query, variables) {
+  if (!signedIn()) { const e = new Error('Please sign in again.'); e.needsSignIn = true; throw e; }
+  const res = await fetch(SHOP.appsyncEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: SESSION.token },
+    body: JSON.stringify({ query, variables }),
+  });
+  if (res.status === 401) { SESSION = null; store('shop_session', null); updateAccount(); const e = new Error('Your session expired. Please sign in again.'); e.needsSignIn = true; throw e; }
+  const json = await res.json();
+  if (json.errors && json.errors.length) throw new Error(json.errors[0].message);
+  return json.data;
+}
+async function ensureUserRecord() {
+  const data = await gql(`query GetUser($id: ID!) { getUser(id: $id) { id preferredStoreId savedAddress { fullName line1 line2 city postcode phone } shopCart { ${LINE_FIELDS} } shopMyItems { ${LINE_FIELDS} } } }`, { id: SESSION.sub });
+  if (data.getUser) return data.getUser;
+  await gql('mutation CreateUser($input: CreateUserInput!) { createUser(input: $input) { id } }',
+    { input: { id: SESSION.sub, email: SESSION.email, name: SESSION.name, profileComplete: false } });
+  return { id: SESSION.sub, preferredStoreId: null, savedAddress: null, shopCart: null, shopMyItems: null };
+}
+function saveAddressToAccount(address) {
+  const { fullName, line1, line2, city, postcode, phone } = address;
+  return gql('mutation SaveAddress($input: UpdateUserInput!) { updateUser(input: $input) { id } }',
+    { input: { id: SESSION.sub, savedAddress: { fullName, line1, line2: line2 || null, city, postcode, phone: phone || null } } });
+}
+function saveStoreToAccount(id) {
+  return gql('mutation SaveStore($input: UpdateUserInput!) { updateUser(input: $input) { id preferredStoreId } }',
+    { input: { id: SESSION.sub, preferredStoreId: id } });
+}
+// ─── Basket + "Your items" on the account ──────────────────────────
+// Both follow the customer to every device they sign in on. The first time
+// this device syncs with an account, what's here is merged into the account
+// copy; after that the account copy wins (it may have changed elsewhere), and
+// every change here is saved straight back to it.
+const LINE_FIELDS = 'barcode qty name brand image quantity';
+const lineOut = (l, withQty) => {
+  const o = { barcode: l.barcode };
+  if (withQty) o.qty = l.qty;
+  for (const k of ['name', 'brand', 'image', 'quantity']) if (l[k]) o[k] = String(l[k]);
+  return o;
+};
+const lineIn = (l) => { const o = { barcode: l.barcode }; for (const k of ['qty', 'name', 'brand', 'image', 'quantity']) if (l[k] != null) o[k] = l[k]; return o; };
+let listsTimer = null, listsSaving = null;
+function saveListsSoon() {
+  // Changed while signed out (e.g. the hour-long Google sign-in ran out):
+  // remember it, so the next sync sends this device's lists up instead of
+  // replacing them with the account's older copy.
+  if (!signedIn()) { if (load('shop_lists_owner', null)) store('shop_lists_dirty', true); return; }
+  if (load('shop_lists_owner', null) !== SESSION.sub) return; // not synced yet — syncLists saves
+  clearTimeout(listsTimer);
+  listsTimer = setTimeout(saveLists, 500);
+}
+function saveLists() {
+  listsTimer = null;
+  if (!signedIn()) return Promise.resolve();
+  const input = {
+    id: SESSION.sub,
+    shopCart: Object.values(CART).filter(l => l.qty > 0).map(l => lineOut(l, true)),
+    shopMyItems: MY_ITEMS.map(l => lineOut(l, false)),
+  };
+  const p = gql('mutation SaveLists($input: UpdateUserInput!) { updateUser(input: $input) { id } }', { input })
+    .then(() => store('shop_lists_dirty', null))
+    .catch(err => { store('shop_lists_dirty', true); console.warn('Could not save basket to account', err); })
+    .finally(() => { if (listsSaving === p) listsSaving = null; });
+  listsSaving = p;
+  return p;
+}
+function syncLists(user) {
+  const serverCart = (user.shopCart || []).map(lineIn);
+  const serverItems = (user.shopMyItems || []).map(lineIn);
+  const firstTime = load('shop_lists_owner', null) !== SESSION.sub;
+  if (firstTime) {
+    // Merge: the account's lines, plus anything only on this device.
+    const cart = {};
+    for (const l of serverCart) cart[l.barcode] = l;
+    for (const l of Object.values(CART)) if (!cart[l.barcode]) cart[l.barcode] = l;
+    const items = [...serverItems, ...MY_ITEMS.filter(i => !serverItems.some(x => x.barcode === i.barcode))].slice(0, 40);
+    CART = cart; MY_ITEMS = items;
+    store('shop_lists_owner', SESSION.sub);
+  } else {
+    if (listsTimer || listsSaving) return; // a change here is on its way up — don't overwrite it
+    if (load('shop_lists_dirty', false)) { saveLists(); return; } // this device has newer changes
+    CART = Object.fromEntries(serverCart.map(l => [l.barcode, l]));
+    MY_ITEMS = serverItems;
+  }
+  store('shop_cart_v2', CART);
+  store('shop_my_items', MY_ITEMS);
+  updateBadges();
+  if (firstTime) saveLists();
+}
+// Back on this tab: pick up changes made on another device.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && signedIn()) syncStoreWithAccount();
+});
+// The chosen supermarket follows the customer's account: on a new device it's
+// loaded at sign-in; a choice made before ever signing in is saved to it.
+async function syncStoreWithAccount() {
+  if (!signedIn()) return;
+  try {
+    const user = await ensureUserRecord();
+    if (user.preferredStoreId && user.preferredStoreId !== STORE_ID) {
+      applyStore(user.preferredStoreId);
+      render();
+    } else if (!user.preferredStoreId && STORE_ID) {
+      await saveStoreToAccount(STORE_ID);
+    }
+    syncLists(user);
+    // Address: the account copy wins (it may have been edited on another
+    // device); an address only on this device is copied up to the account.
+    const local = load('shop_delivery_address', null);
+    if (fullAddress(user.savedAddress)) {
+      store('shop_delivery_address', { ...user.savedAddress, line2: user.savedAddress.line2 || '', phone: user.savedAddress.phone || '' });
+      ACCOUNT = { synced: true, hasAddress: true, error: false };
+    } else if (fullAddress(local)) {
+      await saveAddressToAccount(local);
+      ACCOUNT = { synced: true, hasAddress: true, error: false };
+    } else {
+      ACCOUNT = { synced: true, hasAddress: false, error: false };
+    }
+    render();
+  } catch (err) {
+    console.warn('Could not sync with account', err);
+    ACCOUNT = { synced: false, hasAddress: false, error: true };
+    render();
+  }
+}
+const ORDER_FIELDS = `id orderNumber subtotalPence deliveryFeePence totalPence note paymentMethod status createdAt updatedAt pricedAt
+  mode storeId storeName estimatedSubtotalPence
+  items { barcode name brand image quantity qty estimatedUnitPence buyFromStore available unitPricePence lineTotalPence } address { fullName line1 line2 city postcode phone }`;
+async function fetchOrders() {
+  const data = await gql(`query { listMyOrders(limit: 50) { items { ${ORDER_FIELDS} } } }`, {});
+  ORDERS_CACHE = data.listMyOrders.items || [];
+  updateBadges();
+  return ORDERS_CACHE;
+}
+
+// ─── Postcode check (our server only says yes/no + town) ─────────
+async function checkPostcode(raw) {
+  const pc = String(raw || '').trim();
+  if (pc.replace(/\s+/g, '').length < 5) return { valid: false };
+  try { return await info({ postcode: pc }); } catch { return { error: true }; }
+}
+function deliveryReady() { return !!(SETTINGS && SETTINGS.deliveryConfigured); }
+const NOT_READY = "We're not delivering yet — please check back soon.";
+function areaText() {
+  return SETTINGS && SETTINGS.radiusMiles ? `within ${SETTINGS.radiusMiles} miles of ${SETTINGS.areaName || 'our shop'}` : 'in our local area';
+}
+// ─── Shared fragments ────────────────────────────────────────────
+// Open Food Facts photos are served through our cleaning server
+// (img_clean.tf): background removed, centred on white, cached by CloudFront.
+const OFF_IMAGES = 'https://images.openfoodfacts.org/images/products/';
+function photoUrl(url) { return url && url.startsWith(OFF_IMAGES) ? '/img/' + url.slice(OFF_IMAGES.length) : url; }
+// Supermarket pack shot for the product we matched on Trolley, when there is
+// one (served from /photo/<id>, cached by CloudFront — see catalog-get.js).
+// On: supermarket pack shots from Trolley where we matched the product;
+// otherwise Open Food Facts photos, cleaned by img-clean.
+const USE_TROLLEY_PHOTOS = true;
+const PHOTOS = new Map(); // barcode → Trolley product id
+function notePhoto(barcode, r) { if (r && r !== 'loading' && r.photo) PHOTOS.set(barcode, r.photo); }
+function packShot(p) {
+  const r = PRICES.get(priceKey(p));
+  return r && r !== 'loading' && r.photo ? r.photo : PHOTOS.get(p.barcode);
+}
+// If a photo can't load, fall back to the Open Food Facts original rather
+// than a broken image.
+// Photos fade in over a shimmering placeholder. The page redraws often (e.g.
+// when prices arrive), so remember which photos already loaded — or failed
+// and fell back — and show those straight away instead of shimmering again.
+const LOADED_IMGS = new Set();
+const FALLBACK_IMGS = new Map(); // src that failed → src to use instead (null: none)
+function imgLoaded(el) { el.classList.add('ok'); LOADED_IMGS.add(el.getAttribute('src')); }
+function imgFailed(el) {
+  const src = el.getAttribute('src'), next = el.dataset.fallback;
+  el.onerror = null;
+  if (next && next !== src) { FALLBACK_IMGS.set(src, next); el.removeAttribute('data-fallback'); el.onerror = () => imgFailed(el); el.src = next; return; }
+  FALLBACK_IMGS.set(src, null);
+  el.replaceWith(Object.assign(document.createElement('span'), { className: 'ph', innerHTML: ICONS_PH }));
+}
+function imgTag(src, fallback) {
+  while (FALLBACK_IMGS.has(src)) { const next = FALLBACK_IMGS.get(src); if (next === null) return `<span class="ph">${ICONS_PH}</span>`; src = next; fallback = null; }
+  const ok = LOADED_IMGS.has(src) ? ' ok' : '';
+  const fb = fallback && fallback !== src ? ` data-fallback="${esc(fallback)}"` : '';
+  return `<img class="pic${ok}" src="${esc(src)}" alt="" loading="lazy" decoding="async" onload="imgLoaded(this)" onerror="imgFailed(this)"${fb}/>`;
+}
+function img(p) {
+  const shot = USE_TROLLEY_PHOTOS && p && p.barcode && packShot(p);
+  if (shot) return imgTag(`/photo/${encodeURIComponent(shot)}`, p.image || null);
+  if (!p || !p.image) return `<span class="ph">${icon('basket')}</span>`;
+  return imgTag(photoUrl(p.image), p.image);
+}
+// Placeholders shown while products load, shaped like the real thing.
+function skeletonTiles(n) {
+  return `<div class="grid" aria-busy="true" aria-label="Loading products">${'<div class="tile sk-tile"><div class="tile-img sk"></div><span class="skel"></span><span class="skel"></span><span class="skel sk-btn"></span></div>'.repeat(n)}</div>`;
+}
+function skeletonProduct() {
+  return `<div class="product" aria-busy="true" aria-label="Loading product"><div class="product-img sk"></div>
+    <div><span class="skel" style="height:14px;width:30%"></span><span class="skel" style="height:26px;width:85%;margin-top:12px"></span><span class="skel" style="height:14px;width:40%;margin-top:12px"></span>
+    <span class="skel" style="height:90px;margin-top:20px;border-radius:14px;width:100%"></span><span class="skel sk-btn" style="margin-top:16px"></span></div></div>`;
+}
+function addControl(barcode) {
+  const q = (CART[barcode] && CART[barcode].qty) || 0;
+  if (!q) return `<button class="btn small" ${ADDING.has(barcode) ? 'disabled' : ''} onclick="event.preventDefault();event.stopPropagation();addToCart(${esc(JSON.stringify(barcode))})">${ADDING.has(barcode) ? 'Checking…' : 'Add'}</button>`;
+  return stepper(barcode, q);
+}
+function stepper(barcode, q) {
+  return `<span class="stepper" onclick="event.preventDefault();event.stopPropagation()">
+    <button type="button" aria-label="Decrease" onclick="setQty(${esc(JSON.stringify(barcode))},${q - 1})">−</button><span>${q}</span>
+    <button type="button" aria-label="Increase" onclick="setQty(${esc(JSON.stringify(barcode))},${q + 1})">+</button></span>`;
+}
+function tile(p) {
+  return `<a class="tile" href="#/product/${encodeURIComponent(p.barcode)}">
+    <div class="tile-img">${img(p)}</div>
+    <div class="tile-brand">${esc(cleanBrand(p.brand))}</div>
+    <div class="tile-name">${esc(cleanName(p.name))}</div>
+    <div class="tile-size">${esc(p.quantity || '')}</div>
+    ${tileIngredients(p)}
+    <div class="tile-foot">${addControl(p.barcode)}</div>
+  </a>`;
+}
+function tileIngredients(p) {
+  wantIngredients(p.barcode);
+  const ing = ingredientsOf(p);
+  if (!ing || ing === 'loading') return '<div class="tile-ing" aria-hidden="true"><span class="skel"></span><span class="skel"></span></div>';
+  if (!ing.ingredients) return '<div class="tile-ing none">Ingredients not listed</div>';
+  return `<div class="tile-ing" title="${esc(ing.ingredients)}"><b>Ingredients:</b> ${esc(ing.ingredients)}</div>`;
+}
+// Our delivery promise — shown on the home screen, basket, checkout and orders.
+const DELIVERY_PROMISE = 'We deliver within 24 hours';
+const DELIVERY_SLOT = 'every day between 5pm and 8pm';
+function deliveryNotice(extra = '') {
+  return `<div class="notice info delivery-note">🚚 <b>${DELIVERY_PROMISE}</b> — ${DELIVERY_SLOT}.${extra ? ' ' + extra : ''}</div>`;
+}
+const HOW_IT_WORKS = `<ol class="steps">
+  <li>Order anything from the supermarkets we shop at.</li>
+  <li>We buy it in store and deliver within 24 hours, ${DELIVERY_SLOT}.</li>
+  <li>You pay the shop prices on delivery, by cash or card.</li></ol>`;
+function viewStore() {
+  if (!SETTINGS) { loadSettings(); return '<div class="spinner"></div>'; }
+  return `
+    <h1>Where do you usually shop?</h1>
+    <p style="margin:4px 0 6px">Tap the supermarket you normally buy your groceries from.</p>
+    <p class="hint" style="margin-bottom:16px">We'll show you that shop's products and prices, and buy your order there for you. At the basket you can also choose “Best price”, and we'll buy each item wherever it's cheapest. You can change your supermarket any time.</p>
+    <div class="store-grid">${stores().map(st => `<button class="store-btn ${st.id === STORE_ID ? 'active' : ''}" onclick="chooseStore('${esc(st.id)}')">${esc(st.name)}</button>`).join('')}</div>
+    ${signedIn() ? '<p class="hint" style="margin-top:14px">Saved to your account — it’ll be ready on any device you sign in on.</p>'
+      : `<div class="card signin-box" style="margin-top:18px"><b>Already chose a supermarket on another device?</b><span class="hint" style="margin:0">Sign in and we'll load it for you.</span><div id="gbtn"></div></div>`}`;
+}
+function closedNotice() { return SETTINGS && SETTINGS.shopOpen === false ? `<div class="notice warn">We're not taking orders right now. You can still browse and fill your basket.</div>` : ''; }
+const STATUS_LABEL = { PLACED: 'Order placed', PRICED: 'Shopped', APPROVED: 'Shopped', OUT_FOR_DELIVERY: 'Out for delivery', DELIVERED: 'Delivered', CANCELLED: 'Cancelled' };
+function statusPill(s) { return `<span class="status-pill st-${esc(s)}">${STATUS_LABEL[s] || esc(s)}</span>`; }
+function signInPrompt(title, text) {
+  return `<div class="card signin-box"><div class="empty" style="padding:0"><div class="icon" style="margin:0">${icon('user')}</div></div><h2>${title}</h2><p style="margin:0;color:var(--text2)">${text}</p><div id="gbtn"></div></div>`;
+}
+
+// ─── Views ───────────────────────────────────────────────────────
+function viewHome() {
+  if (!STORE_ID) { afterSignIn = '#/'; return viewStore(); }
+  if (!SETTINGS) loadSettings();
+  remember(MY_ITEMS);
+  remember(HISTORY);
+  // How to order: people weren't sure whether to type or scan, so say it
+  // plainly and give both as big buttons.
+  const scan = `
+    <section class="howto" aria-labelledby="howto-title">
+      <h2 id="howto-title">How to order</h2>
+      <p class="lead">Find the groceries you want — type the name or scan the barcode on the pack.</p>
+      <div class="howto-actions">
+        <button class="howto-btn" type="button" onclick="focusSearch()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span><b>Type to search</b><span>e.g. milk, atta, Heinz beans</span></span></button>
+        <a class="howto-btn alt" href="#/scan">${icon('scan')}<span><b>Scan a barcode</b><span>Use your phone camera</span></span></a>
+      </div>
+      <ol>
+        <li><span class="n">1</span><span><b>Find a product</b> — type in the search bar at the top, or scan its barcode.</span></li>
+        <li><span class="n">2</span><span><b>Tap Add</b> to put it in your basket.</span></li>
+        <li><span class="n">3</span><span><b>Open Basket and check out.</b> ${DELIVERY_PROMISE}, ${DELIVERY_SLOT} — pay on delivery.</span></li>
+      </ol>
+    </section>`;
+  const mine = `
+    <section class="section">
+      <div class="section-head"><h2>Your items</h2></div>
+      ${MY_ITEMS.length ? `<div class="grid">${MY_ITEMS.map(tile).join('')}</div>`
+        : `<div class="home-empty">Nothing here yet. Open a product and choose “Add to my home screen” to keep it here.</div>`}
+    </section>`;
+  const history = `
+    <section class="section">
+      <div class="section-head"><h2>History</h2>${HISTORY.length ? '<button class="link" type="button" onclick="clearHistory()">Clear</button>' : ''}</div>
+      ${HISTORY.length ? `<div class="grid">${HISTORY.map(tile).join('')}</div>`
+        : `<div class="home-empty">Products you scan or open will appear here.</div>`}
+    </section>`;
+  return deliveryNotice() + scan + mine + history;
+}
+
+function viewSearch(params) {
+  if (!STORE_ID) return viewStore();
+  const q = (params.get('q') || '').trim();
+  if (!q) return `<h1>Search</h1><div class="empty"><div class="icon">${icon('search')}</div><p>Search any UK grocery, for example “milk”, “atta” or “Heinz beans”.</p></div>`;
+  const s = SEARCHES.get(q.toLowerCase());
+  if (!s || (!s.products && !s.error)) { runSearch(q); return `<h1>Results for “${esc(q)}” at ${esc(storeName())}</h1><p class="hint">Finding products ${esc(storeName())} sells…</p>${skeletonTiles(8)}`; }
+  if (s.error && !s.products) return `<h1>Results for “${esc(q)}” at ${esc(storeName())}</h1><div class="notice err">${esc(s.error)}</div><button class="btn" onclick="SEARCHES.delete('${esc(q.toLowerCase())}');render()">Try again</button>`;
+  return `
+    <h1>Results for “${esc(q)}” at ${esc(storeName())}</h1>
+    ${s.products.length
+      ? `<p class="hint">${s.total > s.products.length ? `Showing ${s.products.length} of ${s.total.toLocaleString()}` : plural(s.products.length, 'product', 'products')} · you pay shop prices on delivery</p>
+         <div class="grid">${s.products.map(tile).join('')}</div>
+         ${s.page < s.pages ? `<div style="text-align:center;margin-top:18px"><button class="btn ghost" ${s.loading ? 'disabled' : ''} onclick="runSearch(${esc(JSON.stringify(q))}, true)">${s.loading ? 'Loading…' : 'Load more'}</button></div>` : ''}`
+      : `<div class="empty"><div class="icon">${icon('search')}</div><p>Nothing found at ${esc(storeName())}. Try a shorter or different word, or <a href="#/store">pick another supermarket</a>.</p></div>`}`;
+}
+
+function viewProduct(barcode) {
+  let p = PRODUCTS.get(barcode);
+  if (!p || !p.full) { if (!p || !p.loading) { PRODUCTS.set(barcode, { ...(p || {}), barcode, loading: true }); loadProduct(barcode); } if (!p || !p.name) return skeletonProduct(); }
+  p = PRODUCTS.get(barcode);
+  if (!p.missing) addHistory(p);
+  if (p.missing) return `<a class="back" href="#/">‹ Back to home</a><div class="empty"><div class="icon">${icon('scan')}</div><h2>We couldn’t find barcode ${esc(barcode)}</h2><p>It isn’t in the UK product database yet. Try <a href="#/scan">scanning again</a> or search for it by name.</p></div>`;
+  const base = priceFor(p);
+  const ready = base && base !== 'loading';
+  const chosen = (CART[barcode] && CART[barcode].quantity) || SIZE_PICK.get(barcode) || '';
+  const picked = chosen && chosen !== p.quantity ? priceFor({ ...p, quantity: chosen }) : base;
+  const pickedReady = picked && picked !== 'loading';
+  // No size picked yet: show the size Trolley priced (may be the nearest one).
+  const size = chosen || (pickedReady && picked.matchedSize) || p.quantity || '';
+  const sizes = ready ? [...(base.sizes || [])] : [];
+  if (size && pickedReady && picked.storePence && !picked.approximate && !sizes.includes(size)) sizes.unshift(size);
+  const q = (CART[barcode] && CART[barcode].qty) || 0;
+  const priceRow = !pickedReady ? '<span class="hint" style="margin:0">Checking price…</span>'
+    : picked.storePence ? priceTag(picked.storePence)
+    : picked.unavailable ? `<span class="hint" style="margin:0">Couldn't check</span>`
+    : `<span class="cant">${picked.cheapest ? 'Not sold here' : 'Unavailable'}</span>`;
+  const st = priceState(picked);
+  const cheap = pickedReady && picked.cheapest;
+  // Not at their store, but another supermarket sells it: they can still buy it by shopping around.
+  const aroundOnly = MODE === 'STORE' && st === 'none' && cheap;
+  // Which of our supermarkets sell it — call out products only one of them sells.
+  const soldAt = pickedReady && Array.isArray(picked.soldAt) ? picked.soldAt : [];
+  const names = (ids) => ids.map(id => storeName(id));
+  const listNames = (ids) => { const n = names(ids); return n.length > 1 ? `${n.slice(0, -1).join(', ')} and ${n[n.length - 1]}` : n[0] || ''; };
+  const availability = soldAt.length === 1
+    ? `<div class="only-at">🏪 Only available at <b>${esc(storeName(soldAt[0]))}</b>${soldAt[0] !== STORE_ID ? ` — not at ${esc(storeName())}` : ''}</div>`
+    : soldAt.length > 1 ? `<p class="hint" style="margin:10px 0 0">Sold at ${esc(listNames(soldAt))}</p>` : '';
+  const ing = ingredientsOf(p);
+  const ingCard = `
+        <div class="card" style="margin-top:16px">
+          <div class="section-label">INGREDIENTS</div>
+          ${!ing || ing === 'loading' ? '<span class="skel"></span><span class="skel"></span>'
+            : ing.ingredients ? `<p class="ing-text">${esc(ing.ingredients)}</p>`
+            : '<p class="ing-text" style="color:var(--muted)">The ingredients for this product haven’t been listed yet. Please check the pack.</p>'}
+          ${ing && ing !== 'loading' && ing.allergens.length ? `<div class="allergens"><span class="lbl">Contains:</span>${ing.allergens.map(a => `<span class="allergen">${esc(a)}</span>`).join('')}</div>` : ''}
+          <p class="hint" style="margin:12px 0 0">Recipes change, so always check the pack, especially if you have an allergy.</p>
+        </div>`;
+  return `
+    <nav class="crumbs" aria-label="Breadcrumb"><a href="javascript:history.back()">‹ Back</a><span>·</span><a href="#/">Home</a><span>/</span><span>${esc(cleanName(p.name))}</span></nav>
+    <div class="product">
+      <div class="product-img">${img(p)}</div>
+      <div>
+        ${cleanBrand(p.brand) ? `<div class="brand-label">${esc(cleanBrand(p.brand).toUpperCase())}</div>` : ''}
+        <h1 style="margin:4px 0">${esc(cleanName(p.name))}</h1>
+        ${p.quantity && !sizes.length ? `<div style="color:var(--text2)">${esc(p.quantity)}</div>` : ''}
+        ${sizes.length ? `<div class="section-label" style="margin-top:14px">SIZE</div>
+          <div class="chips" style="flex-wrap:wrap;margin-bottom:0">${sizes.map(sz => `<button type="button" class="chip${sz === size ? ' active' : ''}" onclick="pickSize(${esc(JSON.stringify(barcode))},${esc(JSON.stringify(sz))})">${esc(sz)}</button>`).join('')}</div>` : ''}
+        ${availability}
+        <div class="card" style="margin:16px 0">
+          <div class="sum-row" style="font-size:15px"><span>At ${esc(storeName())}${size ? ` · ${esc(size)}` : ''}</span><span>${priceRow}</span></div>
+          ${picked && picked.loyaltyPence ? `<div class="sum-row" style="font-size:14px;color:var(--text2)"><span>${esc(picked.loyaltyLabel)}</span><span>${gbp(picked.loyaltyPence)}</span></div>` : ''}
+          ${picked && picked.offer && !picked.loyaltyPence ? `<p class="hint" style="margin:4px 0 0">Offer: ${esc(picked.offer)}</p>` : ''}
+          ${cheap && cheap.storeId !== STORE_ID ? `<div class="sum-row" style="font-size:15px;color:var(--text)"><span><b>Cheapest</b> · ${esc(cheap.storeName)}</span><span>${priceTag(cheap.pence)}</span></div>
+            ${picked.storePence > cheap.pence ? `<div class="save">Save ${gbp(picked.storePence - cheap.pence)} with Best price</div>` : ''}` : ''}
+          ${pickedReady && picked.approximate ? `<p class="hint" style="margin:6px 0 0">Closest match${picked.storePence ? ` at ${esc(storeName())}` : ''}: <b>${esc(picked.matchedName)}</b></p>` : ''}
+          ${pickedReady && (picked.storePence || cheap) && !aroundOnly ? `<p class="hint">Supermarket shelf price. You pay the price we pay in store, on delivery.</p>`
+            : aroundOnly ? `<p class="hint">${esc(storeName())} doesn't sell this, but ${esc(cheap.storeName)} does. Switch your basket to “Best price” and we'll buy it there for you.</p>`
+            : st === 'failed' ? `<p class="hint">We couldn't check the price just now. <a href="javascript:retryPrices()">Try again</a></p>`
+            : st === 'none' ? `<p class="hint">Sorry, we can't deliver this item — none of the supermarkets we shop at stocks it.${sizes.length > 1 ? ' Try another size.' : ''}</p>` : ''}
+        </div>
+        ${q && st === 'none' ? `<button class="btn ghost" onclick="setQty(${esc(JSON.stringify(barcode))},0)">Remove from basket</button>`
+          : q ? `<div style="display:flex;gap:12px;align-items:center">${stepper(barcode, q)}<a class="btn" href="#/basket">View basket</a></div>`
+          : st === 'ok' ? `<button class="btn" ${ADDING.has(barcode) ? 'disabled' : ''} onclick="addToCart(${esc(JSON.stringify(barcode))})">Add to basket</button>`
+          : aroundOnly ? `<button class="btn" onclick="MODE='SHOP_AROUND';store('shop_mode',MODE);addToCart(${esc(JSON.stringify(barcode))})">Switch to Best price &amp; add to basket</button>`
+          : `<button class="btn" disabled style="background:var(--border2)">${st === 'loading' ? 'Checking price…' : "Can't deliver this item"}</button>`}
+        <div style="margin-top:12px"><button class="btn ghost" onclick="toggleMyItem('${esc(barcode)}')">${isMyItem(barcode) ? '✓ On your home screen · Remove' : `${icon('star')} Add to my home screen`}</button></div>
+        ${ingCard}
+        <p class="hint" style="margin-top:14px">Barcode ${esc(barcode)}</p>
+      </div>
+    </div>`;
+}
+
+// Picking a size also switches the basket line, if the product is in it.
+function pickSize(barcode, size) {
+  SIZE_PICK.set(barcode, size);
+  if (CART[barcode]) { CART[barcode].quantity = size; store('shop_cart_v2', CART); saveListsSoon(); }
+  render();
+}
+function setMode(m) { MODE = m; store('shop_mode', m); render(); }
+function modeChooser() {
+  const atStore = basketTotals('STORE'), around = basketTotals('SHOP_AROUND');
+  const saving = atStore.unpriced || around.unpriced ? 0 : atStore.subtotal - around.subtotal;
+  const store = esc(storeName());
+  const storeMissing = atStore.unpriced
+    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${store} doesn't sell ${plural(atStore.unpriced, 'of your items', 'of your items')} (marked in red in your basket). Choose a different supermarket below, switch to Best price, or remove ${atStore.unpriced === 1 ? 'it' : 'them'}.</span>` : '';
+  const aroundMissing = around.unpriced
+    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${plural(around.unpriced, 'item isn’t', 'items aren’t')} sold at any supermarket we shop at — please remove ${around.unpriced === 1 ? 'it' : 'them'}.</span>` : '';
+  return `<div class="modes">
+    <label class="mode ${MODE === 'STORE' ? 'active' : ''}"><input type="radio" name="mode" ${MODE === 'STORE' ? 'checked' : ''} onchange="setMode('STORE')"/>
+      <span><b>Buy everything from ${store}${atStore.subtotal ? ` · ${gbp(atStore.subtotal)}` : ''}</b><span class="hint">We go to ${store}, buy all your items there at ${store}'s prices, and deliver them to you.</span>${storeMissing}
+        <span class="hint" style="display:block;margin:10px 0 0;font-weight:600">Want a different supermarket?</span>
+        <span class="chips store-chips" style="margin-top:6px">${stores().map(st => `<button type="button" class="chip${st.id === STORE_ID ? ' active' : ''}" onclick="event.preventDefault();basketStore('${esc(st.id)}')">${esc(st.name)}</button>`).join('')}</span></span></label>
+    <label class="mode ${MODE === 'SHOP_AROUND' ? 'active' : ''}"><input type="radio" name="mode" ${MODE === 'SHOP_AROUND' ? 'checked' : ''} onchange="setMode('SHOP_AROUND')"/>
+      <span><b>Best price${around.subtotal ? ` · ${gbp(around.subtotal)}` : ''}</b><span class="hint">We check all the supermarkets, buy each item wherever it's cheapest, and deliver everything to you together.</span>${saving > 0 ? `<span class="save">You save ${gbp(saving)} compared with buying everything from ${store}</span>` : ''}${aroundMissing}</span></label>
+  </div>`;
+}
+// Shop around: which supermarket each item comes from, cheapest first.
+function whereWeBuy() {
+  if (MODE !== 'SHOP_AROUND') return '';
+  const groups = new Map();
+  for (const l of cartLines()) {
+    const at = unitPrice(l) && buyFrom(l);
+    if (!at) continue;
+    const g = groups.get(at) || { items: [], total: 0 };
+    g.items.push(l); g.total += unitPrice(l) * l.qty;
+    groups.set(at, g);
+  }
+  if (!groups.size) return '';
+  return `<div class="section-label" style="margin-top:14px">WHERE WE'LL BUY</div>
+    ${[...groups].map(([store, g]) => `
+      <div class="sum-row" style="font-weight:700"><span>${esc(store)} · ${plural(g.items.reduce((n, l) => n + l.qty, 0), 'item', 'items')}</span><span>${gbp(g.total)}</span></div>
+      <div class="hint" style="margin:0 0 8px">${g.items.map(l => esc(`${l.qty} × ${cleanName(l.name)}`)).join(', ')}</div>`).join('')}`;
+}
+function basketSummary() {
+  const t = basketTotals();
+  return `
+    <div class="sum-row"><span>Items (${cartCount()})</span><span>${gbp(t.subtotal)}</span></div>
+    <div class="sum-row"><span>Delivery</span><span>${t.delivery ? gbp(t.delivery) : 'Free'}</span></div>
+    <div class="sum-row total"><span>Estimated total</span><span>${gbp(t.total)}</span></div>
+    ${t.delivery && t.toFree ? `<p class="hint">Add ${gbp(t.toFree)} more for free delivery.</p>` : ''}
+    ${whereWeBuy()}
+    <p class="hint">Estimated from ${MODE === 'SHOP_AROUND' ? 'supermarket' : esc(storeName()) + "'s"} shelf prices. You pay the prices we pay in store, on delivery, by cash or card.</p>
+    ${deliveryNotice()}`;
+}
+function viewBasket() {
+  if (!STORE_ID) return viewStore();
+  const lines = cartLines();
+  if (!lines.length) return `<h1>Basket</h1><div class="empty"><div class="icon">${icon('basket')}</div><h2>Your basket is empty</h2><p>Search for anything you'd buy at a UK supermarket.</p><a class="btn" href="#/">Start shopping</a></div>`;
+  const fee = SETTINGS ? SETTINGS.deliveryFeePence : 0;
+  return `
+    <h1>Basket</h1>
+    <div class="two-col">
+      <div class="card">${lines.map(l => `
+        <div class="line">
+          <a class="thumb" href="#/product/${encodeURIComponent(l.barcode)}" aria-label="Open ${esc(cleanName(l.name))}">${img(l)}</a>
+          <div class="line-info">
+            <a class="line-link" href="#/product/${encodeURIComponent(l.barcode)}">
+              <div class="line-name">${esc(cleanName(l.name))} <span class="line-go" aria-hidden="true">›</span></div>
+              <div class="line-meta">${esc([cleanBrand(l.brand), l.quantity].filter(Boolean).join(' · '))}</div>
+            </a>
+            <div class="line-meta" style="font-weight:700;color:var(--text)">${linePrice(l)}</div>
+          </div>
+          <div class="line-right">${stepper(l.barcode, l.qty)}</div>
+        </div>`).join('')}</div>
+      <div class="card">
+        <div class="section-label">HOW SHOULD WE BUY YOUR ITEMS?</div>
+        ${modeChooser()}
+        ${basketSummary()}
+        ${SETTINGS && SETTINGS.shopOpen === false ? `<p class="hint" style="color:var(--caution);font-weight:600">We're not taking orders right now.</p>` : ''}
+        ${basketBlocker() ? `<p class="hint" style="color:var(--danger);font-weight:600">${esc(basketBlocker())}</p>` : ''}
+        <a class="btn block" style="margin-top:10px${(SETTINGS && SETTINGS.shopOpen === false) || basketBlocker() ? ';pointer-events:none;background:var(--border2)' : ''}" href="#/checkout">Checkout</a>
+      </div>
+    </div>`;
+}
+
+const EMPTY_ADDRESS = { fullName: '', line1: '', line2: '', city: '', postcode: '', phone: '' };
+let checkoutPostcode = null; // { postcode, town, deliverable } once checked
+let editingAddress = false;
+// The customer's address lives on this device (and on their past orders) —
+// never in a separate customer-address store.
+function savedAddress() {
+  const local = load('shop_delivery_address', null);
+  if (local && local.line1) return local;
+  const last = (ORDERS_CACHE || [])[0];
+  return last ? { ...last.address, line2: last.address.line2 || '' } : null;
+}
+function viewCheckout() {
+  const lines = cartLines();
+  if (!lines.length || cartLines().some(l => priceState(priceFor(l)) === 'none')) { setTimeout(() => { location.hash = '#/basket'; }); return ''; }
+  if (!signedIn()) { afterSignIn = '#/checkout'; return `<a class="back" href="#/basket">‹ Basket</a><h1>Checkout</h1>${signInPrompt('Sign in to check out', 'We use your Google account so you can follow your order — here or in our app.')}`; }
+  if (ORDERS_CACHE === null) fetchOrders().then(render).catch(() => {});
+  const saved = savedAddress();
+  const a = saved || { ...EMPTY_ADDRESS, fullName: SESSION.name, postcode: load('shop_postcode', '') };
+  const showForm = editingAddress || !saved;
+  const pcOk = checkoutPostcode && checkoutPostcode.deliverable;
+  if (!checkoutPostcode && a.postcode) setTimeout(() => runCheckoutPostcode(a.postcode), 0);
+  return `
+    <a class="back" href="#/basket">‹ Basket</a>
+    <h1>Checkout</h1>
+    <form id="checkout-form" class="two-col" onsubmit="event.preventDefault();submitOrder()">
+      <div>
+        <div class="card">
+          <div class="section-label">DELIVERY ADDRESS</div>
+          ${!showForm ? `
+            <div class="addr-card">${esc([a.fullName, a.line1, a.line2, `${a.city} ${a.postcode}`, a.phone].filter(Boolean).join('\n'))}</div>
+            <div class="field-msg" id="pc-msg">${checkoutPostcode ? (checkoutPostcode.deliverable ? `<span style="color:var(--safe)">✓ We deliver here</span>` : `<span style="color:var(--danger)">${esc(checkoutPostcode.message)}</span>`) : '<span style="color:var(--muted)">Checking delivery area…</span>'}</div>
+            <button class="btn small ghost" type="button" onclick="editingAddress=true;render()">Change address</button>
+            ${['fullName', 'line1', 'line2', 'city', 'phone'].map(k => `<input type="hidden" id="${k}" value="${esc(a[k] || '')}"/>`).join('')}
+            <label class="f" for="note" style="margin-top:14px">Note for us (optional)</label><textarea class="f" id="note" rows="2" maxlength="500" placeholder="e.g. substitutions are fine, ring the bell twice"></textarea>
+          ` : `
+          <label class="f" for="postcode">Postcode</label>
+          <div class="pc-row" style="margin:0 0 12px"><input class="f" style="margin:0;text-transform:uppercase" id="postcode" required autocomplete="postal-code" value="${esc(checkoutPostcode ? checkoutPostcode.postcode : a.postcode)}" onchange="checkoutPostcode=null"/>
+            <button class="btn small" type="button" onclick="runCheckoutPostcode(document.getElementById('postcode').value)">Check</button></div>
+          <div class="field-msg" id="pc-msg">${checkoutPostcode ? (checkoutPostcode.deliverable ? `<span style="color:var(--safe)">✓ We deliver to ${esc(checkoutPostcode.postcode)}</span>` : `<span style="color:var(--danger)">${esc(checkoutPostcode.message)}</span>`) : '<span style="color:var(--muted)">Enter your postcode and tap Check.</span>'}</div>
+          <fieldset style="border:0;padding:0;margin:0" ${pcOk ? '' : 'disabled'}>
+            <label class="f" for="line1">House number and street</label><input class="f" id="line1" required autocomplete="address-line1" value="${esc(a.line1)}" placeholder="e.g. 12 Station Road"/>
+            <label class="f" for="line2">Flat, building (optional)</label><input class="f" id="line2" autocomplete="address-line2" value="${esc(a.line2 || '')}"/>
+            <label class="f" for="city">Town</label><input class="f" id="city" required autocomplete="address-level2" value="${esc((checkoutPostcode && checkoutPostcode.town) || a.city)}"/>
+            <label class="f" for="fullName">Full name</label><input class="f" id="fullName" required autocomplete="name" value="${esc(a.fullName)}"/>
+            <label class="f" for="phone">Phone number (optional)</label><input class="f" id="phone" type="tel" autocomplete="tel" value="${esc(a.phone || '')}" placeholder="So our driver can reach you"/>
+            <label class="f" for="note">Note for us (optional)</label><textarea class="f" id="note" rows="2" maxlength="500" placeholder="e.g. substitutions are fine, ring the bell twice"></textarea>
+          </fieldset>
+          ${saved ? '<button class="btn small ghost" type="button" onclick="editingAddress=false;checkoutPostcode=null;render()">Use saved address</button>' : ''}`}
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-label">YOUR ORDER</div>
+        <div class="hint" style="margin-top:0">${MODE === 'STORE' ? `We buy everything from <b>${esc(storeName())}</b> for you` : '<b>Best price</b> — we buy each item wherever it\'s cheapest'} · <a href="#/basket">change</a></div>
+        ${lines.map(l => `<div class="sum-row"><span>${l.qty} × ${esc(title(l))}${l.quantity ? ` <span style="color:var(--muted)">· ${esc(l.quantity)}</span>` : ''}</span><span>${linePrice(l)}</span></div>`).join('')}
+        ${whereWeBuy()}
+        <hr style="border:0;border-top:1px solid var(--border);margin:10px 0"/>
+        ${basketSummary()}
+        <div class="section-label" style="margin-top:12px">WHAT HAPPENS NEXT</div>
+        ${HOW_IT_WORKS}
+        <div class="notice err" id="order-err" hidden style="margin-top:10px"></div>
+        <button class="btn block" id="place-btn" type="submit" style="margin-top:12px" ${pcOk ? '' : 'disabled'}>Place order</button>
+        <p class="hint" style="text-align:center">${DELIVERY_PROMISE}, ${DELIVERY_SLOT}. Nothing to pay until it's delivered. By ordering you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+      </div>
+    </form>`;
+}
+async function runCheckoutPostcode(raw) {
+  const msg = document.getElementById('pc-msg');
+  if (msg) msg.innerHTML = '<span style="color:var(--muted)">Checking…</span>';
+  const r = await checkPostcode(raw);
+  if (r.error) checkoutPostcode = { postcode: raw, deliverable: false, message: "Couldn't check right now — please try again." };
+  else if (!r.valid) checkoutPostcode = { postcode: raw, deliverable: false, message: 'That doesn’t look like a UK postcode.' };
+  else checkoutPostcode = { postcode: r.postcode, town: r.town, deliverable: r.deliverable,
+    message: deliveryReady() ? `Sorry, ${r.postcode} is outside our delivery area (${areaText()}).` : NOT_READY };
+  if (r.valid) store('shop_postcode', r.postcode);
+  if (location.hash.startsWith('#/checkout')) render();
+}
+async function submitOrder() {
+  const val = id => document.getElementById(id).value.trim();
+  const errBox = document.getElementById('order-err');
+  errBox.hidden = true;
+  if (!checkoutPostcode || !checkoutPostcode.deliverable) return;
+  if (basketBlocker()) { errBox.textContent = basketBlocker() + ' Please check your basket.'; errBox.hidden = false; return; }
+  const address = { fullName: val('fullName'), line1: val('line1'), line2: val('line2') || null, city: val('city'), postcode: checkoutPostcode.postcode, phone: val('phone') || null };
+  if (!fullAddress(address)) {
+    errBox.textContent = 'Please add your full delivery address — name, house number and street, town and postcode.';
+    errBox.hidden = false;
+    return;
+  }
+  const btn = document.getElementById('place-btn');
+  btn.disabled = true; btn.textContent = 'Saving your address…';
+  try {
+    // The delivery address is stored on the account before ordering, so it's
+    // ready next time on any device.
+    await saveAddressToAccount(address);
+    store('shop_delivery_address', { ...address, line2: address.line2 || '', phone: address.phone || '' });
+    ACCOUNT = { synced: true, hasAddress: true, error: false };
+  } catch (err) {
+    if (err.needsSignIn) { afterSignIn = '#/checkout'; render(); return; }
+    errBox.textContent = 'We couldn’t save your address to your account — please check your connection and try again.';
+    errBox.hidden = false;
+    btn.disabled = false; btn.textContent = 'Place order';
+    return;
+  }
+  btn.textContent = 'Placing order…';
+  try {
+    const items = cartLines().map(l => ({ barcode: l.barcode, qty: l.qty, name: l.name, brand: l.brand || null, image: l.image || null, quantity: l.quantity || null }));
+    const data = await gql(`mutation PlaceOrder($input: PlaceOrderInput!) { placeOrder(input: $input) { ${ORDER_FIELDS} } }`,
+      { input: { items, address, note: val('note') || null, mode: MODE, storeId: STORE_ID } });
+    const order = data.placeOrder;
+    editingAddress = false;
+    CART = {}; store('shop_cart_v2', CART); saveListsSoon(); updateBadges();
+    ORDERS_CACHE = [order, ...(ORDERS_CACHE || []).filter(o => o.id !== order.id)];
+    location.hash = `#/orders/${order.id}?placed=1`;
+  } catch (err) {
+    if (err.needsSignIn) { afterSignIn = '#/checkout'; render(); return; }
+    errBox.textContent = err.message || 'Something went wrong. Please try again.';
+    errBox.hidden = false;
+    btn.disabled = false; btn.textContent = 'Place order';
+  }
+}
+
+function viewOrders() {
+  if (!signedIn()) { afterSignIn = '#/orders'; return `<h1>Orders</h1>${signInPrompt('Sign in to see your orders', 'Your orders, bills and delivery status appear here.')}`; }
+  if (ORDERS_CACHE === null) {
+    fetchOrders().then(render).catch(err => { if (err.needsSignIn) render(); else $view.innerHTML = `<h1>Orders</h1><div class="notice err">Couldn't load your orders. ${esc(err.message)}</div>`; });
+    return '<h1>Orders</h1><div class="spinner"></div>';
+  }
+  if (!ORDERS_CACHE.length) return `<h1>Orders</h1><div class="empty"><div class="icon">${icon('box')}</div><h2>No orders yet</h2><p>When you place an order, you can follow it here until it's delivered.</p><a class="btn" href="#/">Start shopping</a></div>`;
+  return `<h1>Orders</h1>${ORDERS_CACHE.map(o => `
+    <a class="card order-card" href="#/orders/${esc(o.id)}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><b>Order ${esc(o.orderNumber)}</b>${statusPill(o.status)}</div>
+      <div class="line-meta" style="margin-top:6px">${new Date(o.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · ${plural(o.items.reduce((n, i) => n + i.qty, 0), 'item', 'items')}</div>
+      <div style="font-weight:800;margin-top:4px">${o.totalPence != null ? gbp(o.totalPence) : `About ${gbp((o.estimatedSubtotalPence || 0) + (o.deliveryFeePence || 0))} — waiting for final prices`}</div>
+    </a>`).join('')}`;
+}
+
+function viewOrder(id, params) {
+  if (!signedIn()) { afterSignIn = location.hash; return `<h1>Order</h1>${signInPrompt('Sign in to see this order', 'Use the same Google account you ordered with.')}`; }
+  const o = (ORDERS_CACHE || []).find(x => x.id === id);
+  if (!o) {
+    fetchOrders().then(list => { if (list.find(x => x.id === id)) render(); else $view.innerHTML = '<a class="back" href="#/orders">‹ Orders</a><div class="empty"><p>Order not found.</p></div>'; }).catch(() => {});
+    return '<div class="spinner"></div>';
+  }
+  const steps = ['PLACED', 'PRICED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+  const stepLabel = { PLACED: 'Order placed', PRICED: 'Shopped', OUT_FOR_DELIVERY: 'Out for delivery', DELIVERED: 'Delivered' };
+  const reached = steps.indexOf(o.status === 'APPROVED' ? 'PRICED' : o.status), a = o.address, priced = o.totalPence != null;
+  return `
+    <a class="back" href="#/orders">‹ Orders</a>
+    ${params.get('placed') && o.status === 'PLACED' ? `<div class="notice ok">Order placed! ${DELIVERY_PROMISE}, ${DELIVERY_SLOT}. Nothing to pay until it's delivered.</div>`
+      : ['PLACED', 'PRICED', 'APPROVED'].includes(o.status) ? deliveryNotice() : ''}
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1 style="margin:0">Order ${esc(o.orderNumber)}</h1>${statusPill(o.status)}</div>
+    <p class="line-meta">Placed ${new Date(o.createdAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · <a href="javascript:refreshOrders()">Refresh</a></p>
+    <div class="two-col">
+      <div>
+        <div class="card"><div class="section-label">${priced ? 'YOUR BILL' : 'ITEMS'}</div>
+          <p class="hint" style="margin-top:0">${o.mode === 'STORE' ? `Bought from ${esc(o.storeName || 'your supermarket')}` : 'Best price — bought wherever each item was cheapest'}</p>
+          ${o.items.map(i => {
+            const name = `${i.qty} × ${esc(title(i))}${i.quantity ? ` <span style="color:var(--muted)">· ${esc(i.quantity)}</span>` : ''}`;
+            if (!priced) return `<div class="sum-row"><span>${name}</span><span style="color:var(--muted)">${i.estimatedUnitPence ? `~${gbp(i.estimatedUnitPence * i.qty)}` : ''}</span></div>`;
+            if (i.available === false) return `<div class="sum-row strike"><span>${name}</span><span style="color:var(--danger);font-weight:700">Not available</span></div>`;
+            return `<div class="sum-row"><span>${name}${i.qty > 1 ? ` <span style="color:var(--muted)">(${gbp(i.unitPricePence)} each)</span>` : ''}</span><span>${gbp(i.lineTotalPence)}</span></div>`;
+          }).join('')}
+          <hr style="border:0;border-top:1px solid var(--border);margin:10px 0"/>
+          ${priced ? `<div class="sum-row"><span>Items</span><span>${gbp(o.subtotalPence)}</span></div>` : `<div class="sum-row"><span>Estimated items</span><span>~${gbp(o.estimatedSubtotalPence || 0)}</span></div>`}
+          <div class="sum-row"><span>Delivery</span><span>${o.deliveryFeePence ? gbp(o.deliveryFeePence) : 'Free'}</span></div>
+          ${priced ? `<div class="sum-row total"><span>Total</span><span>${gbp(o.totalPence)}</span></div>` : ''}
+          <p class="hint">Pay on delivery, by cash or card</p>
+        </div>
+        ${o.status === 'PLACED' ? `<button class="btn danger" onclick="orderAction('${esc(o.id)}','cancel')">Cancel order</button>` : ''}
+      </div>
+      <div>
+        <div class="card"><div class="section-label">STATUS</div>
+          ${o.status === 'CANCELLED' ? '<b style="color:var(--danger)">This order was cancelled.</b>'
+            : steps.map((s, i) => `<div class="step"><span class="dot ${i <= reached ? 'done' : ''}">${i <= reached ? '✓' : ''}</span><span style="color:${i <= reached ? 'var(--text)' : 'var(--muted)'}">${stepLabel[s]}</span></div>`).join('')}
+        </div>
+        <div class="card"><div class="section-label">DELIVERY ADDRESS</div>
+          <div style="white-space:pre-line">${esc([a.fullName, a.line1, a.line2, `${a.city} ${a.postcode}`, a.phone].filter(Boolean).join('\n'))}</div>
+          ${o.note ? `<p class="hint">Note: ${esc(o.note)}</p>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+async function refreshOrders() { try { await fetchOrders(); render(); } catch (err) { alert(err.message); } }
+async function orderAction(id, action) {
+  if (action === 'cancel' && !confirm('Cancel this order?')) return;
+  const field = action === 'approve' ? 'approveMyOrder' : 'cancelMyOrder';
+  try {
+    const data = await gql(`mutation Act($orderId: ID!) { ${field}(orderId: $orderId) { ${ORDER_FIELDS} } }`, { orderId: id });
+    ORDERS_CACHE = (ORDERS_CACHE || []).map(o => o.id === id ? data[field] : o);
+    updateBadges(); render();
+  } catch (err) { alert(err.message); refreshOrders(); }
+}
+
+let profilePostcode = null; // result of the profile page's postcode check
+function viewAccount(params = new URLSearchParams()) {
+  if (!signedIn()) {
+    afterSignIn = '#/account';
+    return `<h1>Your profile</h1>${signInPrompt('Sign in to your profile', 'Save your address and supermarket once — they’ll be ready on every device.')}`;
+  }
+  const a = load('shop_delivery_address', null) || { fullName: SESSION.name, line1: '', line2: '', city: '', postcode: load('shop_postcode', ''), phone: '' };
+  const pc = profilePostcode;
+  const banner = ACCOUNT.error
+    ? `<div class="notice err">We couldn’t reach your account just now. Check your connection, then save your address below.</div>`
+    : !ACCOUNT.hasAddress
+      ? `<div class="notice info">Add your delivery address. You’ll need it at checkout, and you only do this once.</div>`
+      : '';
+  return `
+    <h1>Your profile</h1>
+    ${banner}
+    <div class="two-col">
+      <form class="card" onsubmit="event.preventDefault();saveProfile()">
+        <div class="section-label">DELIVERY ADDRESS</div>
+        <label class="f" for="p-postcode">Postcode</label>
+        <div class="pc-row" style="margin:0 0 6px"><input class="f" style="margin:0;text-transform:uppercase" id="p-postcode" autocomplete="postal-code" value="${esc(pc ? pc.postcode : a.postcode)}" onchange="profilePostcode=null"/>
+          <button class="btn small" type="button" onclick="checkProfilePostcode()">Check</button></div>
+        <div class="field-msg" id="p-pc-msg">${pc ? (pc.deliverable ? `<span style="color:var(--safe)">✓ We deliver to ${esc(pc.postcode)}</span>` : `<span style="color:var(--danger)">${esc(pc.message)}</span>`) : ''}</div>
+        <label class="f" for="p-line1">House number and street</label><input class="f" id="p-line1" autocomplete="address-line1" value="${esc(a.line1)}" placeholder="e.g. 12 Station Road"/>
+        <label class="f" for="p-line2">Flat, building (optional)</label><input class="f" id="p-line2" autocomplete="address-line2" value="${esc(a.line2 || '')}"/>
+        <label class="f" for="p-city">Town</label><input class="f" id="p-city" autocomplete="address-level2" value="${esc((pc && pc.town) || a.city)}"/>
+        <label class="f" for="p-name">Full name</label><input class="f" id="p-name" autocomplete="name" value="${esc(a.fullName || SESSION.name)}"/>
+        <label class="f" for="p-phone">Phone number (optional)</label><input class="f" id="p-phone" type="tel" autocomplete="tel" value="${esc(a.phone || '')}" placeholder="So our driver can reach you"/>
+        <div class="notice err" id="p-err" hidden></div>
+        <button class="btn block" id="p-save" type="submit">Save</button>
+        <p class="hint" style="text-align:center">Saved to your account — used automatically at checkout on any device.</p>
+      </form>
+      <div>
+        <div class="card">
+          <div class="section-label">ACCOUNT</div>
+          <div style="font-weight:800">${esc(SESSION.name || 'Your account')}</div>
+          <div class="hint" style="margin:2px 0 0">${esc(SESSION.email)} · signed in with Google</div>
+        </div>
+        <div class="card">
+          <div class="section-label">YOUR SUPERMARKET</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><b>${esc(STORE_ID ? storeName() : 'Not chosen yet')}</b><a class="btn small ghost" href="#/store">Change</a></div>
+        </div>
+        <a class="card order-card" href="#/orders" style="display:flex;justify-content:space-between;align-items:center;font-weight:700">
+          <span>Your orders</span><span>›</span>
+        </a>
+        <button class="btn block danger" type="button" onclick="if(confirm('Sign out?'))signOut()">Sign out</button>
+      </div>
+    </div>`;
+}
+async function checkProfilePostcode() {
+  const raw = document.getElementById('p-postcode').value;
+  document.getElementById('p-pc-msg').innerHTML = '<span style="color:var(--muted)">Checking…</span>';
+  const r = await checkPostcode(raw);
+  if (r.error) profilePostcode = { postcode: raw, deliverable: false, message: "Couldn't check right now — please try again." };
+  else if (!r.valid) profilePostcode = { postcode: raw, deliverable: false, message: 'That doesn’t look like a UK postcode.' };
+  else profilePostcode = { postcode: r.postcode, town: r.town, deliverable: r.deliverable && deliveryReady(),
+    message: deliveryReady() ? `${r.postcode} is outside our delivery area (${areaText()}) — you can still save it.` : NOT_READY };
+  render();
+}
+async function saveProfile() {
+  const val = id => document.getElementById(id).value.trim();
+  const err = document.getElementById('p-err');
+  err.hidden = true;
+  const address = { fullName: val('p-name'), line1: val('p-line1'), line2: val('p-line2'), city: val('p-city'),
+    postcode: (profilePostcode && profilePostcode.postcode) || val('p-postcode').toUpperCase(), phone: val('p-phone') };
+  const missing = [['line1', 'house number and street'], ['city', 'town'], ['postcode', 'postcode'], ['fullName', 'name']].filter(([k]) => !address[k]).map(([, l]) => l);
+  if (missing.length) { err.textContent = 'Please add your ' + missing.join(', ') + '.'; err.hidden = false; return; }
+  if (address.phone && address.phone.replace(/\D/g, '').length < 7) { err.textContent = 'That phone number looks too short — or leave it blank.'; err.hidden = false; return; }
+  const btn = document.getElementById('p-save');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try {
+    await saveAddressToAccount(address);
+    store('shop_delivery_address', address);
+    checkoutPostcode = null;
+    ACCOUNT = { synced: true, hasAddress: true, error: false };
+    btn.textContent = '✓ Saved';
+    setTimeout(() => { if (document.getElementById('p-save')) { btn.disabled = false; btn.textContent = 'Save'; } }, 1500);
+  } catch (e) {
+    err.textContent = e.message || 'Could not save — please try again.'; err.hidden = false;
+    btn.disabled = false; btn.textContent = 'Save';
+  }
+}
+
+function viewSignIn(params = new URLSearchParams()) {
+  if (signedIn()) { setTimeout(() => { location.hash = afterSignIn || '#/'; afterSignIn = null; }); return ''; }
+  return signInPrompt('Sign in', 'Sign in with Google to check out and follow your orders.');
+}
+
+// ─── Barcode scanner ─────────────────────────────────────────────
+// Uses the browser's built-in BarcodeDetector where it exists (Chrome,
+// Android) and the open-source ZXing reader (MIT) elsewhere, e.g. iPhone
+// Safari — loaded only when someone actually scans.
+const ZXING_SCRIPTS = ['https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js',
+                       'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js'];
+let scanner = null; // { stream, timer, controls }
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const el = document.createElement('script'); el.src = src; el.onload = resolve; el.onerror = reject;
+    document.head.appendChild(el);
+  });
+}
+function setScanStatus(text) { const el = document.getElementById('scan-status'); if (el) el.textContent = text; }
+function stopScanner() {
+  if (!scanner) return;
+  clearInterval(scanner.timer);
+  if (scanner.controls) try { scanner.controls.stop(); } catch {}
+  if (scanner.stream) scanner.stream.getTracks().forEach(t => t.stop());
+  scanner = null;
+}
+function onBarcode(code) {
+  const c = String(code || '').replace(/\D/g, '');
+  if (!/^\d{8,14}$/.test(c)) return false;
+  stopScanner();
+  if (navigator.vibrate) navigator.vibrate(60);
+  location.hash = '#/product/' + c;
+  return true;
+}
+async function startScanner() {
+  stopScanner();
+  const video = document.getElementById('scan-video');
+  if (!video) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { setScanStatus('Camera not available — type the barcode below.'); return; }
+  scanner = {};
+  try {
+    if ('BarcodeDetector' in window) {
+      const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
+      scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+      video.srcObject = scanner.stream;
+      await video.play();
+      setScanStatus('Point the camera at the barcode');
+      let busy = false;
+      scanner.timer = setInterval(async () => {
+        if (busy || !scanner || video.readyState < 2) return;
+        busy = true;
+        try { const found = await detector.detect(video); for (const b of found) if (onBarcode(b.rawValue)) break; } catch {}
+        busy = false;
+      }, 200);
+    } else {
+      setScanStatus('Starting camera…');
+      for (const src of ZXING_SCRIPTS) await loadScript(src);
+      if (!scanner) return; // left the page while loading
+      const reader = new ZXingBrowser.BrowserMultiFormatReader();
+      scanner.controls = await reader.decodeFromConstraints({ video: { facingMode: { ideal: 'environment' } } }, video, (result) => {
+        if (result) onBarcode(result.getText());
+      });
+      setScanStatus('Point the camera at the barcode');
+    }
+  } catch (err) {
+    stopScanner();
+    setScanStatus(err && err.name === 'NotAllowedError'
+      ? 'Camera access was blocked — allow it in your browser settings, or type the barcode below.'
+      : 'Could not start the camera — type the barcode below.');
+  }
+}
+function viewScan() {
+  return `
+    <h1>Scan a product</h1>
+    <div class="scan-box">
+      <video id="scan-video" playsinline muted></video>
+      <div class="scan-frame"></div>
+      <div class="scan-status" id="scan-status">Starting camera…</div>
+    </div>
+    <form class="card" style="max-width:480px;margin:0 auto" onsubmit="event.preventDefault();if(!onBarcode(this.code.value)){document.getElementById('code-msg').hidden=false}">
+      <label class="f" for="code">Or type the barcode (the numbers under the lines)</label>
+      <div class="pc-row" style="margin:0"><input class="f" style="margin:0" id="code" name="code" inputmode="numeric" pattern="[0-9 ]*" placeholder="e.g. 5000157024671" autocomplete="off"/><button class="btn small" type="submit">Find</button></div>
+      <div class="field-msg" id="code-msg" hidden style="color:var(--danger);margin-top:6px">Barcodes are 8–14 digits.</div>
+    </form>`;
+}
+
+// ─── Router ──────────────────────────────────────────────────────
+let searchTimer = null;
+// Home "Type to search": jump to the search bar at the top and open the keyboard.
+function focusSearch() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const el = document.getElementById('header-q');
+  if (el) { el.focus(); el.classList.add('pulse'); setTimeout(() => el.classList.remove('pulse'), 1200); }
+}
+function goSearch(q) { if (q.trim()) location.hash = '#/search?' + new URLSearchParams({ q: q.trim() }); }
+function liveSearch(q) { clearTimeout(searchTimer); searchTimer = setTimeout(() => { if (q.trim().length >= 2) goSearch(q); }, 400); }
+
+function render() {
+  const [path, query] = (location.hash.slice(1) || '/').split('?');
+  const params = new URLSearchParams(query || '');
+  const parts = path.split('/').filter(Boolean);
+  let html;
+  if (!parts.length) html = viewHome();
+  else if (parts[0] === 'search') html = viewSearch(params);
+  else if (parts[0] === 'product') html = viewProduct(decodeURIComponent(parts[1] || ''));
+  else if (parts[0] === 'basket') html = viewBasket();
+  else if (parts[0] === 'checkout') html = viewCheckout();
+  else if (parts[0] === 'orders' && parts[1]) html = viewOrder(parts[1], params);
+  else if (parts[0] === 'orders') html = viewOrders();
+  else if (parts[0] === 'signin') html = viewSignIn(params);
+  else if (parts[0] === 'store') html = viewStore();
+  else if (parts[0] === 'scan') html = viewScan();
+  else if (parts[0] === 'account') html = viewAccount(params);
+  else html = viewHome();
+
+  const q = document.getElementById('header-q');
+  if (document.activeElement !== q) q.value = parts[0] === 'search' ? (params.get('q') || '') : '';
+
+  document.querySelectorAll('[data-nav]').forEach(el => el.classList.toggle('active', el.dataset.nav === (parts[0] || '')));
+  // The scan page owns a live camera <video>. Other things finishing loading
+  // (settings, Google sign-in, orders) call render() too — redrawing would
+  // swap in a fresh, empty <video> while the camera keeps feeding the old one,
+  // leaving the page stuck on "Starting camera…". Keep the existing page.
+  if (parts[0] === 'scan' && scanner && document.getElementById('scan-video')) return;
+  $view.innerHTML = html;
+  const g = document.getElementById('gbtn');
+  if (g) renderGoogleButton(g);
+  if (parts[0] === 'scan') { if (!scanner) startScanner(); } else stopScanner();
+}
+
+function setHeaderHeight() { document.documentElement.style.setProperty('--hdr', document.querySelector('header').offsetHeight + 'px'); }
+window.addEventListener('resize', setHeaderHeight);
+setHeaderHeight();
+window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+window.addEventListener('storage', e => { if (e.key === 'shop_cart_v2') { CART = load('shop_cart_v2', {}); updateBadges(); render(); } });
+if (SESSION && !signedIn()) { SESSION = null; store('shop_session', null); }
+if (signedIn()) { fetchOrders().catch(() => {}); syncStoreWithAccount(); }
+updateBadges();
+updateAccount();
+updateStoreLabel();
+loadSettings().then(updateStoreLabel);
+render();
+initGoogle();
+</script>
 </body>
 </html>
