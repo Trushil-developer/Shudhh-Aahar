@@ -37,6 +37,16 @@ import HistoryScreen from './src/screens/HistoryScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import ShoppingListScreen from './src/screens/ShoppingListScreen';
 import CouponExchangeScreen from './src/screens/CouponExchangeScreen';
+import { SHOP_MODE } from './src/config/appMode';
+import { ShopProvider, useShop } from './src/context/ShopContext';
+import { ShopStackParamList } from './src/navigation/shopRoutes';
+import ShopHomeScreen from './src/screens/ShopHomeScreen';
+import ShopSearchScreen from './src/screens/ShopSearchScreen';
+import ShopProductScreen from './src/screens/ShopProductScreen';
+import CartScreen from './src/screens/CartScreen';
+import CheckoutScreen from './src/screens/CheckoutScreen';
+import OrdersScreen from './src/screens/OrdersScreen';
+import OrderDetailScreen from './src/screens/OrderDetailScreen';
 
 // Bootstrap production monitoring
 setupGlobalErrorHandler();
@@ -46,8 +56,8 @@ logger.info('app', 'Shuddhaahar starting', { version: DeviceInfo.getVersion(), e
 // Must resolve before any StoreKit/Play Billing call (requestPurchase,
 // restorePurchases, etc.) will work — see subscriptionService.ts's
 // initIAPConnection comment for why every purchase attempt was failing
-// without this.
-void initIAPConnection();
+// without this. Skipped in shop mode — nothing is sold through the stores.
+if (!SHOP_MODE) void initIAPConnection();
 
 export type RootStackParamList = {
   Home: undefined;
@@ -57,6 +67,7 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const ShopStack = createNativeStackNavigator<ShopStackParamList>();
 const Tab   = createBottomTabNavigator();
 const linking = { prefixes: ['shuddhaahar://'], config: { screens: {} } };
 
@@ -103,6 +114,71 @@ function UpdateRequiredScreen() {
         <Text style={{ color: Colors.textWhite, fontSize: 16, fontWeight: '700' }}>{t('app.updateNow')}</Text>
       </TouchableOpacity>
     </View>
+  );
+}
+
+// ── Delivery shop (SHOP_MODE) ───────────────────────────────
+// Five tabs, each its own stack. Anyone can browse; signing in is only
+// asked for at checkout and on the Orders tab (see SignInModal).
+const shopStackOptions = { headerShown: false, animation: 'slide_from_right' as const };
+
+function ShopHomeStack() {
+  return (
+    <ShopStack.Navigator screenOptions={shopStackOptions}>
+      <ShopStack.Screen name="ShopHome"    component={ShopHomeScreen} />
+      <ShopStack.Screen name="Search"      component={ShopSearchScreen} />
+      <ShopStack.Screen name="ShopProduct" component={ShopProductScreen} />
+    </ShopStack.Navigator>
+  );
+}
+
+function ShopSearchStack() {
+  return (
+    <ShopStack.Navigator screenOptions={shopStackOptions}>
+      <ShopStack.Screen name="Search"      component={ShopSearchScreen} />
+      <ShopStack.Screen name="ShopProduct" component={ShopProductScreen} />
+    </ShopStack.Navigator>
+  );
+}
+
+function CartStack() {
+  return (
+    <ShopStack.Navigator screenOptions={shopStackOptions}>
+      <ShopStack.Screen name="Cart"        component={CartScreen} />
+      <ShopStack.Screen name="Checkout"    component={CheckoutScreen} />
+      <ShopStack.Screen name="ShopProduct" component={ShopProductScreen} />
+    </ShopStack.Navigator>
+  );
+}
+
+function OrdersStack() {
+  return (
+    <ShopStack.Navigator screenOptions={shopStackOptions}>
+      <ShopStack.Screen name="Orders"      component={OrdersScreen} />
+      <ShopStack.Screen name="OrderDetail" component={OrderDetailScreen} />
+    </ShopStack.Navigator>
+  );
+}
+
+function ShopTabs() {
+  const { t } = useTranslation();
+  const { cartCount } = useShop();
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: Colors.navy, borderTopWidth: 0, height: 68, paddingBottom: 10, paddingTop: 8 },
+        tabBarActiveTintColor: Colors.textWhite,
+        tabBarInactiveTintColor: 'rgba(255,255,255,0.65)',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.2 },
+      }}
+    >
+      <Tab.Screen name="HomeTab"    component={ShopHomeStack}   options={{ tabBarLabel: t('shop.tabHome'),   tabBarIcon: ({ color, focused }) => <TabIcon emoji="🏠" color={color} focused={focused} /> }} />
+      <Tab.Screen name="SearchTab"  component={ShopSearchStack} options={{ tabBarLabel: t('shop.tabSearch'), tabBarIcon: ({ color, focused }) => <TabIcon emoji="🔍" color={color} focused={focused} /> }} />
+      <Tab.Screen name="CartTab"    component={CartStack}       options={{ tabBarLabel: t('shop.tabCart'),   tabBarBadge: cartCount > 0 ? cartCount : undefined, tabBarIcon: ({ color, focused }) => <TabIcon emoji="🛒" color={color} focused={focused} /> }} />
+      <Tab.Screen name="OrdersTab"  component={OrdersStack}     options={{ tabBarLabel: t('shop.tabOrders'), tabBarIcon: ({ color, focused }) => <TabIcon emoji="📦" color={color} focused={focused} /> }} />
+      <Tab.Screen name="ProfileTab" component={ProfileScreen}   options={{ tabBarLabel: t('app.tabProfile'), tabBarIcon: ({ color, focused }) => <TabIcon emoji="👤" color={color} focused={focused} /> }} />
+    </Tab.Navigator>
   );
 }
 
@@ -187,7 +263,7 @@ function AppNavigator() {
       // AsyncStorage key is per-user so returning users are never re-prompted.
       const key = `health_setup_prompted_${user.id}`;
       const alreadyPrompted = await AsyncStorage.getItem(key);
-      if (!alreadyPrompted) {
+      if (!alreadyPrompted && !SHOP_MODE) {
         await AsyncStorage.setItem(key, 'true');
         setShowHealthSetup(true);
       }
@@ -227,6 +303,32 @@ function AppNavigator() {
   // 1. Loading spinner — config loading is treated the same as auth/T&C
   //    still loading, so the update-required check below never runs on
   //    stale/default data while the real config is in flight.
+  if (SHOP_MODE) {
+    // Only the first load shows the splash — signing in later must not
+    // unmount the navigator (it would throw away the checkout the customer
+    // was in the middle of).
+    if (loading || appConfigLoading) return <SplashScreen />;
+    if (updateRequired) return <UpdateRequiredScreen />;
+    return (
+      <>
+        <NavigationContainer linking={linking}>
+          <OfflineBar />
+          <ShopTabs />
+        </NavigationContainer>
+        {user && showTCModal && tcCheck && (
+          <TCConsentModal
+            visible={true}
+            version={tcCheck.currentVersion}
+            isUpdate={tcCheck.isUpdate}
+            acceptedVersion={tcCheck.acceptedVersion}
+            userId={user.id}
+            onAccepted={handleTCAccepted}
+          />
+        )}
+      </>
+    );
+  }
+
   if (loading || tcChecking || appConfigLoading) {
     return <SplashScreen />;
   }
@@ -295,8 +397,10 @@ export default function App() {
               nesting is safe either way; this order is required for the above. */}
           <AppConfigProvider>
             <AuthProvider>
-              <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
-              <AppNavigator />
+              <ShopProvider>
+                <StatusBar barStyle="dark-content" backgroundColor={Colors.bg} />
+                <AppNavigator />
+              </ShopProvider>
             </AuthProvider>
           </AppConfigProvider>
         </ErrorBoundary>

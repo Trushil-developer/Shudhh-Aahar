@@ -15,6 +15,8 @@ import { useResponsive, TABLET_CONTENT_MAX_WIDTH } from '../utils/responsive';
 import { getSubscriptionState, SubscriptionState, MEMBERSHIP_ENABLED } from '../services/subscriptionService';
 import { graphqlRequest } from '../services/userDataService';
 import logger from '../utils/logger';
+import { SHOP_MODE } from '../config/appMode';
+import { SignInModal } from '../components/ShopUI';
 import type { PageSlug } from '../services/cmsService';
 
 // `category: 'deletion'` is what lets admin filter this out from generic
@@ -28,6 +30,7 @@ const CREATE_CONTACT_SUBMISSION = /* GraphQL */ `
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const { user, healthProfile, refreshProfile, signOut, isMember } = useAuth();
+  const [signInOpen, setSignInOpen] = useState(false);
   const { rw, rh, rf, rr, isTablet } = useResponsive();
   const s = useMemo(() => createStyles(rw, rh, rf, rr), [rw, rh, rf, rr]);
   const [editingProfile, setEditingProfile]     = useState(false);
@@ -121,6 +124,11 @@ export default function ProfileScreen() {
           }
           <Text style={s.userName}>{user?.name || t('profile.myAccount')}</Text>
           <Text style={s.userEmail}>{user?.email || ''}</Text>
+          {!user && (
+            <TouchableOpacity style={[s.upgradeBtnFull, { alignSelf: 'stretch', marginTop: 12 }]} onPress={() => setSignInOpen(true)} activeOpacity={0.85}>
+              <Text style={s.upgradeBtnFullText}>{t('shop.signIn')}</Text>
+            </TouchableOpacity>
+          )}
           {MEMBERSHIP_ENABLED && (
             <View style={[s.planBadge, isMember ? { backgroundColor: Colors.navyLight, borderColor: Colors.navy } : { backgroundColor: Colors.surfaceAlt, borderColor: Colors.border }]}>
               <Text style={[s.planBadgeText, { color: isMember ? Colors.navy : Colors.textMuted }]}>
@@ -130,7 +138,8 @@ export default function ProfileScreen() {
           )}
         </View>
 
-        {/* ── Health profile ── */}
+        {/* ── Health profile (hidden in shop mode) ── */}
+        {!SHOP_MODE && (<>
         <Text style={s.sectionLabel}>{t('profile.healthProfile')}</Text>
         <View style={s.card}>
           <View style={s.healthSummary}>
@@ -158,6 +167,7 @@ export default function ProfileScreen() {
             }
           </TouchableOpacity>
         </View>
+        </>)}
 
         {MEMBERSHIP_ENABLED && (<>
         <Text style={s.sectionLabel}>{t('profile.membership')}</Text>
@@ -184,8 +194,8 @@ export default function ProfileScreen() {
         {/* ── App links ── */}
         <Text style={s.sectionLabel}>{t('profile.information')}</Text>
         <View style={s.card}>
-          <LinkRow icon="📖" label={t('profile.howItWorks')}      onPress={() => setCMSPage('how-it-works')} />
-          <LinkRow icon="⚠️" label={t('profile.allergenGuide')}   onPress={() => setCMSPage('allergen-guide')} />
+          {!SHOP_MODE && <LinkRow icon="📖" label={t('profile.howItWorks')}      onPress={() => setCMSPage('how-it-works')} />}
+          {!SHOP_MODE && <LinkRow icon="⚠️" label={t('profile.allergenGuide')}   onPress={() => setCMSPage('allergen-guide')} />}
           <LinkRow icon="❓" label={t('profile.faq')}              onPress={() => setCMSPage('faq')} />
           <LinkRow icon="📧" label={t('profile.contactSupport')}  onPress={() => setCMSPage('contact')} />
           <LinkRow icon="🔒" label={t('profile.privacyPolicy')}   onPress={() => setCMSPage('privacy-policy')} />
@@ -193,6 +203,7 @@ export default function ProfileScreen() {
         </View>
 
         {/* ── Account actions ── */}
+        {user && (<>
         <TouchableOpacity
           style={s.signOutBtn}
           activeOpacity={0.8}
@@ -226,11 +237,14 @@ export default function ProfileScreen() {
             : <Text style={s.deleteText}>{t('profile.deleteMyData')}</Text>
           }
         </TouchableOpacity>
+        </>)}
 
         <Text style={s.version}>{t('profile.version')}</Text>
 
         </View>
       </ScrollView>
+
+      <SignInModal visible={signInOpen} onClose={() => setSignInOpen(false)} />
 
       <Modal visible={showSubscription} animationType="slide" presentationStyle="fullScreen">
         {/* Modal presents in its own native window on iOS — SafeAreaProvider

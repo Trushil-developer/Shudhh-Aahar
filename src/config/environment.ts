@@ -40,6 +40,9 @@ export interface EnvironmentConfig {
   // Anthropic key server-side (see src/services/aiProxy.ts)
   aiProxyUrl: string;
 
+  // Shop — public catalogue + shop settings (terraform output catalog_url)
+  catalogUrl: string;
+
   // Trolley price API
   trolleyApiKey: string;
 
@@ -102,6 +105,7 @@ const DEV_CONFIG: EnvironmentConfig = {
   dynamoTableName:    'shuddhaahar-dev-users',
 
   aiProxyUrl:         process.env.DEV_AI_PROXY_URL          || '',
+  catalogUrl:         process.env.DEV_CATALOG_URL           || '',
   trolleyApiKey:      process.env.DEV_TROLLEY_API_KEY       || '',
 
   iapVerifyUrl:       process.env.DEV_IAP_VERIFY_URL        || '',
@@ -146,6 +150,7 @@ const STAGING_CONFIG: EnvironmentConfig = {
   dynamoTableName:   'shuddhaahar-staging-users',
 
   aiProxyUrl:        process.env.STAGING_AI_PROXY_URL         || '',
+  catalogUrl:        process.env.STAGING_CATALOG_URL          || '',
   trolleyApiKey:     process.env.STAGING_TROLLEY_API_KEY      || '',
 
   iapVerifyUrl:      process.env.STAGING_IAP_VERIFY_URL       || '',
@@ -185,6 +190,8 @@ const PROD_CONFIG: EnvironmentConfig = {
   // Real, deployed endpoint (terraform output ai_proxy_url) — not secret;
   // callers must still present a valid sign-in token.
   aiProxyUrl:        process.env.PROD_AI_PROXY_URL || 'https://cxe2w6odd7.execute-api.eu-west-2.amazonaws.com',
+  // Real, deployed endpoint (terraform output catalog_url) — public GET.
+  catalogUrl:        process.env.PROD_CATALOG_URL || 'https://v36cyuprlc.execute-api.eu-west-2.amazonaws.com',
   trolleyApiKey:     process.env.PROD_TROLLEY_API_KEY      || '',
 
   // Real, deployed endpoint (terraform output iap_verify_url) — not secret,
