@@ -194,6 +194,34 @@ h2{font-size:19px;font-weight:800;margin:0}
 @media(min-width:760px){.hero{padding:30px 32px}.hero h1{font-size:32px}}
 .max-note{display:block;font-size:11px;font-weight:600;color:var(--muted);text-align:center;margin-top:4px}
 .stepper button:disabled{opacity:.35;cursor:not-allowed}
+.hero-search{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.hero-search input{flex:1;min-width:0;border:0;border-radius:12px;padding:13px 14px;font:inherit;font-size:16px;color:var(--text)}
+.hero-search .btn{background:#fff;color:var(--navy)}
+.hero-search .hero-scan{background:rgba(255,255,255,.15);color:#fff;display:inline-flex;align-items:center;gap:6px}
+.hero-search .hero-scan .ico{width:18px;height:18px}
+@media(max-width:520px){.hero-search input{flex-basis:100%}.hero-search .btn{flex:1}}
+.shop-row{display:flex;flex-wrap:wrap;gap:8px}
+.shop-pill{font:inherit;font-size:14px;font-weight:700;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
+.shop-pill.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.steps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.step-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--text2);line-height:1.45}
+.step-card b{color:var(--text);font-size:15px}
+.step-card .n{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px}
+@media(max-width:860px){.steps-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;background:var(--info-bg);border-radius:16px;padding:18px;margin:22px 0}
+.facts div{display:flex;flex-direction:column;gap:2px;text-align:center}
+.facts b{font-size:22px;color:var(--navy)}
+.facts span{font-size:13px;color:var(--text2)}
+@media(max-width:640px){.facts{grid-template-columns:repeat(2,minmax(0,1fr))}.facts b{font-size:19px}}
+.faq details{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.faq summary{cursor:pointer;padding:14px 16px;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';font-size:20px;line-height:1;color:var(--accent)}
+.faq details[open] summary::after{content:'−'}
+.faq p{margin:0;padding:0 16px 14px;color:var(--text2);line-height:1.5}
+.contact-band{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin:22px 0 6px}
+.contact-band div{display:flex;flex-direction:column;gap:2px}
+.contact-band span{color:var(--text2);font-size:14px}
 .tile-sizes{font-size:12px;font-weight:600;color:var(--accent);margin-top:-2px}
 .tile-ing{font-size:12px;line-height:1.4;color:var(--text2);margin-top:6px;min-height:34px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tile-ing b{font-weight:600;color:var(--text)}
@@ -1241,23 +1269,28 @@ function viewHome() {
   if (!SETTINGS) loadSettings();
   remember(MY_ITEMS);
   remember(HISTORY);
-  // How to order: people weren't sure whether to type or scan, so say it
-  // plainly and give both as big buttons — folded away until tapped.
-  const scan = `
-    <details class="howto">
-      <summary><h2>How to order?</h2><span class="howto-chev" aria-hidden="true"></span></summary>
-      <p class="lead">Find the groceries you want — type the name or scan the barcode on the pack.</p>
-      <div class="howto-actions">
-        <button class="howto-btn" type="button" onclick="focusSearch()"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <span><b>Type to search</b><span>e.g. milk, atta, Heinz beans</span></span></button>
-        <a class="howto-btn alt" href="#/scan">${icon('scan')}<span><b>Scan a barcode</b><span>Use your phone camera</span></span></a>
-      </div>
-      <ol>
-        <li><span class="n">1</span><span><b>Find a product</b> — type in the search bar at the top, or scan its barcode.</span></li>
-        <li><span class="n">2</span><span><b>Tap Add</b> to put it in your basket.</span></li>
-        <li><span class="n">3</span><span><b>Open Basket and check out.</b> ${DELIVERY_PROMISE}, ${DELIVERY_SLOT} — pay on delivery. ${DELIVERY_CUTOFF}.</span></li>
-      </ol>
-    </details>`;
+  const fee = SETTINGS ? SETTINGS.deliveryFeePence : null;
+  const freeOver = SETTINGS ? SETTINGS.freeDeliveryOverPence : null;
+  const feeShort = fee == null ? '' : !fee ? 'Free delivery' : freeOver > 0 ? `${gbp(fee)} delivery` : `${gbp(fee)} delivery`;
+  const feeSub = fee && freeOver > 0 ? `Free over ${gbp(freeOver)}` : 'Per order';
+  // 1. What we do, with search right there.
+  const hero = `
+    <section class="hero">
+      <h1>Groceries delivered to your door, at supermarket prices</h1>
+      <p>Tell us what you need. We shop at your supermarket and bring it round the same evening.</p>
+      <form class="hero-search" role="search" onsubmit="event.preventDefault();goSearch(this.q.value)">
+        <input name="q" type="search" placeholder="Search milk, atta, Heinz beans…" aria-label="Search groceries" autocomplete="off"/>
+        <button class="btn" type="submit">Search</button>
+        <a class="btn hero-scan" href="#/scan" aria-label="Scan a barcode">${icon('scan')}<span>Scan</span></a>
+      </form>
+      <div class="hero-points"><span>🛒 Supermarket shelf prices</span><span>🚚 Delivered 5pm – 8pm</span><span>💷 Pay on delivery</span></div>
+    </section>`;
+  // 2. The supermarkets we shop at — tap one to shop there.
+  const shops = `
+    <section class="section">
+      <div class="section-head"><h2>We shop at</h2><span class="hint" style="margin:0">Tap to switch</span></div>
+      <div class="shop-row">${stores().map(st => `<button type="button" class="shop-pill${st.id === STORE_ID ? ' active' : ''}" onclick="chooseStore('${esc(st.id)}');render()">${st.id === STORE_ID ? '✓ ' : ''}${esc(st.name)}</button>`).join('')}</div>
+    </section>`;
   // Only shown once there's something in them.
   const mine = MY_ITEMS.length ? `
     <section class="section">
@@ -1270,6 +1303,7 @@ function viewHome() {
       <div class="grid">${HISTORY.slice(0, historyShown).map(tile).join('')}</div>
       ${HISTORY.length > historyShown ? `<div style="text-align:center;margin-top:14px"><button class="btn ghost" type="button" onclick="showMoreHistory()">Show more (${HISTORY.length - historyShown} more)</button></div>` : ''}
     </section>` : '';
+  // 3. Categories.
   const categories = `
     <section class="section">
       <div class="section-head"><h2>What would you like to buy today?</h2></div>
@@ -1279,21 +1313,48 @@ function viewHome() {
           <span class="cat-name">${esc(c.name)}</span>
         </a>`).join('')}</div>
     </section>`;
-  // Which supermarket they're shopping at, and how to change it.
-  const storeBar = `
-    <a class="store-bar" href="#/store">
-      <span class="store-bar-ico">${icon('store')}</span>
-      <span class="store-bar-text"><span class="hint" style="margin:0">You're shopping at</span><b>${esc(storeName())}</b></span>
-      <span class="store-bar-change">Change<span class="sb-long"> supermarket</span> ›</span>
-    </a>`;
-  // What we offer, in one line, for first-time visitors.
-  const hero = `
-    <section class="hero">
-      <h1>Groceries delivered to your door, at supermarket prices</h1>
-      <p>We shop at Tesco, Sainsbury's, Asda and more for you. Choose <b>Best price</b> and we buy each item wherever it's cheapest.</p>
-      <div class="hero-points"><span>🛒 Supermarket shelf prices</span><span>🚚 Delivered 5pm – 8pm</span><span>💷 Pay on delivery</span></div>
+  // 4. How it works, in four steps.
+  const steps = `
+    <section class="section">
+      <div class="section-head"><h2>How to order?</h2></div>
+      <div class="steps-grid">
+        <div class="step-card"><span class="n">1</span><b>Find it</b><span>Search by name or scan the barcode on a pack you already have.</span></div>
+        <div class="step-card"><span class="n">2</span><b>Add to basket</b><span>See your supermarket's shelf price and pick the size you want.</span></div>
+        <div class="step-card"><span class="n">3</span><b>We do the shopping</b><span>We buy everything at ${esc(storeName())}, or each item wherever it's cheapest with Best price.</span></div>
+        <div class="step-card"><span class="n">4</span><b>Delivered tonight</b><span>${DELIVERY_CUTOFF}. Pay on the doorstep, by cash or card.</span></div>
+      </div>
     </section>`;
-  return hero + storeBar + homeDeliveryCard() + scan + mine + categories + history;
+  // 5. Key facts, from our real settings.
+  const facts = `
+    <section class="facts">
+      <div><b>${stores().length || 8}</b><span>supermarkets to choose from</span></div>
+      <div><b>5pm – 8pm</b><span>delivery, every day</span></div>
+      <div><b>${SETTINGS && SETTINGS.radiusMiles ? `${SETTINGS.radiusMiles} miles` : 'Local'}</b><span>${SETTINGS && SETTINGS.areaName ? `around ${esc(SETTINGS.areaName)}` : 'delivery area'}</span></div>
+      <div><b>${esc(feeShort || 'Pay on delivery')}</b><span>${esc(fee == null ? 'cash or card' : feeSub)}</span></div>
+    </section>`;
+  // 6. Questions people ask, answered from how the shop actually works.
+  const faq = [
+    ['When will my order arrive?', `${DELIVERY_PROMISE}, ${DELIVERY_SLOT}. ${DELIVERY_CUTOFF}.`],
+    ['Where do you deliver?', deliveryReady() ? `We deliver ${areaText()}. Check your postcode above.` : NOT_READY],
+    ['How do I pay?', 'You pay when your shopping arrives, by cash or card. Nothing is taken when you order.'],
+    ['What price will I pay?', "The supermarket's regular shelf price, without Clubcard, Nectar or other member offers, plus the delivery fee. You see the total before you order."],
+    ["What if an item isn't available?", "We take it off your bill, so you only pay for what we bring. Add a note at checkout if you're happy with a substitute."],
+    ['Can I cancel my order?', "Yes, from your Orders page until we confirm it. After that, please contact us."],
+    ['Can I return something?', "Groceries can't be returned for change of mind. If an item is missing, damaged or not what you ordered, contact us and we'll put it right."],
+    ['Is there a limit on how many I can buy?', 'You can order up to 10 of any one product.'],
+  ];
+  const faqHtml = `
+    <section class="section">
+      <div class="section-head"><h2>Questions</h2></div>
+      <div class="faq">${faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
+    </section>`;
+  // 7. Contact.
+  const contact = `
+    <section class="contact-band">
+      <div><b>Still have a question?</b><span>We're happy to help — just get in touch.</span></div>
+      <a class="btn" href="/contact">Contact us</a>
+    </section>`;
+  return hero + shops + homeDeliveryCard() + mine + categories + steps + facts + history + faqHtml + contact;
 }
 
 // Home shortcuts: tap a category to search for it. Photos are pack shots of a
