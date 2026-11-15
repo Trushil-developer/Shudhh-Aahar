@@ -3078,6 +3078,7 @@ function orderCard(o) {
     <div class="ord-side">
       <div class="ord-amount">${gbp(orderTotal(o))}
         <small>Pay on delivery · ${orderItemCount(o)} ${orderItemCount(o) === 1 ? 'item' : 'items'}${unavailable ? ` · ${unavailable} not available` : ''}</small>
+        ${unpricedCount(o) && !['DELIVERED', 'CANCELLED'].includes(o.status) ? `<small style="color:var(--orange);font-size:12px">⚠️ ${unpricedCount(o)} ${unpricedCount(o) === 1 ? 'item' : 'items'} to price</small>` : ''}
         ${o.status === 'DELIVERED' ? `<small style="font-size:12px;margin-top:2px">${Number.isInteger(o.costPence) ? `You earned ${earnedHtml(orderEarned(o))}` : '<span style="color:var(--orange)">No receipt or cost</span>'}</small>` : ''}</div>
       <div class="ord-actions"><button class="btn btn-ghost" onclick="event.stopPropagation();openOrder('${o.id}')">View</button>${nextBtn}</div>
     </div>
@@ -3115,6 +3116,10 @@ function orderStage(status) {
   return { PLACED: 0, PRICED: 0, APPROVED: 0, CONFIRMED: 1, OUT_FOR_DELIVERY: 1, DELIVERED: 2 }[status];
 }
 function itemUnit(i) { return i.unitPricePence || i.estimatedUnitPence || null; }
+// Ordered while supermarket prices were unavailable: no price yet. Enter it
+// from the receipt before the order can be marked delivered.
+function needsPrice(i) { return i.available !== false && !itemUnit(i); }
+function unpricedCount(o) { return o.items.filter(needsPrice).length; }
 function openOrder(id) {
   const o = ORDERS.find(x => x.id === id);
   if (!o) return;
@@ -3142,7 +3147,9 @@ function openOrder(id) {
           ${itemBarcodeHtml(o, i, idx)}
           <div style="font-size:11px;color:var(--muted);margin-top:5px">${itemUnit(i) ? `${gbp(itemUnit(i))} each · ` : ''}<a href="${itemTrolleyUrl(i)}" target="_blank" rel="noopener">Find it ↗</a></div></td>
         <td style="white-space:nowrap;text-align:right;font-size:14px;padding-top:10px">
-          <div class="op-line" data-idx="${idx}" style="${i.available === false ? 'text-decoration:line-through;color:var(--muted)' : ''}"><b>${itemUnit(i) ? gbp(itemUnit(i) * i.qty) : '—'}</b></div>
+          ${!itemUnit(i) && editable
+            ? `<div style="font-size:11px;font-weight:700;color:var(--orange);margin-bottom:4px">Price from receipt</div>£<input class="form-input op-price" data-idx="${idx}" type="number" inputmode="decimal" min="0" step="0.01" placeholder="each" style="width:84px;padding:5px 7px;display:inline-block" oninput="updateOrderTotal('${o.id}')"/>`
+            : `<div class="op-line" data-idx="${idx}" style="${i.available === false ? 'text-decoration:line-through;color:var(--muted)' : ''}"><b>${itemUnit(i) ? gbp(itemUnit(i) * i.qty) : '<span style="color:var(--orange)">No price</span>'}</b></div>`}
           ${editable ? `<div style="font-size:12px;margin-top:6px"><label><input type="checkbox" class="op-na" data-idx="${idx}" ${i.available === false ? 'checked' : ''} onchange="updateOrderTotal('${o.id}')"/> Not available</label></div>`
             : i.available === false ? '<div style="font-size:12px;color:var(--red)">Not available</div>' : ''}</td>
       </tr>`;
@@ -3178,7 +3185,7 @@ function openOrder(id) {
     <div class="om-section">
       <h3><span class="n">2</span> Bill</h3>
       <div class="om-bill"><div><div style="font-size:11px;color:var(--muted);font-weight:700">CUSTOMER PAYS ON DELIVERY</div><div class="big" id="op-total">${gbp(orderTotal(o))}</div></div>
-        ${editable ? `<button class="btn btn-primary" id="op-save" style="display:none" onclick="saveOrderPrices('${o.id}')">Save Not available</button>` : ''}</div>
+        ${editable ? `<button class="btn btn-primary" id="op-save" style="display:none" onclick="saveOrderPrices('${o.id}')">Save changes</button>` : ''}</div>
       <div id="op-status" style="font-size:12px;margin-top:6px"></div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px">Prices are fixed at the customer's checkout prices. Items ticked Not available come off the bill; the delivery fee stays as charged.</div>
     </div>
@@ -3228,7 +3235,9 @@ function openOrder(id) {
 function readOrderPrices(o) {
   return o.items.map((item, idx) => {
     const box = document.querySelector(`.op-na[data-idx="${idx}"]`);
-    return { item, available: box ? !box.checked : item.available !== false, pence: itemUnit(item) };
+    const typed = document.querySelector(`.op-price[data-idx="${idx}"]`);
+    const pence = itemUnit(item) || (typed && typed.value ? toPence(typed.value) : null);
+    return { item, available: box ? !box.checked : item.available !== false, pence: Number.isInteger(pence) && pence > 0 ? pence : null, typed: !!(typed && typed.value) };
   });
 }
 
@@ -3241,8 +3250,9 @@ function updateOrderTotal(id) {
   });
   const subtotal = rows.reduce((s, r) => s + (r.available && r.pence ? r.pence * r.item.qty : 0), 0);
   const fee = o.deliveryFeePence || 0;
-  document.getElementById('op-total').textContent = `${gbp(subtotal + fee)} (items ${gbp(subtotal)} + delivery ${fee ? gbp(fee) : 'free'})`;
-  const changed = rows.some(r => r.available !== (r.item.available !== false));
+  const toPrice = rows.filter(r => r.available && !r.pence).length;
+  document.getElementById('op-total').textContent = `${gbp(subtotal + fee)} (items ${gbp(subtotal)} + delivery ${fee ? gbp(fee) : 'free'})${toPrice ? ` · ${toPrice} ${toPrice === 1 ? 'item' : 'items'} still to price` : ''}`;
+  const changed = rows.some(r => r.available !== (r.item.available !== false) || r.typed);
   const btn = document.getElementById('op-save');
   if (btn) btn.style.display = changed ? '' : 'none';
 }
@@ -3252,6 +3262,8 @@ async function saveOrderPrices(id) {
   const rows = readOrderPrices(o);
   const status = document.getElementById('op-status');
   if (!rows.some(r => r.available)) { status.style.color = 'var(--red)'; status.textContent = 'Every item is ticked Not available — cancel the order instead.'; return; }
+  const missing = rows.filter(r => r.available && !r.pence && needsPrice(r.item)).map(r => r.item.name);
+  if (missing.length) { status.style.color = 'var(--red)'; status.textContent = 'Enter a price (from the receipt) or tick Not available for: ' + missing.join(', '); return; }
   const btn = document.getElementById('op-save');
   btn.disabled = true;
   try {
@@ -3294,6 +3306,11 @@ function openDeliverForm(id, fromModal) {
   closeDeliverForm();
   const o = ORDERS.find(x => x.id === id);
   if (!o) return;
+  if (unpricedCount(o) || o.totalPence == null) {
+    alert('Some items have no price yet. Open the order, enter their prices from the receipt (or tick Not available), save, then mark it delivered.');
+    if (!fromModal) openOrder(id);
+    return;
+  }
   const wrap = document.createElement('div');
   wrap.id = 'deliver-form';
   wrap.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(10,20,35,.6);display:flex;align-items:center;justify-content:center;padding:16px';

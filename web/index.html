@@ -636,7 +636,8 @@ function linePrice(l) {
   const r = priceFor(l), st = priceState(r);
   if (st === 'loading') return '<span class="hint" style="margin:0">Checking price…</span>';
   if (st === 'ok') return gbp(unitPrice(l) * l.qty) + (MODE === 'SHOP_AROUND' ? ` <span class="hint" style="margin:0;font-weight:600">· from ${esc(buyFrom(l))}</span>` : '');
-  if (st === 'failed') return `<span class="hint" style="margin:0">Couldn't check the price · <a href="javascript:retryPrices()">Try again</a></span>`;
+  // Prices unreachable (fallback): it can still be ordered, priced when we shop.
+  if (st === 'failed') return `<span class="hint" style="margin:0">Price confirmed when we shop · <a href="javascript:retryPrices()">Check again</a></span>`;
   // Buying at one store, but another of ours sells it: say so, not "can't deliver".
   if (MODE === 'STORE' && r.cheapest) return `<span class="cant">${esc(storeName())} doesn't sell this</span> · <a href="javascript:void 0" onclick="setMode('SHOP_AROUND')">Switch to Best price</a> · <a href="javascript:void 0" onclick="setQty(${esc(JSON.stringify(l.barcode))},0)">Remove</a>`;
   return `<span class="cant">Sorry, we can't deliver this item</span> · <a href="javascript:void 0" onclick="setQty(${esc(JSON.stringify(l.barcode))},0)">Remove</a>`;
@@ -648,7 +649,6 @@ function basketBlocker() {
     const elsewhere = MODE === 'STORE' && cartLines().some(l => { const r = priceFor(l); return priceState(r) === 'none' && r.cheapest; });
     return elsewhere ? `${storeName()} doesn't sell some of your items (marked in red). Choose a different supermarket, switch to Best price, or remove them.` : "Remove the items we can't deliver to continue.";
   }
-  if (states.includes('failed')) return "We couldn't check some prices — tap Try again.";
   if (states.includes('loading')) return 'Checking prices…';
   return '';
 }
@@ -658,8 +658,11 @@ function basketTotals(mode = MODE) {
   const fee = SETTINGS ? SETTINGS.deliveryFeePence : 300;
   const freeOver = SETTINGS ? SETTINGS.freeDeliveryOverPence : 3000;
   const delivery = lines.length && !(freeOver > 0 && subtotal >= freeOver) ? fee : 0;
-  const unpriced = lines.filter(l => !unitPrice(l, mode)).length;
-  return { subtotal, delivery, total: subtotal + delivery, freeOver, toFree: freeOver > 0 ? Math.max(0, freeOver - subtotal) : 0, unpriced };
+  // missing: not sold where we'd buy it (blocks checkout). unpriced: prices
+  // couldn't be checked (fallback) — allowed, priced when we shop.
+  const missing = lines.filter(l => priceState(priceFor(l), mode) === 'none').length;
+  const unpriced = lines.filter(l => priceState(priceFor(l), mode) === 'failed').length;
+  return { subtotal, delivery, total: subtotal + delivery, freeOver, toFree: freeOver > 0 ? Math.max(0, freeOver - subtotal) : 0, unpriced, missing };
 }
 // Prices are keyed by store, so a store change just needs a redraw.
 function refreshCartPrices() { render(); }
@@ -775,7 +778,7 @@ async function runSearch(query, more) {
     seedPrices(r.products);
     remember(r.products);
     const products = more && prev ? [...prev.products, ...r.products.filter(p => !prev.products.some(x => x.barcode === p.barcode))] : r.products;
-    SEARCHES.set(key, { products, page: r.page, pages: r.pages, total: r.total, loading: false });
+    SEARCHES.set(key, { products, page: r.page, pages: r.pages, total: r.total, loading: false, fallback: !!r.fallback });
   } catch (err) {
     SEARCHES.set(key, { ...(prev || {}), loading: false, error: err.message });
   }
@@ -834,8 +837,8 @@ async function addToCart(barcode) {
   const st = priceState(await priceReady(picked && picked !== p.quantity ? { ...p, quantity: picked } : p));
   ADDING.delete(barcode);
   if (st === 'ok') return setQty(barcode, 1);
-  if (st === 'failed') { PRICES.forEach((r, k) => priceState(r) === 'failed' && PRICES.delete(k)); toast("We couldn't check the price just now. Please try again."); }
-  else toast(MODE === 'STORE'
+  if (st === 'failed') { setQty(barcode, 1); toast("We couldn't check the price right now, so we'll confirm it when we shop."); return; }
+  toast(MODE === 'STORE'
     ? `Sorry, ${storeName()} doesn't stock ${title(p) || 'this item'}, so we can't deliver it from there.`
     : `Sorry, we can't deliver ${title(p) || 'this item'} — none of the supermarkets we shop at stocks it.`);
   render();
@@ -1167,6 +1170,7 @@ function tilePrice(p) {
   if (r.storePence) {
     return `<div class="tile-price">${gbp(r.storePence)}</div>`;
   }
+  if (r.unavailable) return `<div class="tile-price"><span class="tile-note">Price confirmed when we shop</span></div>`;
   return `<div class="tile-price"><span class="tile-note">Not sold at ${esc(storeName())}</span></div>`;
 }
 function tile(p, withPrice = false) {
@@ -1459,6 +1463,7 @@ function viewSearch(params) {
   const waiting = s.loading && shown >= s.products.length;
   return `
     <h1>Results for “${esc(q)}” at ${esc(storeName())}</h1>
+    ${s.fallback ? `<div class="notice info">We can't check live supermarket prices right now. You can still order: we'll confirm each price when we shop, and you pay on delivery.</div>` : ''}
     ${sizeChips}
     ${s.products.length
       ? `<p class="hint">Showing ${plural(shown, 'product', 'products')}${size ? ` in ${esc(size)}` : ''} · pay on delivery</p>
@@ -1488,7 +1493,7 @@ function viewProduct(barcode) {
   const q = (CART[barcode] && CART[barcode].qty) || 0;
   const priceRow = !pickedReady ? '<span class="hint" style="margin:0">Checking price…</span>'
     : picked.storePence ? priceTag(picked.storePence)
-    : picked.unavailable ? `<span class="hint" style="margin:0">Couldn't check</span>`
+    : picked.unavailable ? `<span class="hint" style="margin:0">Price confirmed when we shop</span>`
     : `<span class="cant">${picked.cheapest ? 'Not sold here' : 'Unavailable'}</span>`;
   const st = priceState(picked);
   const cheap = pickedReady && picked.cheapest;
@@ -1564,12 +1569,12 @@ function pickSize(barcode, size) {
 function setMode(m) { MODE = m; store('shop_mode', m); render(); }
 function modeChooser() {
   const atStore = basketTotals('STORE'), around = basketTotals('SHOP_AROUND');
-  const saving = atStore.unpriced || around.unpriced ? 0 : atStore.subtotal - around.subtotal;
+  const saving = atStore.unpriced || around.unpriced || atStore.missing || around.missing ? 0 : atStore.subtotal - around.subtotal;
   const store = esc(storeName());
-  const storeMissing = atStore.unpriced
-    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${store} doesn't sell ${plural(atStore.unpriced, 'of your items', 'of your items')} (marked in red in your basket). Change your supermarket at the top of the page, switch to Best price, or remove ${atStore.unpriced === 1 ? 'it' : 'them'}.</span>` : '';
-  const aroundMissing = around.unpriced
-    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${plural(around.unpriced, 'item isn’t', 'items aren’t')} sold at any supermarket we shop at — please remove ${around.unpriced === 1 ? 'it' : 'them'}.</span>` : '';
+  const storeMissing = atStore.missing
+    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${store} doesn't sell ${plural(atStore.missing, 'of your items', 'of your items')} (marked in red in your basket). Change your supermarket at the top of the page, switch to Best price, or remove ${atStore.missing === 1 ? 'it' : 'them'}.</span>` : '';
+  const aroundMissing = around.missing
+    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${plural(around.missing, 'item isn’t', 'items aren’t')} sold at any supermarket we shop at — please remove ${around.missing === 1 ? 'it' : 'them'}.</span>` : '';
   return `<div class="modes">
     <label class="mode ${MODE === 'STORE' ? 'active' : ''}"><input type="radio" name="mode" ${MODE === 'STORE' ? 'checked' : ''} onchange="setMode('STORE')"/>
       <span><b>Buy everything from ${store}${atStore.subtotal ? ` · ${gbp(atStore.subtotal)}` : ''}</b><span class="hint">We go to ${store}, buy all your items there at ${store}'s prices, and deliver them to you.</span>${storeMissing}</span></label>
@@ -1582,7 +1587,8 @@ function basketSummary() {
   return `
     <div class="sum-row"><span>Items (${cartCount()})</span><span>${gbp(t.subtotal)}</span></div>
     <div class="sum-row"><span>Delivery</span><span>${t.delivery ? gbp(t.delivery) : 'Free'}</span></div>
-    <div class="sum-row total"><span>Total</span><span>${gbp(t.total)}</span></div>
+    <div class="sum-row total"><span>${t.unpriced ? 'Total so far' : 'Total'}</span><span>${gbp(t.total)}</span></div>
+    ${t.unpriced ? `<div class="notice info" style="margin:8px 0">${plural(t.unpriced, 'item', 'items')} will be priced when we shop, at the supermarket's shelf price, so your final bill will be higher than shown. You pay the final bill on delivery.</div>` : ''}
     ${t.delivery && t.toFree ? `<p class="hint">Add ${gbp(t.toFree)} more for free delivery.</p>` : ''}
     <p class="hint">Based on ${MODE === 'SHOP_AROUND' ? 'supermarket' : esc(storeName()) + "'s"} regular shelf prices, without Clubcard, Nectar or other offers. This is what you pay on delivery, by cash or card. If we can't get an item, we take it off your bill.</p>
     ${deliveryNotice()}`;
