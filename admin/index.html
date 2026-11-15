@@ -165,6 +165,47 @@ tr:hover td{background:rgba(20,28,36,0.025)}
 .badge-cyan{background:var(--cyan-bg);color:var(--cyan);border:1px solid rgba(65,182,230,0.25)}
 .badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(0,61,120,0.25)}
 .badge-muted{background:var(--surface2);color:var(--muted);border:1px solid var(--border2)}
+/* Orders board */
+.ord-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 14px}
+.ord-step{background:var(--surface2);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.4}
+.ord-step b{display:block;color:var(--text);font-size:13px;margin-bottom:2px}
+.ord-step .n{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;font-weight:800;align-items:center;justify-content:center;margin-right:6px}
+.ord-cutoff{font-size:12px;color:var(--text2);background:var(--accent-glow);border-radius:10px;padding:9px 12px;margin-bottom:14px}
+.ord-group{margin-top:18px}
+.ord-group-title{font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--text2);text-transform:uppercase;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.ord-group-title .count{background:var(--surface2);border-radius:999px;padding:1px 8px;color:var(--text)}
+.ord-card{border:1px solid var(--border);border-left:4px solid var(--border2);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--surface);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.ord-card:hover{border-color:var(--border2);box-shadow:0 2px 10px rgba(0,0,0,.05)}
+.ord-card.s-PLACED{border-left-color:var(--orange)}
+.ord-card.s-CONFIRMED,.ord-card.s-PRICED,.ord-card.s-APPROVED,.ord-card.s-OUT_FOR_DELIVERY{border-left-color:var(--accent)}
+.ord-card.s-DELIVERED{border-left-color:var(--green);opacity:.85}
+.ord-card.s-CANCELLED{border-left-color:var(--border2);opacity:.6}
+.ord-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ord-num{font-family:var(--mono);font-weight:800;font-size:14px}
+.ord-due{font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--surface2);color:var(--text2)}
+.ord-due.today{background:var(--orange-bg);color:var(--orange)}
+.ord-due.late{background:var(--red-bg);color:var(--red)}
+.ord-items{display:flex;align-items:center;gap:8px;margin:8px 0 6px;font-size:13px;color:var(--text)}
+.ord-thumbs{display:flex}
+.ord-thumbs img,.ord-thumbs span{width:34px;height:34px;border-radius:8px;border:2px solid var(--surface);background:var(--surface2);object-fit:contain;margin-right:-8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+.ord-meta{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--text2)}
+.ord-side{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.ord-amount{font-size:18px;font-weight:800}
+.ord-amount small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
+.ord-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+/* Order window */
+.om-track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin:14px 0 6px}
+.om-track div{font-size:11px;font-weight:700;color:var(--muted);text-align:center;padding-top:10px;border-top:4px solid var(--border)}
+.om-track div.done{color:var(--green);border-top-color:var(--green)}
+.om-track div.now{color:var(--navy);border-top-color:var(--navy)}
+.om-section{border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:14px}
+.om-section h3{font-size:13px;font-weight:800;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.om-section h3 .n{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--navy);color:#fff;font-size:11px;align-items:center;justify-content:center}
+.om-store{font-size:12px;font-weight:800;color:var(--navy);background:var(--accent-glow);border-radius:8px;padding:6px 10px;margin:10px 0 4px;display:flex;justify-content:space-between}
+.om-store:first-of-type{margin-top:0}
+.om-bill{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface2);border-radius:10px;padding:12px 14px;margin-top:10px}
+.om-bill .big{font-size:20px;font-weight:800}
+@media(max-width:760px){.ord-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.ord-card{grid-template-columns:1fr}.ord-side{align-items:flex-start;text-align:left}.ord-actions{justify-content:flex-start}}
 
 /* ── Progress bars ── */
 .progress{background:var(--border);border-radius:99px;height:5px;overflow:hidden}
@@ -419,34 +460,29 @@ tr:hover td{background:rgba(20,28,36,0.025)}
     <!-- ══ ORDERS ════════════════════════════ -->
     <div class="page" id="page-orders">
       <div class="stats-grid">
-        <div class="stat-card orange"><div class="stat-label">New — Go Shop</div><div class="stat-value" id="ord-placed">—</div></div>
-        <div class="stat-card blue"><div class="stat-label">Shopped — Bill Entered</div><div class="stat-value" id="ord-priced">—</div></div>
-        <div class="stat-card green"><div class="stat-label">Out For Delivery</div><div class="stat-value" id="ord-approved">—</div></div>
+        <div class="stat-card orange"><div class="stat-label">New — to confirm</div><div class="stat-value" id="ord-placed">—</div></div>
+        <div class="stat-card blue"><div class="stat-label">Confirmed — to deliver</div><div class="stat-value" id="ord-confirmed">—</div></div>
         <div class="stat-card green"><div class="stat-label">Delivered Today</div><div class="stat-value" id="ord-delivered-today">—</div></div>
       </div>
       <div class="card">
         <div class="card-title">Orders <span class="card-badge" id="orders-count-label">—</span></div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:14px">
-          1) <b>Go shopping</b> for each new order and enter the shop prices — that's the bill the customer pays on delivery →
-          2) mark <b>Out for delivery</b> → 3) <b>Delivered</b>. Customers don't approve anything: we promise delivery within
-          24 hours, every day between 5pm and 8pm. Customers pay on delivery (cash or card).
-        </p>
+        <div class="ord-steps">
+          <div class="ord-step"><span class="n">1</span><b>Confirm</b>Accept the new order. The customer is emailed that it comes on the next delivery round.</div>
+          <div class="ord-step"><span class="n">2</span><b>Shop</b>Buy the items. Tick <i>Not available</i> for anything you can't get — it comes off their bill.</div>
+          <div class="ord-step"><span class="n">3</span><b>Delivered</b>Customer pays the bill shown, by cash or card. They're emailed when you mark it delivered.</div>
+        </div>
+        <div class="ord-cutoff">🚚 We deliver every day between 5pm and 8pm. Orders placed <b>before 4pm</b> are due the same evening; later orders are due the next evening. Each order shows when it's due.</div>
         <div class="filter-bar">
           <select class="filter-select" id="orders-status-filter" onchange="loadAndRenderOrders()">
             <option value="">All Status</option>
-            <option value="PLACED">New — go shop</option>
-            <option value="PRICED">Bill entered</option>
-            <option value="APPROVED">Approved (older orders)</option>
-            <option value="OUT_FOR_DELIVERY">Out for delivery</option>
+            <option value="PLACED">New — to confirm</option>
+            <option value="CONFIRMED">Confirmed</option>
             <option value="DELIVERED">Delivered</option>
             <option value="CANCELLED">Cancelled</option>
           </select>
           <button class="btn btn-ghost" onclick="loadAndRenderOrders()">↻ Reload</button>
         </div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Order</th><th>Placed</th><th>Customer</th><th>Postcode</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
-          <tbody id="orders-tbody"></tbody>
-        </table></div>
+        <div id="orders-board"></div>
       </div>
     </div>
 
@@ -981,7 +1017,7 @@ tr:hover td{background:rgba(20,28,36,0.025)}
 
 <!-- User modal -->
 <div class="modal-overlay" id="order-modal" onclick="if(event.target.id==='order-modal')this.classList.remove('open')">
-  <div class="modal" style="width:560px">
+  <div class="modal" style="width:680px;max-width:calc(100vw - 24px)">
     <button class="btn btn-ghost" style="position:absolute;top:16px;right:16px" onclick="document.getElementById('order-modal').classList.remove('open')">✕</button>
     <div id="order-modal-body"></div>
   </div>
@@ -2749,19 +2785,22 @@ const SHOP_CONFIG = {
 };
 const SHOP_CATEGORIES = ['Fruit & Veg', 'Dairy & Eggs', 'Bakery', 'Meat & Fish', 'Cupboard', 'Drinks', 'Snacks', 'Frozen', 'Household', 'Personal Care', 'Baby'];
 const ORDER_STATUS_META = {
-  PLACED:           { label: 'New — go shop',     badge: 'badge-orange' },
-  PRICED:           { label: 'Bill entered',      badge: 'badge-blue' },
-  APPROVED:         { label: 'Approved (old)',    badge: 'badge-green' },
-  OUT_FOR_DELIVERY: { label: 'Out for delivery',  badge: 'badge-blue' },
+  PLACED:           { label: 'New — to confirm',  badge: 'badge-orange' },
+  CONFIRMED:        { label: 'Confirmed',         badge: 'badge-blue' },
+  // Older orders only:
+  PRICED:           { label: 'New (old order)',   badge: 'badge-orange' },
+  APPROVED:         { label: 'New (old order)',   badge: 'badge-orange' },
+  OUT_FOR_DELIVERY: { label: 'Confirmed',         badge: 'badge-blue' },
   DELIVERED:        { label: 'Delivered',         badge: 'badge-green' },
   CANCELLED:        { label: 'Cancelled',         badge: 'badge-muted' },
 };
-// Admin moves an order on with these; entering prices uses the modal.
-// No customer approval: an order can go out as soon as it's shopped.
-const NEXT_ORDER_STATUS = { PLACED: 'OUT_FOR_DELIVERY', PRICED: 'OUT_FOR_DELIVERY', APPROVED: 'OUT_FOR_DELIVERY', OUT_FOR_DELIVERY: 'DELIVERED' };
-const NEXT_ORDER_LABEL = { PLACED: '🚚 Out for delivery', PRICED: '🚚 Out for delivery', APPROVED: '🚚 Out for delivery', OUT_FOR_DELIVERY: '✅ Delivered' };
-// Prices can be entered or corrected until the order is delivered.
-const PRICE_EDITABLE = ['PLACED', 'PRICED', 'APPROVED', 'OUT_FOR_DELIVERY'];
+// New → Confirmed → Delivered. The bill is fixed at checkout; the only
+// change the owner makes is ticking items Not available (until delivered).
+const NEXT_ORDER_STATUS = { PLACED: 'CONFIRMED', PRICED: 'CONFIRMED', APPROVED: 'CONFIRMED', CONFIRMED: 'DELIVERED', OUT_FOR_DELIVERY: 'DELIVERED' };
+const NEXT_ORDER_LABEL = { PLACED: '✔ Confirm order', PRICED: '✔ Confirm order', APPROVED: '✔ Confirm order', CONFIRMED: '✅ Delivered', OUT_FOR_DELIVERY: '✅ Delivered' };
+const AVAIL_EDITABLE = ['PLACED', 'CONFIRMED', 'PRICED', 'APPROVED', 'OUT_FOR_DELIVERY'];
+const NEW_STATUSES = ['PLACED', 'PRICED', 'APPROVED'];
+const CONFIRMED_STATUSES = ['CONFIRMED', 'OUT_FOR_DELIVERY'];
 
 const ORDER_FIELDS = `id orderNumber userId subtotalPence deliveryFeePence totalPence note paymentMethod status createdAt updatedAt pricedAt
   mode storeId storeName estimatedSubtotalPence
@@ -2813,7 +2852,7 @@ async function loadAndRenderOrders() {
   try {
     ORDERS = await fetchOrders(status);
   } catch (err) {
-    document.getElementById('orders-tbody').innerHTML = `<tr><td colspan="8" style="color:var(--red)">${escapeHtml(err.message)}</td></tr>`;
+    document.getElementById('orders-board').innerHTML = `<p style="color:var(--red)">${escapeHtml(err.message)}</p>`;
     return;
   }
   renderOrders();
@@ -2822,9 +2861,8 @@ async function loadAndRenderOrders() {
 
 function renderOrderStats(orders) {
   const today = new Date().toDateString();
-  document.getElementById('ord-placed').textContent = orders.filter(o => o.status === 'PLACED').length;
-  document.getElementById('ord-priced').textContent = orders.filter(o => o.status === 'PRICED').length;
-  document.getElementById('ord-approved').textContent = orders.filter(o => o.status === 'OUT_FOR_DELIVERY').length;
+  document.getElementById('ord-placed').textContent = orders.filter(o => NEW_STATUSES.includes(o.status)).length;
+  document.getElementById('ord-confirmed').textContent = orders.filter(o => CONFIRMED_STATUSES.includes(o.status)).length;
   document.getElementById('ord-delivered-today').textContent = orders.filter(o => o.status === 'DELIVERED' && new Date(o.updatedAt).toDateString() === today).length;
   updateOrdersBadge(orders.filter(o => o.status === 'PLACED').length);
 }
@@ -2834,22 +2872,79 @@ function orderStatusBadge(status) {
   return `<span class="badge ${m.badge}">${m.label}</span>`;
 }
 
+// When an order is due: placed before 4pm → that evening (5–8pm), later →
+// the next evening. Uses this computer's clock (the shop is in the UK).
+const DELIVERY_CUTOFF_HOUR = 16;
+function orderDue(o) {
+  const placed = new Date(o.createdAt);
+  const day = new Date(placed);
+  if (placed.getHours() >= DELIVERY_CUTOFF_HOUR) day.setDate(day.getDate() + 1);
+  const end = new Date(day); end.setHours(20, 0, 0, 0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const dayDiff = Math.round((new Date(day).setHours(0, 0, 0, 0) - today) / 86400000);
+  const when = dayDiff === 0 ? 'Today' : dayDiff === 1 ? 'Tomorrow' : dayDiff === -1 ? 'Yesterday'
+    : day.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const open = !['DELIVERED', 'CANCELLED'].includes(o.status);
+  return { label: `${when} 5–8pm`, late: open && Date.now() > end.getTime(), today: open && dayDiff === 0 };
+}
+function orderPlacedText(o) {
+  return new Date(o.createdAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+function orderItemCount(o) { return o.items.reduce((n, i) => n + i.qty, 0); }
+function orderWhere(o) {
+  if (o.mode === 'STORE') return `🏪 Buy at ${escapeHtml(o.storeName || '—')}`;
+  const shops = [...new Set(o.items.map(i => i.buyFromStore).filter(Boolean))];
+  return `🔀 Best price${shops.length ? ` · ${escapeHtml(shops.join(', '))}` : ''}`;
+}
+function orderCard(o) {
+  const due = orderDue(o);
+  const names = o.items.map(i => `${i.qty > 1 ? i.qty + ' × ' : ''}${[i.brand, i.name].filter(Boolean).join(' ')}`);
+  const shown = names.slice(0, 2).join(', ') + (names.length > 2 ? ` +${names.length - 2} more` : '');
+  const thumbs = o.items.slice(0, 4).map(i => i.image ? `<img src="${escapeHtml(i.image)}" alt="" loading="lazy"/>` : '<span>🛒</span>').join('');
+  const unavailable = o.items.filter(i => i.available === false).length;
+  const nextBtn = NEXT_ORDER_STATUS[o.status]
+    ? `<button class="btn btn-primary" onclick="event.stopPropagation();setOrderStatus('${o.id}','${NEXT_ORDER_STATUS[o.status]}')">${NEXT_ORDER_LABEL[o.status]}</button>` : '';
+  return `<div class="ord-card s-${o.status}" onclick="openOrder('${o.id}')">
+    <div>
+      <div class="ord-head">
+        <span class="ord-num">${escapeHtml(o.orderNumber)}</span>${orderStatusBadge(o.status)}
+        ${['DELIVERED', 'CANCELLED'].includes(o.status) ? '' : `<span class="ord-due ${due.late ? 'late' : due.today ? 'today' : ''}">${due.late ? '⚠️ Late · was due ' : 'Due '}${due.label}</span>`}
+      </div>
+      <div class="ord-items"><span class="ord-thumbs">${thumbs}</span><span style="margin-left:10px">${escapeHtml(shown)}</span></div>
+      <div class="ord-meta">
+        <span>👤 ${escapeHtml(o.address.fullName)}</span>
+        <span>📍 ${escapeHtml(o.address.postcode)}</span>
+        <span>${orderWhere(o)}</span>
+        <span>🕒 Placed ${orderPlacedText(o)}</span>
+      </div>
+    </div>
+    <div class="ord-side">
+      <div class="ord-amount">${gbp(orderTotal(o))}
+        <small>Pay on delivery · ${orderItemCount(o)} ${orderItemCount(o) === 1 ? 'item' : 'items'}${unavailable ? ` · ${unavailable} not available` : ''}</small></div>
+      <div class="ord-actions"><button class="btn btn-ghost" onclick="event.stopPropagation();openOrder('${o.id}')">View</button>${nextBtn}</div>
+    </div>
+  </div>`;
+}
+// The bill: fixed at checkout (older orders fall back to their estimate).
+function orderTotal(o) { return o.totalPence != null ? o.totalPence : (o.estimatedSubtotalPence || 0) + (o.deliveryFeePence || 0); }
+const ORDER_GROUPS = [
+  { title: '🆕 New — confirm these', statuses: NEW_STATUSES },
+  { title: '🚚 Confirmed — next delivery round', statuses: CONFIRMED_STATUSES },
+  { title: '✅ Delivered', statuses: ['DELIVERED'] },
+  { title: 'Cancelled', statuses: ['CANCELLED'] },
+];
 function renderOrders() {
   document.getElementById('orders-count-label').textContent = `${ORDERS.length} shown`;
-  document.getElementById('orders-tbody').innerHTML = ORDERS.length ? ORDERS.map(o => `
-    <tr>
-      <td class="td-mono">${escapeHtml(o.orderNumber)}</td>
-      <td style="font-size:11px">${new Date(o.createdAt).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
-      <td>${escapeHtml(o.address.fullName)}<div style="font-size:11px;color:var(--muted)">${escapeHtml(o.address.phone)}</div></td>
-      <td class="td-mono">${escapeHtml(o.address.postcode)}</td>
-      <td>${o.items.reduce((n, i) => n + i.qty, 0)}<div style="font-size:10px;color:var(--muted)">${o.mode === 'STORE' ? '🏪 ' + escapeHtml(o.storeName || '') : '🔀 Shop around'}</div></td>
-      <td><b>${o.totalPence != null ? gbp(o.totalPence) : `<span style="color:var(--muted)">~${gbp((o.estimatedSubtotalPence || 0) + (o.deliveryFeePence || 0))}</span>`}</b></td>
-      <td>${orderStatusBadge(o.status)}</td>
-      <td><div style="display:flex;gap:5px">
-        ${PRICE_EDITABLE.includes(o.status) ? `<button class="btn ${o.totalPence == null ? 'btn-primary' : 'btn-ghost'}" onclick="openOrder('${o.id}')">💷 ${o.totalPence == null ? 'Enter prices' : 'Edit prices'}</button>` : `<button class="btn btn-ghost" onclick="openOrder('${o.id}')">View</button>`}
-        ${NEXT_ORDER_STATUS[o.status] ? `<button class="btn btn-primary" onclick="setOrderStatus('${o.id}','${NEXT_ORDER_STATUS[o.status]}')">${NEXT_ORDER_LABEL[o.status]}</button>` : ''}
-      </div></td>
-    </tr>`).join('') : '<tr><td colspan="8" style="color:var(--muted)">No orders yet.</td></tr>';
+  const board = document.getElementById('orders-board');
+  if (!ORDERS.length) { board.innerHTML = '<p style="color:var(--muted)">No orders yet.</p>'; return; }
+  // Open orders: most urgent (earliest placed) first. Finished: newest first.
+  const byAge = (a, b) => new Date(a.createdAt) - new Date(b.createdAt);
+  board.innerHTML = ORDER_GROUPS.map(g => {
+    const list = ORDERS.filter(o => g.statuses.includes(o.status));
+    if (!list.length) return '';
+    list.sort(['DELIVERED', 'CANCELLED'].includes(g.statuses[0]) ? (a, b) => byAge(b, a) : byAge);
+    return `<div class="ord-group"><div class="ord-group-title">${g.title}<span class="count">${list.length}</span></div>${list.map(orderCard).join('')}</div>`;
+  }).join('');
 }
 
 let SHOP_SETTINGS_CACHE = null;
@@ -2857,43 +2952,79 @@ function trolleySearchUrl(item) {
   return 'https://www.trolley.co.uk/search/?q=' + encodeURIComponent([item.brand, item.name, item.quantity].filter(Boolean).join(' '));
 }
 
+const ORDER_TRACK = ['Placed', 'Confirmed', 'Delivered'];
+function orderStage(status) {
+  return { PLACED: 0, PRICED: 0, APPROVED: 0, CONFIRMED: 1, OUT_FOR_DELIVERY: 1, DELIVERED: 2 }[status];
+}
+function itemUnit(i) { return i.unitPricePence || i.estimatedUnitPence || null; }
 function openOrder(id) {
   const o = ORDERS.find(x => x.id === id);
   if (!o) return;
   const a = o.address;
-  const editable = PRICE_EDITABLE.includes(o.status);
-  if (editable && !SHOP_SETTINGS_CACHE) adminGraphqlRequest(ADMIN_GET_SHOP_SETTINGS_QUERY, {}).then(d => { SHOP_SETTINGS_CACHE = d.adminGetShopSettings; updateOrderTotal(id); }).catch(() => {});
-  const itemRows = o.items.map((i, idx) => `
-      <tr>
-        <td style="padding:6px 0;width:44px">${i.image ? `<img src="${escapeHtml(i.image)}" style="width:40px;height:40px;object-fit:contain"/>` : '🛒'}</td>
-        <td style="padding:6px 8px">${i.qty} × ${escapeHtml([i.brand, i.name].filter(Boolean).join(' '))}${i.quantity ? ` <span style="color:var(--muted)">${escapeHtml(i.quantity)}</span>` : ''}
-          ${i.buyFromStore ? `<div style="font-size:11px;font-weight:700;color:var(--green,#1a7f37)">🏪 Buy at ${escapeHtml(i.buyFromStore)}${i.estimatedUnitPence ? ` · ~${gbp(i.estimatedUnitPence)} each` : ''}</div>` : ''}
-          <div style="font-size:10px;color:var(--muted);font-family:var(--mono)">${escapeHtml(i.barcode)} · <a href="${trolleySearchUrl(i)}" target="_blank" rel="noopener">Check on Trolley ↗</a></div></td>
-        ${editable ? `
-        <td style="white-space:nowrap">£<input class="form-input op-price" data-idx="${idx}" type="number" min="0" step="0.01" style="width:80px;padding:5px 7px;display:inline-block" placeholder="each"
-            value="${(i.unitPricePence || i.estimatedUnitPence) ? ((i.unitPricePence || i.estimatedUnitPence) / 100).toFixed(2) : ''}" ${i.available === false ? 'disabled' : ''} oninput="updateOrderTotal('${o.id}')"/></td>
-        <td style="white-space:nowrap;font-size:11px"><label><input type="checkbox" class="op-na" data-idx="${idx}" ${i.available === false ? 'checked' : ''} onchange="this.closest('tr').querySelector('.op-price').disabled=this.checked;updateOrderTotal('${o.id}')"/> Not available</label></td>`
-        : `<td style="text-align:right">${i.available === false ? '<span style="color:var(--red)">Not available</span>' : gbp(i.lineTotalPence)}</td>`}
-      </tr>`).join('');
+  const editable = AVAIL_EDITABLE.includes(o.status);
+  const due = orderDue(o);
+  const itemRow = (i, idx) => `
+      <tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 0;width:48px">${i.image ? `<img src="${escapeHtml(i.image)}" style="width:42px;height:42px;object-fit:contain;border-radius:8px;background:var(--surface2)"/>` : '🛒'}</td>
+        <td style="padding:8px">
+          <div style="font-size:13px"><b>${i.qty} ×</b> ${escapeHtml([i.brand, i.name].filter(Boolean).join(' '))}${i.quantity ? ` <span style="color:var(--muted)">${escapeHtml(i.quantity)}</span>` : ''}</div>
+          <div style="font-size:11px;color:var(--muted)">${itemUnit(i) ? `${gbp(itemUnit(i))} each · ` : ''}<a href="${trolleySearchUrl(i)}" target="_blank" rel="noopener">Find it ↗</a></div></td>
+        <td style="white-space:nowrap;text-align:right;font-size:13px">
+          <div class="op-line" data-idx="${idx}" style="${i.available === false ? 'text-decoration:line-through;color:var(--muted)' : ''}">${itemUnit(i) ? gbp(itemUnit(i) * i.qty) : '—'}</div>
+          ${editable ? `<div style="font-size:11px;margin-top:4px"><label><input type="checkbox" class="op-na" data-idx="${idx}" ${i.available === false ? 'checked' : ''} onchange="updateOrderTotal('${o.id}')"/> Not available</label></div>`
+            : i.available === false ? '<div style="font-size:11px;color:var(--red)">Not available</div>' : ''}</td>
+      </tr>`;
+  // Shopping list grouped by supermarket, so it reads like a route.
+  const groups = new Map();
+  o.items.forEach((i, idx) => {
+    const shop = (o.mode === 'STORE' ? o.storeName : i.buyFromStore) || o.storeName || 'Any supermarket';
+    if (!groups.has(shop)) groups.set(shop, []);
+    groups.get(shop).push([i, idx]);
+  });
+  const list = [...groups].map(([shop, rows]) => `
+      <div class="om-store"><span>🏪 ${escapeHtml(shop)}</span><span>${rows.reduce((n, [i]) => n + i.qty, 0)} ${rows.reduce((n, [i]) => n + i.qty, 0) === 1 ? 'item' : 'items'}</span></div>
+      <table style="width:100%;border-collapse:collapse">${rows.map(([i, idx]) => itemRow(i, idx)).join('')}</table>`).join('');
+  const stage = orderStage(o.status);
+  const mapUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([a.line1, a.line2, a.city, a.postcode].filter(Boolean).join(', '));
   document.getElementById('order-modal-body').innerHTML = `
-    <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">ORDER ${escapeHtml(o.orderNumber)}</div>
-    <div style="display:flex;align-items:center;gap:10px;margin:6px 0 4px"><div style="font-size:20px;font-weight:800" id="op-total">${o.totalPence != null ? gbp(o.totalPence) : 'Not priced yet'}</div>${orderStatusBadge(o.status)}<span style="font-size:11px;color:var(--muted)">pay on delivery</span></div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Placed ${new Date(o.createdAt).toLocaleString('en-GB')}${o.totalPence == null ? ' · enter the shop prices after shopping' : ''}</div>
-    <div style="border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:13px;font-weight:700;background:${o.mode === 'STORE' ? 'var(--orange-bg,#FEF3CD)' : 'var(--green-bg)'}">
-      ${o.mode === 'STORE' ? `🏪 Customer wants everything from <b>${escapeHtml(o.storeName || '')}</b> at ${escapeHtml(o.storeName || '')}'s shelf prices.`
-        : `🔀 Shop around — buy each item wherever it's cheapest. (Customer's usual store: ${escapeHtml(o.storeName || '—')}.)`}
-      ${o.estimatedSubtotalPence ? `<div style="font-weight:500;font-size:12px;margin-top:4px">Customer saw an estimated ${gbp(o.estimatedSubtotalPence)} for items. Price boxes start from those estimates — correct any that differ.</div>` : ''}
+    <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">ORDER</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 40px 4px 0">
+      <div style="font-size:22px;font-weight:800;font-family:var(--mono)">${escapeHtml(o.orderNumber)}</div>${orderStatusBadge(o.status)}
+      ${['DELIVERED', 'CANCELLED'].includes(o.status) ? '' : `<span class="ord-due ${due.late ? 'late' : due.today ? 'today' : ''}">${due.late ? '⚠️ Late · was due ' : 'Due '}${due.label}</span>`}
     </div>
-    <div class="form-label">ITEMS${editable ? ' — CONFIRM YOUR PRICE PER ITEM' : ''}</div>
-    <table style="width:100%;font-size:12px;margin-bottom:6px">${itemRows}</table>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Delivery: worked out from the final items total (your Delivery Settings) when you send the bill.</div>
-    ${editable ? `<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px"><button class="btn btn-primary" id="op-save" onclick="saveOrderPrices('${o.id}')">💷 ${o.totalPence == null ? 'Save bill' : 'Update bill'}</button><span id="op-status" style="font-size:12px"></span></div>` : ''}
-    <div class="form-label">DELIVER TO</div>
-    <div style="font-size:13px;line-height:1.6;margin-bottom:16px">${escapeHtml(a.fullName)}<br>${escapeHtml(a.line1)}${a.line2 ? '<br>' + escapeHtml(a.line2) : ''}<br>${escapeHtml(a.city)} ${escapeHtml(a.postcode)}<br>📞 <a href="tel:${escapeHtml(a.phone)}">${escapeHtml(a.phone)}</a></div>
-    ${o.note ? `<div class="form-label">NOTE</div><div style="font-size:13px;margin-bottom:16px">${escapeHtml(o.note)}</div>` : ''}
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+    <div style="font-size:12px;color:var(--muted)">Placed ${orderPlacedText(o)} · ${orderItemCount(o)} ${orderItemCount(o) === 1 ? 'item' : 'items'} · pay on delivery (cash or card)</div>
+    ${o.status === 'CANCELLED' ? '<div style="margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--red-bg);color:var(--red);font-weight:700;font-size:13px">This order was cancelled.</div>'
+      : `<div class="om-track">${ORDER_TRACK.map((t, k) => `<div class="${k < stage ? 'done' : k === stage ? 'now' : ''}">${k < stage ? '✓ ' : ''}${t}</div>`).join('')}</div>`}
+
+    <div class="om-section">
+      <h3><span class="n">1</span> Shopping list
+        <span style="font-weight:600;font-size:12px;color:var(--text2);margin-left:auto">${o.mode === 'STORE' ? `Everything from ${escapeHtml(o.storeName || '')}, at its shelf prices` : 'Best price: each item where it’s cheapest'}</span></h3>
+      ${list}
+    </div>
+
+    <div class="om-section">
+      <h3><span class="n">2</span> Bill</h3>
+      <div class="om-bill"><div><div style="font-size:11px;color:var(--muted);font-weight:700">CUSTOMER PAYS ON DELIVERY</div><div class="big" id="op-total">${gbp(orderTotal(o))}</div></div>
+        ${editable ? `<button class="btn btn-primary" id="op-save" style="display:none" onclick="saveOrderPrices('${o.id}')">Save Not available</button>` : ''}</div>
+      <div id="op-status" style="font-size:12px;margin-top:6px"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">Prices are fixed at the customer's checkout prices. Items ticked Not available come off the bill; the delivery fee stays as charged.</div>
+    </div>
+
+    <div class="om-section">
+      <h3><span class="n">3</span> Deliver to</h3>
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="font-size:14px;line-height:1.6"><b>${escapeHtml(a.fullName)}</b><br>${escapeHtml(a.line1)}${a.line2 ? '<br>' + escapeHtml(a.line2) : ''}<br>${escapeHtml(a.city)} <b>${escapeHtml(a.postcode)}</b></div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${a.phone ? `<a class="btn btn-ghost" href="tel:${escapeHtml(a.phone)}">📞 ${escapeHtml(a.phone)}</a>` : ''}
+          <a class="btn btn-ghost" href="${mapUrl}" target="_blank" rel="noopener">🗺️ Open in Maps</a>
+        </div>
+      </div>
+      ${o.note ? `<div style="margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--orange-bg);font-size:13px"><b>Customer note:</b> ${escapeHtml(o.note)}</div>` : ''}
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">
       ${NEXT_ORDER_STATUS[o.status] ? `<button class="btn btn-primary" onclick="setOrderStatus('${o.id}','${NEXT_ORDER_STATUS[o.status]}',true)">${NEXT_ORDER_LABEL[o.status]}</button>` : ''}
-      ${['DELIVERED', 'CANCELLED'].includes(o.status) ? '' : `<button class="btn btn-danger" onclick="setOrderStatus('${o.id}','CANCELLED',true)">Cancel order</button>`}
+      ${['DELIVERED', 'CANCELLED'].includes(o.status) ? '' : `<button class="btn btn-danger" style="margin-left:auto" onclick="setOrderStatus('${o.id}','CANCELLED',true)">Cancel order</button>`}
     </div>`;
   document.getElementById('order-modal').classList.add('open');
   if (editable) updateOrderTotal(o.id);
@@ -2901,33 +3032,37 @@ function openOrder(id) {
 
 function readOrderPrices(o) {
   return o.items.map((item, idx) => {
-    const na = document.querySelector(`.op-na[data-idx="${idx}"]`).checked;
-    const pence = toPence(document.querySelector(`.op-price[data-idx="${idx}"]`).value);
-    return { item, available: !na, pence };
+    const box = document.querySelector(`.op-na[data-idx="${idx}"]`);
+    return { item, available: box ? !box.checked : item.available !== false, pence: itemUnit(item) };
   });
 }
 
 function updateOrderTotal(id) {
   const o = ORDERS.find(x => x.id === id);
   const rows = readOrderPrices(o);
-  const done = rows.every(r => !r.available || (Number.isInteger(r.pence) && r.pence > 0));
-  const subtotal = rows.reduce((s, r) => s + (r.available && Number.isInteger(r.pence) ? r.pence * r.item.qty : 0), 0);
-  const fee = SHOP_SETTINGS_CACHE ? (subtotal >= SHOP_SETTINGS_CACHE.freeDeliveryOverPence ? 0 : SHOP_SETTINGS_CACHE.deliveryFeePence) : (o.deliveryFeePence || 0);
-  document.getElementById('op-total').textContent = `${gbp(subtotal + fee)}${done ? '' : ' so far'} (items ${gbp(subtotal)} + delivery ${fee ? gbp(fee) : 'free'})`;
+  rows.forEach((r, idx) => {
+    const el = document.querySelector(`.op-line[data-idx="${idx}"]`);
+    if (el) el.style.cssText = r.available ? '' : 'text-decoration:line-through;color:var(--muted)';
+  });
+  const subtotal = rows.reduce((s, r) => s + (r.available && r.pence ? r.pence * r.item.qty : 0), 0);
+  const fee = o.deliveryFeePence || 0;
+  document.getElementById('op-total').textContent = `${gbp(subtotal + fee)} (items ${gbp(subtotal)} + delivery ${fee ? gbp(fee) : 'free'})`;
+  const changed = rows.some(r => r.available !== (r.item.available !== false));
+  const btn = document.getElementById('op-save');
+  if (btn) btn.style.display = changed ? '' : 'none';
 }
 
 async function saveOrderPrices(id) {
   const o = ORDERS.find(x => x.id === id);
   const rows = readOrderPrices(o);
   const status = document.getElementById('op-status');
-  const missing = rows.filter(r => r.available && !(Number.isInteger(r.pence) && r.pence > 0)).map(r => r.item.name);
-  if (missing.length) { status.style.color = 'var(--red)'; status.textContent = 'Enter a price (or tick Not available) for: ' + missing.join(', '); return; }
+  if (!rows.some(r => r.available)) { status.style.color = 'var(--red)'; status.textContent = 'Every item is ticked Not available — cancel the order instead.'; return; }
   const btn = document.getElementById('op-save');
   btn.disabled = true;
   try {
     const data = await adminGraphqlRequest(ADMIN_PRICE_ORDER_MUTATION, {
       orderId: id,
-      prices: rows.map(r => ({ barcode: r.item.barcode, available: r.available, unitPricePence: r.available ? r.pence : null })),
+      prices: rows.map(r => ({ barcode: r.item.barcode, available: r.available, unitPricePence: r.pence })),
     });
     ORDERS = ORDERS.map(x => x.id === id ? data.adminPriceOrder : x);
     renderOrders();
@@ -2942,9 +3077,6 @@ async function saveOrderPrices(id) {
 
 async function setOrderStatus(id, status, fromModal) {
   if (status === 'CANCELLED' && !confirm('Cancel this order? The customer will see it as cancelled.')) return;
-  const ord = ORDERS.find(o => o.id === id);
-  if (status === 'OUT_FOR_DELIVERY' && ord && ord.totalPence == null
-    && !confirm("You haven't entered the shop prices yet, so the customer won't see a bill. Send it out for delivery anyway?")) return;
   try {
     const data = await adminGraphqlRequest(ADMIN_UPDATE_ORDER_STATUS_MUTATION, { orderId: id, status });
     const updated = data.adminUpdateOrderStatus;

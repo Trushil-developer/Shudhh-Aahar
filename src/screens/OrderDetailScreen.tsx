@@ -12,7 +12,7 @@ import { ShopNav, ShopStackParamList } from '../navigation/shopRoutes';
 import { Colors } from '../theme/medical';
 import { useResponsive, TABLET_CONTENT_MAX_WIDTH } from '../utils/responsive';
 
-const TIMELINE: OrderStatus[] = ['PLACED', 'CONFIRMED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+const TIMELINE: OrderStatus[] = ['PLACED', 'CONFIRMED', 'DELIVERED'];
 
 const STATUS_COLORS: Record<OrderStatus, { fg: string; bg: string }> = {
   PLACED:           { fg: Colors.caution,   bg: Colors.cautionBg },

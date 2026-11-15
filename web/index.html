@@ -1,11 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#0A3B70"/>
-<title>Shuddh Aahar | Everyday groceries delivered</title>
-<meta name="description" content="Everyday essentials from your favourite UK supermarket, with full ingredients for every product. We shop for you and deliver. Pay on delivery."/>
+<title>Grocery Delivery in Harrow | Shuddh Aahar</title>
+<meta name="description" content="Grocery delivery within 5 miles of Harrow. Order from Tesco, Sainsbury's, Asda, Morrisons, Aldi, Lidl, Waitrose or M&S. Delivered 5pm to 8pm daily, pay on delivery."/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<link rel="canonical" href="https://www.shuddhaahar.shop/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Shuddh Aahar"/>
+<meta property="og:locale" content="en_GB"/>
+<meta property="og:url" content="https://www.shuddhaahar.shop/"/>
+<meta property="og:title" content="Grocery Delivery in Harrow | Shuddh Aahar"/>
+<meta property="og:description" content="Grocery delivery within 5 miles of Harrow. Order from Tesco, Sainsbury's, Asda, Morrisons, Aldi, Lidl, Waitrose or M&S. Delivered 5pm to 8pm daily, pay on delivery."/>
+<meta property="og:image" content="https://www.shuddhaahar.shop/og-image.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="Shuddh Aahar: grocery delivery in Harrow"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Grocery Delivery in Harrow | Shuddh Aahar"/>
+<meta name="twitter:description" content="Grocery delivery within 5 miles of Harrow. Order from Tesco, Sainsbury's, Asda, Morrisons, Aldi, Lidl, Waitrose or M&S. Delivered 5pm to 8pm daily, pay on delivery."/>
+<meta name="twitter:image" content="https://www.shuddhaahar.shop/og-image.png"/>
+<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "OnlineStore", "@id": "https://www.shuddhaahar.shop/#business", "name": "Shuddh Aahar", "url": "https://www.shuddhaahar.shop/", "logo": "https://www.shuddhaahar.shop/favicon-180.png", "image": "https://www.shuddhaahar.shop/og-image.png", "description": "Grocery delivery within 5 miles of Harrow. Order from Tesco, Sainsbury's, Asda, Morrisons, Aldi, Lidl, Waitrose or M&S. Delivered 5pm to 8pm daily, pay on delivery.", "email": "info@shuddhaahar.shop", "areaServed": {"@type": "Place", "name": "Harrow, London, United Kingdom"}, "currenciesAccepted": "GBP", "paymentAccepted": "Cash, Card", "contactPoint": {"@type": "ContactPoint", "contactType": "customer support", "email": "info@shuddhaahar.shop", "areaServed": "GB", "availableLanguage": "en-GB"}}, {"@context": "https://schema.org", "@type": "WebSite", "@id": "https://www.shuddhaahar.shop/#website", "name": "Shuddh Aahar", "url": "https://www.shuddhaahar.shop/", "inLanguage": "en-GB", "publisher": {"@id": "https://www.shuddhaahar.shop/#business"}}]</script>
 <link rel="icon" type="image/png" href="/favicon-32.png"/>
 <link rel="apple-touch-icon" href="/favicon-180.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -247,7 +264,7 @@ input.f:disabled{background:var(--surface2);color:var(--text2)}
 .status-pill{display:inline-block;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:800;white-space:nowrap}
 .st-PLACED{background:var(--caution-bg);color:var(--caution)}
 .st-PRICED{background:var(--caution-bg);color:var(--caution)}
-.st-APPROVED,.st-OUT_FOR_DELIVERY{background:var(--info-bg);color:var(--info)}
+.st-CONFIRMED,.st-APPROVED,.st-OUT_FOR_DELIVERY{background:var(--info-bg);color:var(--info)}
 .st-DELIVERED{background:var(--safe-bg);color:var(--safe)}
 .st-CANCELLED{background:var(--surface2);color:var(--muted)}
 .order-card{display:block;text-decoration:none;color:inherit}
@@ -314,6 +331,14 @@ input.f:disabled{background:var(--surface2);color:var(--text2)}
   .two-col{gap:12px}
   .modes .mode{padding:12px 10px}
 }
+.about{padding:8px 0 28px}
+.about h2{font-size:20px;margin:0 0 8px}
+.about p{color:var(--text2);font-size:14px;line-height:1.55;margin:0 0 10px;max-width:780px}
+.about .faq{margin-top:14px;max-width:780px;border-top:1px solid var(--border)}
+.about details{border-bottom:1px solid var(--border)}
+.about summary{cursor:pointer;padding:12px 0;font-weight:700;font-size:14px}
+.about details p{margin:0 0 12px}
+body:not(.is-home) .about{display:none}
 footer{border-top:1px solid var(--border);padding:22px 0;font-size:12px;color:var(--muted);background:var(--surface)}
 footer p{margin:4px 0}
 footer a{color:var(--text2);text-decoration:none}
@@ -348,7 +373,7 @@ footer a{color:var(--text2);text-decoration:none}
 <body>
 <header>
   <div class="wrap header-inner">
-    <a class="header-brand" href="#/">
+    <a class="header-brand" href="#/" aria-label="Shuddh Aahar home">
       <img class="logo-mark" src="/favicon-180.png" alt=""/>
       <div>
         <div class="logo-name">Shuddh Aahar</div>
@@ -371,6 +396,23 @@ footer a{color:var(--text2);text-decoration:none}
 </header>
 
 <main><div class="wrap" id="view"><div class="spinner"></div></div></main>
+
+<!-- What we do, in plain words, for people and search engines. Static HTML so
+     it's readable without JavaScript; shown on the home page only. -->
+<section class="about" id="about" aria-labelledby="about-h">
+  <div class="wrap">
+    <h2 id="about-h">Grocery delivery in Harrow</h2>
+    <p>Shuddh Aahar delivers groceries to homes within 5 miles of Harrow. Choose your usual supermarket (Tesco, Sainsbury's, Asda, Morrisons, Aldi, Lidl, Waitrose or Marks &amp; Spencer), search or scan the products you want, and we buy them in store and bring them to your door.</p>
+    <p>We deliver every day between 5pm and 8pm. Order before 4pm for delivery the same evening; after 4pm, the next evening. You pay the prices shown at checkout, on delivery, by cash or card. Delivery is £3, and free on orders of £30 or more.</p>
+    <div class="faq">
+      <details><summary>Which areas do you deliver to?</summary><p>Homes within 5 miles of Harrow. Enter your postcode at checkout and we'll tell you straight away if we can deliver to you.</p></details>
+      <details><summary>Which supermarkets can I order from?</summary><p>Tesco, Sainsbury's, Asda, Morrisons, Aldi, Lidl, Waitrose and Marks &amp; Spencer. You can change your supermarket at any time.</p></details>
+      <details><summary>When will my groceries arrive?</summary><p>Every day between 5pm and 8pm. Orders placed before 4pm arrive the same evening; orders after 4pm arrive the next evening.</p></details>
+      <details><summary>How do I pay?</summary><p>You pay the total shown at checkout when your order is delivered, by cash or card. There's nothing to pay online.</p></details>
+      <details><summary>How much is delivery?</summary><p>£3 per order, and free when your order comes to £30 or more.</p></details>
+    </div>
+  </div>
+</section>
 
 <!-- Phone navigation: within thumb reach, like a shopping app -->
 <nav class="tabbar" aria-label="Main">
@@ -495,13 +537,6 @@ function chooseStore(id) {
   if (signedIn()) saveStoreToAccount(id).catch(err => console.warn('Could not save supermarket to account', err));
   location.hash = '#/';
 }
-// Basket: pick the supermarket to buy everything at, without leaving the basket.
-function basketStore(id) {
-  MODE = 'STORE'; store('shop_mode', MODE);
-  applyStore(id);
-  if (signedIn()) saveStoreToAccount(id).catch(err => console.warn('Could not save supermarket to account', err));
-  render();
-}
 function updateStoreLabel() {
   const label = STORE_ID ? storeName() : 'Store';
   document.getElementById('store-label').textContent = label;
@@ -553,7 +588,7 @@ function toast(msg) {
   el.textContent = msg; el.hidden = false;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
 }
-function priceTag(pence) { return pence ? `<span class="price">${gbp(pence)}</span><span class="est">est.</span>` : ''; }
+function priceTag(pence) { return pence ? `<span class="price">${gbp(pence)}</span>` : ''; }
 function linePrice(l) {
   const r = priceFor(l), st = priceState(r);
   if (st === 'loading') return '<span class="hint" style="margin:0">Checking price…</span>';
@@ -1007,11 +1042,11 @@ function imgFailed(el) {
   FALLBACK_IMGS.set(src, null);
   el.replaceWith(Object.assign(document.createElement('span'), { className: 'ph', innerHTML: ICONS_PH }));
 }
-function imgTag(src, fallback) {
+function imgTag(src, fallback, alt = '') {
   while (FALLBACK_IMGS.has(src)) { const next = FALLBACK_IMGS.get(src); if (next === null) return `<span class="ph">${ICONS_PH}</span>`; src = next; fallback = null; }
   const ok = LOADED_IMGS.has(src) ? ' ok' : '';
   const fb = fallback && fallback !== src ? ` data-fallback="${esc(fallback)}"` : '';
-  return `<img class="pic${ok}" src="${esc(src)}" alt="" loading="lazy" decoding="async" onload="imgLoaded(this)" onerror="imgFailed(this)"${fb}/>`;
+  return `<img class="pic${ok}" src="${esc(src)}" alt="${esc(alt)}" loading="lazy" decoding="async" onload="imgLoaded(this)" onerror="imgFailed(this)"${fb}/>`;
 }
 // Trolley photos off: products found through search have no barcode, so the
 // server looks for the same product on Open Food Facts (catalog-get.js
@@ -1041,9 +1076,9 @@ function pumpOffPhotos() {
       });
   }
 }
-function img(p) {
+function img(p, alt = '') {
   const shot = useTrolleyPhotos() && p && p.barcode && (packShot(p) || (isTrolleyId(p.barcode) ? p.barcode.slice(2) : null));
-  if (shot) return imgTag(`/photo/${encodeURIComponent(shot)}`, p.image || null);
+  if (shot) return imgTag(`/photo/${encodeURIComponent(shot)}`, p.image || null, alt);
   // Trolley photos on and its price check (which finds the Trolley match) is
   // still running: shimmer until it's back, rather than showing the Open Food
   // Facts photo and then swapping it.
@@ -1051,10 +1086,10 @@ function img(p) {
   if (p && !p.image && SETTINGS && isTrolleyId(p.barcode) && !useTrolleyPhotos()) {
     const url = OFF_PHOTOS.get(p.barcode);
     if (url === undefined) wantOffPhoto(p);
-    if (url && url !== 'loading') return imgTag(photoUrl(url), url);
+    if (url && url !== 'loading') return imgTag(photoUrl(url), url, alt);
   }
   if (!p || !p.image) return `<span class="ph">${icon('basket')}</span>`;
-  return imgTag(photoUrl(p.image), p.image);
+  return imgTag(photoUrl(p.image), p.image, alt);
 }
 // Placeholders shown while products load, shaped like the real thing.
 function skeletonTiles(n) {
@@ -1087,7 +1122,7 @@ function tilePrice(p) {
 }
 function tile(p, withPrice = false) {
   return `<a class="tile" href="#/product/${encodeURIComponent(p.barcode)}">
-    <div class="tile-img">${img(p)}</div>
+    <div class="tile-img">${img(p, cleanName(p.name))}</div>
     <div class="tile-brand">${esc(tileBrand(p))}</div>
     <div class="tile-name">${esc(cleanName(p.name))}</div>
     <div class="tile-size">${esc(p.quantity || '')}</div>
@@ -1111,8 +1146,9 @@ function tileIngredients(p) {
 // Our delivery promise — shown on the home screen, basket, checkout and orders.
 const DELIVERY_PROMISE = 'We deliver within 24 hours';
 const DELIVERY_SLOT = 'every day between 5pm and 8pm';
+const DELIVERY_CUTOFF = 'Order before 4pm and we deliver the same evening; after 4pm, the next evening';
 function deliveryNotice(extra = '') {
-  return `<div class="notice info delivery-note">🚚 <b>${DELIVERY_PROMISE}</b> — ${DELIVERY_SLOT}.${extra ? ' ' + extra : ''}</div>`;
+  return `<div class="notice info delivery-note">🚚 <b>${DELIVERY_PROMISE}</b> — ${DELIVERY_SLOT}.<div class="delivery-area">${DELIVERY_CUTOFF}.</div>${extra ? ' ' + extra : ''}</div>`;
 }
 // Home screen: the promise plus where we deliver, what it costs, and a
 // postcode check (our server only answers yes/no + town; the shop's own
@@ -1131,6 +1167,7 @@ function homeDeliveryCard() {
     : `<span style="color:var(--danger)">${esc(pc.message)}</span>`;
   return `<div class="notice info delivery-note">
       🚚 <b>${DELIVERY_PROMISE}</b> — ${DELIVERY_SLOT}.
+      <div class="delivery-area">${DELIVERY_CUTOFF}.</div>
       <div class="delivery-area">${deliveryReady() ? `We deliver ${esc(areaText())}` : NOT_READY}${deliveryReady() && deliveryFeeText() ? ` · ${esc(deliveryFeeText())}` : ''}</div>
       ${deliveryReady() ? `<form class="pc-row" onsubmit="runHomePostcode(); return false">
         <input id="home-postcode" aria-label="Your postcode" placeholder="Your postcode, e.g. HA1 2AB" autocomplete="postal-code" value="${esc(pc ? pc.postcode : load('shop_postcode', ''))}" oninput="homePostcode=null"/>
@@ -1154,7 +1191,7 @@ async function runHomePostcode() {
 const HOW_IT_WORKS = `<ol class="steps">
   <li>Order anything from the supermarkets we shop at.</li>
   <li>We buy it in store and deliver within 24 hours, ${DELIVERY_SLOT}.</li>
-  <li>You pay the shop prices on delivery, by cash or card.</li></ol>`;
+  <li>You pay the prices you see at checkout, on delivery, by cash or card.</li></ol>`;
 function viewStore() {
   if (!SETTINGS) { loadSettings(); return '<div class="spinner"></div>'; }
   return `
@@ -1166,7 +1203,7 @@ function viewStore() {
       : `<div class="card signin-box" style="margin-top:18px"><b>Already chose a supermarket on another device?</b><span class="hint" style="margin:0">Sign in and we'll load it for you.</span><div id="gbtn"></div></div>`}`;
 }
 function closedNotice() { return SETTINGS && SETTINGS.shopOpen === false ? `<div class="notice warn">We're not taking orders right now. You can still browse and fill your basket.</div>` : ''; }
-const STATUS_LABEL = { PLACED: 'Order placed', PRICED: 'Order placed', APPROVED: 'Order placed', OUT_FOR_DELIVERY: 'Out for delivery', DELIVERED: 'Delivered', CANCELLED: 'Cancelled' };
+const STATUS_LABEL = { PLACED: 'Order placed', PRICED: 'Order placed', APPROVED: 'Order placed', CONFIRMED: 'Confirmed', OUT_FOR_DELIVERY: 'Confirmed', DELIVERED: 'Delivered', CANCELLED: 'Cancelled' };
 function statusPill(s) { return `<span class="status-pill st-${esc(s)}">${STATUS_LABEL[s] || esc(s)}</span>`; }
 function signInPrompt(title, text) {
   return `<div class="card signin-box"><div class="empty" style="padding:0"><div class="icon" style="margin:0">${icon('user')}</div></div><h2>${title}</h2><p style="margin:0;color:var(--text2)">${text}</p><div id="gbtn"></div></div>`;
@@ -1192,7 +1229,7 @@ function viewHome() {
       <ol>
         <li><span class="n">1</span><span><b>Find a product</b> — type in the search bar at the top, or scan its barcode.</span></li>
         <li><span class="n">2</span><span><b>Tap Add</b> to put it in your basket.</span></li>
-        <li><span class="n">3</span><span><b>Open Basket and check out.</b> ${DELIVERY_PROMISE}, ${DELIVERY_SLOT} — pay on delivery.</span></li>
+        <li><span class="n">3</span><span><b>Open Basket and check out.</b> ${DELIVERY_PROMISE}, ${DELIVERY_SLOT} — pay on delivery. ${DELIVERY_CUTOFF}.</span></li>
       </ol>
     </details>`;
   // Only shown once there's something in them.
@@ -1286,7 +1323,7 @@ function viewSearch(params) {
   return `
     <h1>Results for “${esc(q)}” at ${esc(storeName())}</h1>
     ${s.products.length
-      ? `<p class="hint">Showing ${plural(shown, 'product', 'products')} · you pay shop prices on delivery</p>
+      ? `<p class="hint">Showing ${plural(shown, 'product', 'products')} · pay on delivery</p>
          <div class="grid">${s.products.slice(0, shown).map(p => tile(p, true)).join('')}</div>
          ${more ? `<div style="text-align:center;margin-top:18px"><button class="btn ghost" ${waiting ? 'disabled' : ''} onclick="showMore(${esc(JSON.stringify(q))})">${waiting ? 'Loading…' : 'Load more'}</button></div>` : ''}`
       : `<div class="empty"><div class="icon">${icon('search')}</div><p>Nothing found at ${esc(storeName())}. Try a shorter or different word, or <a href="#/store">pick another supermarket</a>.</p></div>`}`;
@@ -1337,7 +1374,7 @@ function viewProduct(barcode) {
   return `
     <nav class="crumbs" aria-label="Breadcrumb"><a href="javascript:history.back()">‹ Back</a><span>·</span><a href="#/">Home</a><span>/</span><span>${esc(cleanName(p.name))}</span></nav>
     <div class="product">
-      <div class="product-img">${img(p)}</div>
+      <div class="product-img">${img(p, cleanName(p.name))}</div>
       <div>
         ${cleanBrand(p.brand) ? `<div class="brand-label">${esc(cleanBrand(p.brand).toUpperCase())}</div>` : ''}
         <h1 style="margin:4px 0">${esc(cleanName(p.name))}</h1>
@@ -1352,7 +1389,7 @@ function viewProduct(barcode) {
           ${picked && picked.storePence && cheap && cheap.storeId !== STORE_ID && picked.storePence > cheap.pence
             ? `<p class="hint" style="margin:8px 0 0">💡 Add it to your basket and choose <b>Best price</b> to see if another supermarket has it cheaper.</p>` : ''}
           ${pickedReady && picked.approximate ? `<p class="hint" style="margin:6px 0 0">Closest match${picked.storePence ? ` at ${esc(storeName())}` : ''}: <b>${esc(picked.matchedName)}</b></p>` : ''}
-          ${pickedReady && (picked.storePence || cheap) && !aroundOnly ? `<p class="hint">Supermarket shelf price. You pay the price we pay in store, on delivery.</p>`
+          ${pickedReady && (picked.storePence || cheap) && !aroundOnly ? `<p class="hint">Supermarket shelf price. This is what you pay, on delivery.</p>`
             : aroundOnly ? `<p class="hint">${esc(storeName())} doesn't sell this, but ${esc(cheap.storeName)} does. Switch your basket to “Best price” and we'll buy it there for you.</p>`
             : st === 'failed' ? `<p class="hint">We couldn't check the price just now. <a href="javascript:retryPrices()">Try again</a></p>`
             : st === 'none' ? `<p class="hint">Sorry, we can't deliver this item — none of the supermarkets we shop at stocks it.${sizes.length > 1 ? ' Try another size.' : ''}</p>` : ''}
@@ -1381,44 +1418,24 @@ function modeChooser() {
   const saving = atStore.unpriced || around.unpriced ? 0 : atStore.subtotal - around.subtotal;
   const store = esc(storeName());
   const storeMissing = atStore.unpriced
-    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${store} doesn't sell ${plural(atStore.unpriced, 'of your items', 'of your items')} (marked in red in your basket). Choose a different supermarket below, switch to Best price, or remove ${atStore.unpriced === 1 ? 'it' : 'them'}.</span>` : '';
+    ? `<span class="hint cant" style="display:block;margin:6px 0 0">${store} doesn't sell ${plural(atStore.unpriced, 'of your items', 'of your items')} (marked in red in your basket). Change your supermarket at the top of the page, switch to Best price, or remove ${atStore.unpriced === 1 ? 'it' : 'them'}.</span>` : '';
   const aroundMissing = around.unpriced
     ? `<span class="hint cant" style="display:block;margin:6px 0 0">${plural(around.unpriced, 'item isn’t', 'items aren’t')} sold at any supermarket we shop at — please remove ${around.unpriced === 1 ? 'it' : 'them'}.</span>` : '';
   return `<div class="modes">
     <label class="mode ${MODE === 'STORE' ? 'active' : ''}"><input type="radio" name="mode" ${MODE === 'STORE' ? 'checked' : ''} onchange="setMode('STORE')"/>
-      <span><b>Buy everything from ${store}${atStore.subtotal ? ` · ${gbp(atStore.subtotal)}` : ''}</b><span class="hint">We go to ${store}, buy all your items there at ${store}'s prices, and deliver them to you.</span>${storeMissing}
-        <span class="hint" style="display:block;margin:10px 0 0;font-weight:600">Want a different supermarket?</span>
-        <span class="chips store-chips" style="margin-top:6px">${stores().map(st => `<button type="button" class="chip${st.id === STORE_ID ? ' active' : ''}" onclick="event.preventDefault();basketStore('${esc(st.id)}')">${esc(st.name)}</button>`).join('')}</span></span></label>
+      <span><b>Buy everything from ${store}${atStore.subtotal ? ` · ${gbp(atStore.subtotal)}` : ''}</b><span class="hint">We go to ${store}, buy all your items there at ${store}'s prices, and deliver them to you.</span>${storeMissing}</span></label>
     <label class="mode ${MODE === 'SHOP_AROUND' ? 'active' : ''}"><input type="radio" name="mode" ${MODE === 'SHOP_AROUND' ? 'checked' : ''} onchange="setMode('SHOP_AROUND')"/>
       <span><b>Best price${around.subtotal ? ` · ${gbp(around.subtotal)}` : ''}</b><span class="hint">We check all the supermarkets, buy each item wherever it's cheapest, and deliver everything to you together.</span>${saving > 0 ? `<span class="save">You save ${gbp(saving)} compared with buying everything from ${store}</span>` : ''}${aroundMissing}</span></label>
   </div>`;
-}
-// Shop around: which supermarket each item comes from, cheapest first.
-function whereWeBuy() {
-  if (MODE !== 'SHOP_AROUND') return '';
-  const groups = new Map();
-  for (const l of cartLines()) {
-    const at = unitPrice(l) && buyFrom(l);
-    if (!at) continue;
-    const g = groups.get(at) || { items: [], total: 0 };
-    g.items.push(l); g.total += unitPrice(l) * l.qty;
-    groups.set(at, g);
-  }
-  if (!groups.size) return '';
-  return `<div class="section-label" style="margin-top:14px">WHERE WE'LL BUY</div>
-    ${[...groups].map(([store, g]) => `
-      <div class="sum-row" style="font-weight:700"><span>${esc(store)} · ${plural(g.items.reduce((n, l) => n + l.qty, 0), 'item', 'items')}</span><span>${gbp(g.total)}</span></div>
-      <div class="hint" style="margin:0 0 8px">${g.items.map(l => esc(`${l.qty} × ${cleanName(l.name)}`)).join(', ')}</div>`).join('')}`;
 }
 function basketSummary() {
   const t = basketTotals();
   return `
     <div class="sum-row"><span>Items (${cartCount()})</span><span>${gbp(t.subtotal)}</span></div>
     <div class="sum-row"><span>Delivery</span><span>${t.delivery ? gbp(t.delivery) : 'Free'}</span></div>
-    <div class="sum-row total"><span>Estimated total</span><span>${gbp(t.total)}</span></div>
+    <div class="sum-row total"><span>Total</span><span>${gbp(t.total)}</span></div>
     ${t.delivery && t.toFree ? `<p class="hint">Add ${gbp(t.toFree)} more for free delivery.</p>` : ''}
-    ${whereWeBuy()}
-    <p class="hint">Estimated from ${MODE === 'SHOP_AROUND' ? 'supermarket' : esc(storeName()) + "'s"} shelf prices. You pay the prices we pay in store, on delivery, by cash or card.</p>
+    <p class="hint">Based on ${MODE === 'SHOP_AROUND' ? 'supermarket' : esc(storeName()) + "'s"} shelf prices. This is what you pay on delivery, by cash or card. If we can't get an item, we take it off your bill.</p>
     ${deliveryNotice()}`;
 }
 function viewBasket() {
@@ -1506,14 +1523,13 @@ function viewCheckout() {
         <div class="section-label">YOUR ORDER</div>
         <div class="hint" style="margin-top:0">${MODE === 'STORE' ? `We buy everything from <b>${esc(storeName())}</b> for you` : '<b>Best price</b> — we buy each item wherever it\'s cheapest'} · <a href="#/basket">change</a></div>
         ${lines.map(l => `<div class="sum-row"><span>${l.qty} × ${esc(title(l))}${l.quantity ? ` <span style="color:var(--muted)">· ${esc(l.quantity)}</span>` : ''}</span><span>${linePrice(l)}</span></div>`).join('')}
-        ${whereWeBuy()}
         <hr style="border:0;border-top:1px solid var(--border);margin:10px 0"/>
         ${basketSummary()}
         <div class="section-label" style="margin-top:12px">WHAT HAPPENS NEXT</div>
         ${HOW_IT_WORKS}
         <div class="notice err" id="order-err" hidden style="margin-top:10px"></div>
         <button class="btn block" id="place-btn" type="submit" style="margin-top:12px" ${pcOk ? '' : 'disabled'}>Place order</button>
-        <p class="hint" style="text-align:center">${DELIVERY_PROMISE}, ${DELIVERY_SLOT}. Nothing to pay until it's delivered. By ordering you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+        <p class="hint" style="text-align:center">${DELIVERY_PROMISE}, ${DELIVERY_SLOT}. ${DELIVERY_CUTOFF}. Nothing to pay until it's delivered. By ordering you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
       </div>
     </form>`;
 }
@@ -1557,7 +1573,8 @@ async function submitOrder() {
   }
   btn.textContent = 'Placing order…';
   try {
-    const items = cartLines().map(l => ({ barcode: l.barcode, qty: l.qty, name: l.name, brand: l.brand || null, image: l.image || null, quantity: l.quantity || null }));
+    // unitPricePence: the price shown here — it becomes the bill.
+    const items = cartLines().map(l => ({ barcode: l.barcode, qty: l.qty, name: l.name, brand: l.brand || null, image: l.image || null, quantity: l.quantity || null, unitPricePence: unitPrice(l) || null }));
     const data = await gql(`mutation PlaceOrder($input: PlaceOrderInput!) { placeOrder(input: $input) { ${ORDER_FIELDS} } }`,
       { input: { items, address, note: val('note') || null, mode: MODE, storeId: STORE_ID } });
     const order = data.placeOrder;
@@ -1596,13 +1613,16 @@ function viewOrder(id, params) {
     fetchOrders().then(list => { if (list.find(x => x.id === id)) render(); else lastViewHtml = null, $view.innerHTML = '<a class="back" href="#/orders">‹ Orders</a><div class="empty"><p>Order not found.</p></div>'; }).catch(() => {});
     return '<div class="spinner"></div>';
   }
-  const steps = ['PLACED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
-  const stepLabel = { PLACED: 'Order placed', OUT_FOR_DELIVERY: 'Out for delivery', DELIVERED: 'Delivered' };
-  const reached = steps.indexOf(['PRICED', 'APPROVED'].includes(o.status) ? 'PLACED' : o.status), a = o.address, priced = o.totalPence != null;
+  const steps = ['PLACED', 'CONFIRMED', 'DELIVERED'];
+  const stepLabel = { PLACED: 'Order placed', CONFIRMED: 'Confirmed', DELIVERED: 'Delivered' };
+  // Older orders may carry PRICED/APPROVED (= placed) or OUT_FOR_DELIVERY (= confirmed).
+  const stage = { PRICED: 'PLACED', APPROVED: 'PLACED', OUT_FOR_DELIVERY: 'CONFIRMED' }[o.status] || o.status;
+  const reached = steps.indexOf(stage), a = o.address, priced = o.totalPence != null;
   return `
     <a class="back" href="#/orders">‹ Orders</a>
-    ${params.get('placed') && o.status === 'PLACED' ? `<div class="notice ok">Order placed! ${DELIVERY_PROMISE}, ${DELIVERY_SLOT}. Nothing to pay until it's delivered.</div>`
-      : ['PLACED', 'PRICED', 'APPROVED'].includes(o.status) ? deliveryNotice() : ''}
+    ${params.get('placed') && o.status === 'PLACED' ? `<div class="notice ok">Order placed! We'll confirm it shortly and email you. Nothing to pay until it's delivered.</div>`
+      : stage === 'PLACED' ? `<div class="notice info delivery-note">🕒 <b>Waiting for us to confirm your order.</b> We'll email you as soon as it's confirmed.</div>`
+      : stage === 'CONFIRMED' ? `<div class="notice ok">✔ <b>Your order is confirmed.</b> We'll deliver it on our next delivery round, between 5pm and 8pm.</div>` : ''}
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1 style="margin:0">Order ${esc(o.orderNumber)}</h1>${statusPill(o.status)}</div>
     <p class="line-meta">Placed ${new Date(o.createdAt).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · <a href="javascript:refreshOrders()">Refresh</a></p>
     <div class="two-col">
@@ -1863,6 +1883,16 @@ function patchView(html) {
   next.innerHTML = html;
   morph($view, next.content);
 }
+const HOME_TITLE = document.title;
+function pageTitle(parts, params) {
+  const t = {
+    search: () => params.get('q') ? `${params.get('q')} at ${storeName()}` : 'Search',
+    product: () => { const p = PRODUCTS.get(decodeURIComponent(parts[1] || '')); return p && p.name ? cleanName(p.name) : 'Product'; },
+    basket: () => 'Basket', checkout: () => 'Checkout', orders: () => parts[1] ? 'Your order' : 'Your orders',
+    signin: () => 'Sign in', store: () => 'Choose your supermarket', scan: () => 'Scan a barcode', account: () => 'Your profile',
+  }[parts[0]];
+  return t ? `${t()} | Shuddh Aahar` : HOME_TITLE;
+}
 function render() {
   const [path, query] = (location.hash.slice(1) || '/').split('?');
   const params = new URLSearchParams(query || '');
@@ -1880,6 +1910,10 @@ function render() {
   else if (parts[0] === 'scan') html = viewScan();
   else if (parts[0] === 'account') html = viewAccount(params);
   else html = viewHome();
+
+  const isHome = !parts.length || !['search', 'product', 'basket', 'checkout', 'orders', 'signin', 'store', 'scan', 'account'].includes(parts[0]);
+  document.body.classList.toggle('is-home', isHome);
+  document.title = pageTitle(parts, params);
 
   const q = document.getElementById('header-q');
   if (document.activeElement !== q) q.value = parts[0] === 'search' ? (params.get('q') || '') : '';
