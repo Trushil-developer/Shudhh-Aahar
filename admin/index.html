@@ -2804,8 +2804,21 @@ const CONFIRMED_STATUSES = ['CONFIRMED', 'OUT_FOR_DELIVERY'];
 
 const ORDER_FIELDS = `id orderNumber userId subtotalPence deliveryFeePence totalPence note paymentMethod status createdAt updatedAt pricedAt
   mode storeId storeName estimatedSubtotalPence
-  items { barcode name brand image quantity qty estimatedUnitPence buyFromStore available unitPricePence lineTotalPence }
+  items { barcode name brand image quantity qty estimatedUnitPence buyFromStore available unitPricePence lineTotalPence
+    trolleyId offer loyaltyPence loyaltyLabel matchedName approximate }
   address { fullName line1 line2 city postcode phone }`;
+// The photo the customer saw. Older orders lost it when it was one of our
+// site-relative photos; for Trolley products we can still rebuild it.
+const SITE_URL = 'https://www.shuddhaahar.shop';
+function itemPhoto(i) {
+  if (i.image) return i.image;
+  const id = i.trolleyId || (/^T-/.test(i.barcode) ? i.barcode.slice(2) : null);
+  return id ? `${SITE_URL}/photo/${encodeURIComponent(id)}` : null;
+}
+function itemTrolleyUrl(i) {
+  const id = i.trolleyId || (/^T-/.test(i.barcode) ? i.barcode.slice(2) : null);
+  return id ? `https://www.trolley.co.uk/product/p/${encodeURIComponent(id)}` : trolleySearchUrl(i);
+}
 const ADMIN_LIST_ORDERS_QUERY = `query AdminListOrders($status: String, $limit: Int, $nextToken: String) {
   adminListOrders(status: $status, limit: $limit, nextToken: $nextToken) { items { ${ORDER_FIELDS} } nextToken } }`;
 const ADMIN_UPDATE_ORDER_STATUS_MUTATION = `mutation AdminUpdateOrderStatus($orderId: ID!, $status: String!) {
@@ -2900,7 +2913,7 @@ function orderCard(o) {
   const due = orderDue(o);
   const names = o.items.map(i => `${i.qty > 1 ? i.qty + ' × ' : ''}${[i.brand, i.name].filter(Boolean).join(' ')}`);
   const shown = names.slice(0, 2).join(', ') + (names.length > 2 ? ` +${names.length - 2} more` : '');
-  const thumbs = o.items.slice(0, 4).map(i => i.image ? `<img src="${escapeHtml(i.image)}" alt="" loading="lazy"/>` : '<span>🛒</span>').join('');
+  const thumbs = o.items.slice(0, 4).map(i => itemPhoto(i) ? `<img src="${escapeHtml(itemPhoto(i))}" alt="" loading="lazy"/>` : '<span>🛒</span>').join('');
   const unavailable = o.items.filter(i => i.available === false).length;
   const nextBtn = NEXT_ORDER_STATUS[o.status]
     ? `<button class="btn btn-primary" onclick="event.stopPropagation();setOrderStatus('${o.id}','${NEXT_ORDER_STATUS[o.status]}')">${NEXT_ORDER_LABEL[o.status]}</button>` : '';
@@ -2963,17 +2976,32 @@ function openOrder(id) {
   const a = o.address;
   const editable = AVAIL_EDITABLE.includes(o.status);
   const due = orderDue(o);
-  const itemRow = (i, idx) => `
-      <tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:8px 0;width:48px">${i.image ? `<img src="${escapeHtml(i.image)}" style="width:42px;height:42px;object-fit:contain;border-radius:8px;background:var(--surface2)"/>` : '🛒'}</td>
-        <td style="padding:8px">
-          <div style="font-size:13px"><b>${i.qty} ×</b> ${escapeHtml([i.brand, i.name].filter(Boolean).join(' '))}${i.quantity ? ` <span style="color:var(--muted)">${escapeHtml(i.quantity)}</span>` : ''}</div>
-          <div style="font-size:11px;color:var(--muted)">${itemUnit(i) ? `${gbp(itemUnit(i))} each · ` : ''}<a href="${trolleySearchUrl(i)}" target="_blank" rel="noopener">Find it ↗</a></div></td>
-        <td style="white-space:nowrap;text-align:right;font-size:13px">
-          <div class="op-line" data-idx="${idx}" style="${i.available === false ? 'text-decoration:line-through;color:var(--muted)' : ''}">${itemUnit(i) ? gbp(itemUnit(i) * i.qty) : '—'}</div>
-          ${editable ? `<div style="font-size:11px;margin-top:4px"><label><input type="checkbox" class="op-na" data-idx="${idx}" ${i.available === false ? 'checked' : ''} onchange="updateOrderTotal('${o.id}')"/> Not available</label></div>`
-            : i.available === false ? '<div style="font-size:11px;color:var(--red)">Not available</div>' : ''}</td>
+  // Everything the customer saw, so nothing gets missed or swapped.
+  const itemRow = (i, idx) => {
+    const photo = itemPhoto(i);
+    const isTrolley = /^T-/.test(i.barcode);
+    return `
+      <tr style="border-bottom:1px solid var(--border);vertical-align:top">
+        <td style="padding:10px 0;width:96px">${photo
+          ? `<a href="${escapeHtml(photo)}" target="_blank" rel="noopener" title="Open full-size photo"><img src="${escapeHtml(photo)}" alt="" style="width:88px;height:88px;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--border)"/></a>`
+          : '<div style="width:88px;height:88px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--surface2);font-size:28px">🛒</div>'}</td>
+        <td style="padding:10px">
+          ${i.brand ? `<div style="font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--text2)">${escapeHtml(i.brand.toUpperCase())}</div>` : ''}
+          <div style="font-size:14px;font-weight:700;line-height:1.35"><span style="display:inline-block;min-width:34px;padding:1px 6px;margin-right:6px;border-radius:6px;background:var(--accent);color:#fff;text-align:center">${i.qty}×</span>${escapeHtml(i.name)}</div>
+          ${i.quantity ? `<div style="font-size:13px;margin-top:3px">Pack size: <b>${escapeHtml(i.quantity)}</b></div>` : ''}
+          ${i.matchedName && i.matchedName.toLowerCase() !== [i.brand, i.name].filter(Boolean).join(' ').toLowerCase()
+            ? `<div style="font-size:12px;margin-top:3px;color:var(--text2)">Supermarket listing: ${escapeHtml(i.matchedName)}</div>` : ''}
+          ${i.approximate ? `<div style="font-size:12px;margin-top:5px;padding:5px 8px;border-radius:8px;background:var(--orange-bg);color:var(--orange);font-weight:700">⚠️ Closest match only — check the photo and pack size before buying</div>` : ''}
+          ${i.loyaltyPence ? `<div style="font-size:12px;margin-top:4px">🏷️ ${escapeHtml(i.loyaltyLabel || 'Member price')}: <b>${gbp(i.loyaltyPence)}</b></div>`
+            : i.offer ? `<div style="font-size:12px;margin-top:4px">🏷️ Offer: <b>${escapeHtml(i.offer)}</b></div>` : ''}
+          <div style="font-size:11px;color:var(--muted);margin-top:5px;font-family:var(--mono)">${isTrolley ? 'No barcode' : `Barcode ${escapeHtml(i.barcode)}`}${itemUnit(i) ? ` · ${gbp(itemUnit(i))} each` : ''}
+            · <a href="${itemTrolleyUrl(i)}" target="_blank" rel="noopener">Find it ↗</a></div></td>
+        <td style="white-space:nowrap;text-align:right;font-size:14px;padding-top:10px">
+          <div class="op-line" data-idx="${idx}" style="${i.available === false ? 'text-decoration:line-through;color:var(--muted)' : ''}"><b>${itemUnit(i) ? gbp(itemUnit(i) * i.qty) : '—'}</b></div>
+          ${editable ? `<div style="font-size:12px;margin-top:6px"><label><input type="checkbox" class="op-na" data-idx="${idx}" ${i.available === false ? 'checked' : ''} onchange="updateOrderTotal('${o.id}')"/> Not available</label></div>`
+            : i.available === false ? '<div style="font-size:12px;color:var(--red)">Not available</div>' : ''}</td>
       </tr>`;
+  };
   // Shopping list grouped by supermarket, so it reads like a route.
   const groups = new Map();
   o.items.forEach((i, idx) => {

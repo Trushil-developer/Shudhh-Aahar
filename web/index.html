@@ -1544,6 +1544,33 @@ async function runCheckoutPostcode(raw) {
   if (r.valid) store('shop_postcode', r.postcode);
   if (location.hash.startsWith('#/checkout')) render();
 }
+// The photo the customer is looking at, as a full URL (relative /photo and
+// /img paths only work on this site, so the order would lose them).
+function shownPhoto(p) {
+  const shot = useTrolleyPhotos() && (packShot(p) || (isTrolleyId(p.barcode) ? p.barcode.slice(2) : null));
+  let src = shot ? `/photo/${encodeURIComponent(shot)}` : null;
+  if (!src && isTrolleyId(p.barcode)) { const u = OFF_PHOTOS.get(p.barcode); if (u && u !== 'loading') src = photoUrl(u); }
+  if (!src && p.image) src = photoUrl(p.image);
+  return src ? new URL(src, location.origin).href : null;
+}
+function orderLine(l) {
+  const r = priceFor(l), ok = r && r !== 'loading';
+  // Offers and loyalty prices are the chosen store's; only pass them on when
+  // that's where we'll buy it.
+  const atOwnStore = MODE === 'STORE' || (ok && r.cheapest && r.cheapest.storeId === STORE_ID);
+  const trolleyId = (ok && r.photo) || PHOTOS.get(l.barcode) || (isTrolleyId(l.barcode) ? l.barcode.slice(2) : null);
+  return {
+    barcode: l.barcode, qty: l.qty, name: l.name, brand: l.brand || null, quantity: l.quantity || null,
+    image: shownPhoto(l),
+    unitPricePence: unitPrice(l) || null,
+    trolleyId: trolleyId || null,
+    offer: ok && atOwnStore && r.offer ? r.offer : null,
+    loyaltyPence: ok && atOwnStore && r.loyaltyPence ? r.loyaltyPence : null,
+    loyaltyLabel: ok && atOwnStore && r.loyaltyLabel ? r.loyaltyLabel : null,
+    matchedName: ok && r.matchedName ? r.matchedName : null,
+    approximate: ok && r.approximate ? true : null,
+  };
+}
 async function submitOrder() {
   const val = id => document.getElementById(id).value.trim();
   const errBox = document.getElementById('order-err');
@@ -1573,8 +1600,9 @@ async function submitOrder() {
   }
   btn.textContent = 'Placing order…';
   try {
-    // unitPricePence: the price shown here — it becomes the bill.
-    const items = cartLines().map(l => ({ barcode: l.barcode, qty: l.qty, name: l.name, brand: l.brand || null, image: l.image || null, quantity: l.quantity || null, unitPricePence: unitPrice(l) || null }));
+    // unitPricePence: the price shown here — it becomes the bill. The rest is
+    // what the customer saw, so we buy exactly that product.
+    const items = cartLines().map(orderLine);
     const data = await gql(`mutation PlaceOrder($input: PlaceOrderInput!) { placeOrder(input: $input) { ${ORDER_FIELDS} } }`,
       { input: { items, address, note: val('note') || null, mode: MODE, storeId: STORE_ID } });
     const order = data.placeOrder;
