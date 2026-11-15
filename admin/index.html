@@ -463,13 +463,15 @@ tr:hover td{background:rgba(20,28,36,0.025)}
         <div class="stat-card orange"><div class="stat-label">New — to confirm</div><div class="stat-value" id="ord-placed">—</div></div>
         <div class="stat-card blue"><div class="stat-label">Confirmed — to deliver</div><div class="stat-value" id="ord-confirmed">—</div></div>
         <div class="stat-card green"><div class="stat-label">Delivered Today</div><div class="stat-value" id="ord-delivered-today">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Earned Today</div><div class="stat-value" id="ord-earned-today">—</div></div>
+        <div class="stat-card green"><div class="stat-label">Earned This Month</div><div class="stat-value" id="ord-earned-month">—</div><div style="font-size:11px;color:var(--muted);margin-top:4px" id="ord-earned-note"></div></div>
       </div>
       <div class="card">
         <div class="card-title">Orders <span class="card-badge" id="orders-count-label">—</span></div>
         <div class="ord-steps">
           <div class="ord-step"><span class="n">1</span><b>Confirm</b>Accept the new order. The customer is emailed that it comes on the next delivery round.</div>
           <div class="ord-step"><span class="n">2</span><b>Shop</b>Buy the items. Tick <i>Not available</i> for anything you can't get — it comes off their bill.</div>
-          <div class="ord-step"><span class="n">3</span><b>Delivered</b>Customer pays the bill shown, by cash or card. They're emailed when you mark it delivered.</div>
+          <div class="ord-step"><span class="n">3</span><b>Delivered</b>Customer pays the bill shown, by cash or card. Upload the receipt and what you paid to mark it delivered — they're emailed and you see what you earned.</div>
         </div>
         <div class="ord-cutoff">🚚 We deliver every day between 5pm and 8pm. Orders placed <b>before 4pm</b> are due the same evening; later orders are due the next evening. Each order shows when it's due.</div>
         <div class="filter-bar">
@@ -2929,7 +2931,13 @@ const ORDER_FIELDS = `id orderNumber userId subtotalPence deliveryFeePence total
   mode storeId storeName estimatedSubtotalPence
   items { barcode name brand image quantity qty estimatedUnitPence buyFromStore available unitPricePence lineTotalPence
     trolleyId offer loyaltyPence loyaltyLabel matchedName approximate ean eanSource }
-  address { fullName line1 line2 city postcode phone }`;
+  address { fullName line1 line2 city postcode phone }
+  costPence receiptKey deliveredAt`;
+const ADMIN_RECEIPT_UPLOAD_MUTATION = `mutation AdminReceiptUploadUrl($orderId: ID!, $contentType: String!) {
+  adminReceiptUploadUrl(orderId: $orderId, contentType: $contentType) { uploadUrl receiptKey } }`;
+const ADMIN_DELIVER_ORDER_MUTATION = `mutation AdminDeliverOrder($orderId: ID!, $costPence: Int!, $receiptKey: String!) {
+  adminDeliverOrder(orderId: $orderId, costPence: $costPence, receiptKey: $receiptKey) { ${ORDER_FIELDS} } }`;
+const ADMIN_RECEIPT_URL_QUERY = `query AdminReceiptUrl($orderId: ID!) { adminReceiptUrl(orderId: $orderId) }`;
 const ADMIN_SET_ITEM_BARCODE_MUTATION = `mutation AdminSetItemBarcode($orderId: ID!, $barcode: String!, $ean: String!) {
   adminSetItemBarcode(orderId: $orderId, barcode: $barcode, ean: $ean) { ${ORDER_FIELDS} } }`;
 // The photo the customer saw. Older orders lost it when it was one of our
@@ -3001,7 +3009,18 @@ function renderOrderStats(orders) {
   const today = new Date().toDateString();
   document.getElementById('ord-placed').textContent = orders.filter(o => NEW_STATUSES.includes(o.status)).length;
   document.getElementById('ord-confirmed').textContent = orders.filter(o => CONFIRMED_STATUSES.includes(o.status)).length;
-  document.getElementById('ord-delivered-today').textContent = orders.filter(o => o.status === 'DELIVERED' && new Date(o.updatedAt).toDateString() === today).length;
+  document.getElementById('ord-delivered-today').textContent = orders.filter(o => o.status === 'DELIVERED' && new Date(o.deliveredAt || o.updatedAt).toDateString() === today).length;
+  // Earned = what customers paid minus what you paid at the supermarket, for
+  // delivered orders with a receipt and cost entered.
+  const now = new Date();
+  const withCost = orders.filter(o => o.status === 'DELIVERED' && Number.isInteger(o.costPence) && Number.isInteger(o.totalPence));
+  const sum = list => list.reduce((s, o) => s + orderEarned(o), 0);
+  const day = withCost.filter(o => new Date(o.deliveredAt || o.updatedAt).toDateString() === today);
+  const month = withCost.filter(o => { const d = new Date(o.deliveredAt || o.updatedAt); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear(); });
+  document.getElementById('ord-earned-today').textContent = gbp(sum(day));
+  document.getElementById('ord-earned-month').textContent = gbp(sum(month));
+  const missing = orders.filter(o => o.status === 'DELIVERED' && !Number.isInteger(o.costPence)).length;
+  document.getElementById('ord-earned-note').textContent = `${month.length} ${month.length === 1 ? 'order' : 'orders'}${missing ? ` · ${missing} delivered without a cost` : ''}`;
   updateOrdersBadge(orders.filter(o => o.status === 'PLACED').length);
 }
 
@@ -3058,7 +3077,8 @@ function orderCard(o) {
     </div>
     <div class="ord-side">
       <div class="ord-amount">${gbp(orderTotal(o))}
-        <small>Pay on delivery · ${orderItemCount(o)} ${orderItemCount(o) === 1 ? 'item' : 'items'}${unavailable ? ` · ${unavailable} not available` : ''}</small></div>
+        <small>Pay on delivery · ${orderItemCount(o)} ${orderItemCount(o) === 1 ? 'item' : 'items'}${unavailable ? ` · ${unavailable} not available` : ''}</small>
+        ${o.status === 'DELIVERED' ? `<small style="font-size:12px;margin-top:2px">${Number.isInteger(o.costPence) ? `You earned ${earnedHtml(orderEarned(o))}` : '<span style="color:var(--orange)">No receipt or cost</span>'}</small>` : ''}</div>
       <div class="ord-actions"><button class="btn btn-ghost" onclick="event.stopPropagation();openOrder('${o.id}')">View</button>${nextBtn}</div>
     </div>
   </div>`;
@@ -3117,8 +3137,8 @@ function openOrder(id) {
           ${i.matchedName && i.matchedName.toLowerCase() !== [i.brand, i.name].filter(Boolean).join(' ').toLowerCase()
             ? `<div style="font-size:12px;margin-top:3px;color:var(--text2)">Supermarket listing: ${escapeHtml(i.matchedName)}</div>` : ''}
           ${i.approximate ? `<div style="font-size:12px;margin-top:5px;padding:5px 8px;border-radius:8px;background:var(--orange-bg);color:var(--orange);font-weight:700">⚠️ Closest match only — check the photo and pack size before buying</div>` : ''}
-          ${i.loyaltyPence ? `<div style="font-size:12px;margin-top:4px">🏷️ ${escapeHtml(i.loyaltyLabel || 'Member price')}: <b>${gbp(i.loyaltyPence)}</b></div>`
-            : i.offer ? `<div style="font-size:12px;margin-top:4px">🏷️ Offer: <b>${escapeHtml(i.offer)}</b></div>` : ''}
+          ${i.loyaltyPence ? `<div style="font-size:12px;margin-top:4px">🏷️ ${escapeHtml(i.loyaltyLabel || 'Member price')}: <b>${gbp(i.loyaltyPence)}</b> <span style="color:var(--muted)">(for you only: customer pays the regular price)</span></div>`
+            : i.offer ? `<div style="font-size:12px;margin-top:4px">🏷️ Offer: <b>${escapeHtml(i.offer)}</b> <span style="color:var(--muted)">(for you only: customer pays the regular price)</span></div>` : ''}
           ${itemBarcodeHtml(o, i, idx)}
           <div style="font-size:11px;color:var(--muted);margin-top:5px">${itemUnit(i) ? `${gbp(itemUnit(i))} each · ` : ''}<a href="${itemTrolleyUrl(i)}" target="_blank" rel="noopener">Find it ↗</a></div></td>
         <td style="white-space:nowrap;text-align:right;font-size:14px;padding-top:10px">
@@ -3162,6 +3182,28 @@ function openOrder(id) {
       <div id="op-status" style="font-size:12px;margin-top:6px"></div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px">Prices are fixed at the customer's checkout prices. Items ticked Not available come off the bill; the delivery fee stays as charged.</div>
     </div>
+
+    ${o.status === 'DELIVERED' ? `<div class="om-section">
+
+      <h3>💷 Earnings</h3>
+
+      ${Number.isInteger(o.costPence) ? `<div class="om-bill" style="margin-top:0">
+
+        <div style="font-size:13px;line-height:1.7">Customer paid <b>${gbp(o.totalPence || 0)}</b><br>You paid <b>${gbp(o.costPence)}</b> at the supermarket</div>
+
+        <div style="text-align:right"><div style="font-size:11px;color:var(--muted);font-weight:700">YOU EARNED</div><div class="big">${earnedHtml(orderEarned(o))}</div></div></div>`
+
+        : '<div style="font-size:13px;color:var(--orange);font-weight:700">Delivered before receipts were required, so there is no cost or receipt yet.</div>'}
+
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+
+        ${o.receiptKey ? `<button class="btn btn-ghost" onclick="viewReceipt('${o.id}')">🧾 View receipt</button>` : ''}
+
+        <button class="btn btn-ghost" onclick="openDeliverForm('${o.id}', true)">${o.receiptKey ? 'Change receipt or cost' : 'Add receipt and cost'}</button>
+
+      </div>
+
+    </div>` : ''}
 
     <div class="om-section">
       <h3><span class="n">3</span> Deliver to</h3>
@@ -3229,6 +3271,7 @@ async function saveOrderPrices(id) {
 }
 
 async function setOrderStatus(id, status, fromModal) {
+  if (status === 'DELIVERED') return openDeliverForm(id, fromModal);
   if (status === 'CANCELLED' && !confirm('Cancel this order? The customer will see it as cancelled.')) return;
   try {
     const data = await adminGraphqlRequest(ADMIN_UPDATE_ORDER_STATUS_MUTATION, { orderId: id, status });
@@ -3240,6 +3283,103 @@ async function setOrderStatus(id, status, fromModal) {
   } catch (err) {
     alert('Could not update the order: ' + err.message);
   }
+}
+
+// ── Delivered: receipt + what you paid ──
+function orderEarned(o) { return (o.totalPence || 0) - (o.costPence || 0); }
+function earnedHtml(pence) { return `<b style="color:${pence >= 0 ? 'var(--green)' : 'var(--red)'}">${pence < 0 ? '−' : ''}${gbp(Math.abs(pence))}</b>`; }
+let deliverFile = null;
+function closeDeliverForm() { const el = document.getElementById('deliver-form'); if (el) el.remove(); deliverFile = null; }
+function openDeliverForm(id, fromModal) {
+  closeDeliverForm();
+  const o = ORDERS.find(x => x.id === id);
+  if (!o) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'deliver-form';
+  wrap.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(10,20,35,.6);display:flex;align-items:center;justify-content:center;padding:16px';
+  wrap.innerHTML = `
+    <div style="background:var(--surface);border-radius:16px;padding:22px;width:min(460px,100%);max-height:92vh;overflow:auto">
+      <div style="font-size:11px;color:var(--muted);font-family:var(--mono)">ORDER ${escapeHtml(o.orderNumber)}</div>
+      <div style="font-size:18px;font-weight:800;margin:2px 0 4px">Mark as delivered</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Customer pays <b>${o.totalPence != null ? gbp(o.totalPence) : '—'}</b> on delivery.</div>
+      <label class="form-label">1. RECEIPT (PHOTO OR PDF)</label>
+      <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:2px dashed var(--border2);border-radius:12px;padding:16px;cursor:pointer;font-weight:700;color:var(--accent)">
+        <input type="file" id="df-file" accept="image/*,application/pdf" style="display:none" onchange="pickDeliverFile(this)"/>
+        <span id="df-file-label">📷 Take a photo or choose a file</span>
+      </label>
+      <div id="df-preview" style="margin-top:8px"></div>
+      <label class="form-label" style="margin-top:14px;display:block">2. WHAT YOU PAID AT THE SUPERMARKET (£)</label>
+      <input class="form-input" id="df-cost" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 9.85" oninput="updateDeliverEarned('${o.id}')"/>
+      <div id="df-earned" style="font-size:14px;margin-top:10px;min-height:20px"></div>
+      <div id="df-msg" style="font-size:12px;margin-top:6px"></div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-primary" id="df-save" onclick="saveDelivered('${o.id}', ${fromModal ? 'true' : 'false'})">✅ Mark delivered</button>
+        <button class="btn btn-ghost" onclick="closeDeliverForm()">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(wrap);
+}
+function updateDeliverEarned(id) {
+  const o = ORDERS.find(x => x.id === id);
+  const cost = toPence(document.getElementById('df-cost').value);
+  const el = document.getElementById('df-earned');
+  el.innerHTML = Number.isInteger(cost) && cost > 0 && o.totalPence != null
+    ? `You earn ${earnedHtml(o.totalPence - cost)} on this order <span style="color:var(--muted);font-size:12px">(${gbp(o.totalPence)} − ${gbp(cost)})</span>` : '';
+}
+function pickDeliverFile(input) {
+  deliverFile = input.files && input.files[0] || null;
+  document.getElementById('df-file-label').textContent = deliverFile ? '✓ ' + deliverFile.name + ' — tap to change' : '📷 Take a photo or choose a file';
+  const prev = document.getElementById('df-preview');
+  prev.innerHTML = deliverFile && deliverFile.type.startsWith('image/') ? `<img src="${URL.createObjectURL(deliverFile)}" style="max-width:100%;max-height:180px;border-radius:10px;border:1px solid var(--border)"/>` : '';
+}
+// Phone photos are several MB: shrink to 1600px JPEG before uploading.
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('Could not read the photo.')), 'image/jpeg', 0.82);
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = () => reject(new Error('Could not read the photo — try a JPEG or PNG.'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function saveDelivered(id, fromModal) {
+  const msg = document.getElementById('df-msg');
+  const btn = document.getElementById('df-save');
+  const say = (t, bad) => { msg.textContent = t; msg.style.color = bad ? 'var(--red)' : 'var(--muted)'; };
+  const cost = toPence(document.getElementById('df-cost').value);
+  if (!deliverFile) return say('Add a photo or PDF of the receipt.', true);
+  if (!Number.isInteger(cost) || cost <= 0) return say('Enter what you paid, e.g. 9.85', true);
+  btn.disabled = true;
+  try {
+    let body = deliverFile, type = deliverFile.type;
+    if (type !== 'application/pdf') { say('Preparing photo…'); body = await shrinkImage(deliverFile); type = 'image/jpeg'; }
+    say('Uploading receipt…');
+    const { uploadUrl, receiptKey } = (await adminGraphqlRequest(ADMIN_RECEIPT_UPLOAD_MUTATION, { orderId: id, contentType: type })).adminReceiptUploadUrl;
+    const put = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Type': type }, body });
+    if (!put.ok) throw new Error('Upload failed (HTTP ' + put.status + ')');
+    say('Saving…');
+    const updated = (await adminGraphqlRequest(ADMIN_DELIVER_ORDER_MUTATION, { orderId: id, costPence: cost, receiptKey })).adminDeliverOrder;
+    ORDERS = ORDERS.map(o => o.id === id ? updated : o);
+    closeDeliverForm();
+    renderOrders();
+    if (!document.getElementById('orders-status-filter').value) renderOrderStats(ORDERS);
+    if (fromModal) openOrder(id);
+  } catch (err) {
+    say(err.message, true);
+    btn.disabled = false;
+  }
+}
+async function viewReceipt(id) {
+  try {
+    const url = (await adminGraphqlRequest(ADMIN_RECEIPT_URL_QUERY, { orderId: id })).adminReceiptUrl;
+    if (url) window.open(url, '_blank', 'noopener'); else alert('No receipt for this order.');
+  } catch (err) { alert('Could not open the receipt: ' + err.message); }
 }
 
 function updateOrdersBadge(count) {

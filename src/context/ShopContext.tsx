@@ -11,7 +11,7 @@ import {
 } from '../services/shopService';
 
 const CART_KEY = 'shop_cart';
-export const MAX_QTY_PER_ITEM = 50;
+export const MAX_QTY_PER_ITEM = 10; // per product; shop-actions.js rejects more
 
 export interface CartLine {
   barcode: string;
