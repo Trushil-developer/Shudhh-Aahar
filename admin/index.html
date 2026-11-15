@@ -555,11 +555,11 @@ tr:hover td{background:rgba(20,28,36,0.025)}
           <label class="switch"><input type="checkbox" id="ds-shopOpen"/><span class="switch-slider"></span></label>
           <span style="font-size:13px;font-weight:700">Shop open — taking orders</span>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;margin:-8px 0 20px">
-          <label class="switch"><input type="checkbox" id="ds-trolleyPhotos" onchange="saveTrolleyPhotos(this)"/><span class="switch-slider"></span></label>
-          <span style="font-size:13px;font-weight:700">Trolley photos</span>
-          <span id="ds-photos-status" style="font-size:12px;font-weight:600"></span>
-          <span style="font-size:11px;color:var(--muted)">Off: the website shows Open Food Facts photos instead. Products without one show a placeholder.</span>
+        <div style="display:flex;align-items:center;gap:12px;margin:-8px 0 20px;flex-wrap:wrap">
+          <label class="switch"><input type="checkbox" id="ds-trolley" onchange="saveTrolley(this)"/><span class="switch-slider"></span></label>
+          <span style="font-size:13px;font-weight:700">Trolley</span>
+          <span id="ds-trolley-status" style="font-size:12px;font-weight:600"></span>
+          <span style="font-size:11px;color:var(--muted)">On: live supermarket prices, sizes and photos from Trolley. Off: nothing from Trolley — search and photos come from Open Food Facts, items show "Price confirmed when we shop", and you enter prices from the receipt.</span>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:14px">
           <div><label class="form-label">SHOP POSTCODE</label><input class="form-input" id="ds-storePostcode" placeholder="e.g. HA1 2AB" style="text-transform:uppercase"/></div>
@@ -2959,7 +2959,7 @@ const ADMIN_UPDATE_ORDER_STATUS_MUTATION = `mutation AdminUpdateOrderStatus($ord
 const ADMIN_UPSERT_PRODUCT_MUTATION = `mutation AdminUpsertCatalogProduct($input: AdminUpsertCatalogProductInput!) {
   adminUpsertCatalogProduct(input: $input) { barcode name brand image quantity category pricePence inStock essential sortOrder updatedAt } }`;
 const ADMIN_DELETE_PRODUCT_MUTATION = `mutation AdminDeleteCatalogProduct($barcode: ID!) { adminDeleteCatalogProduct(barcode: $barcode) }`;
-const SHOP_SETTINGS_FIELDS = 'storePostcode radiusMiles areaName deliveryFeePence freeDeliveryOverPence shopOpen trolleyPhotos';
+const SHOP_SETTINGS_FIELDS = 'storePostcode radiusMiles areaName deliveryFeePence freeDeliveryOverPence shopOpen trolleyPhotos forceFallback';
 const ADMIN_UPDATE_SHOP_SETTINGS_MUTATION = `mutation AdminUpdateShopSettings($input: AdminUpdateShopSettingsInput!) {
   adminUpdateShopSettings(input: $input) { ${SHOP_SETTINGS_FIELDS} } }`;
 const ADMIN_GET_SHOP_SETTINGS_QUERY = `query { adminGetShopSettings { ${SHOP_SETTINGS_FIELDS} } }`;
@@ -3893,7 +3893,7 @@ async function loadShopSettings() {
   try {
     const st = (await adminGraphqlRequest(ADMIN_GET_SHOP_SETTINGS_QUERY, {})).adminGetShopSettings || {};
     document.getElementById('ds-shopOpen').checked = st.shopOpen !== false;
-    document.getElementById('ds-trolleyPhotos').checked = st.trolleyPhotos !== false;
+    document.getElementById('ds-trolley').checked = st.trolleyPhotos !== false && st.forceFallback !== true;
     document.getElementById('ds-storePostcode').value = st.storePostcode || '';
     document.getElementById('ds-radius').value = st.radiusMiles ?? 5;
     document.getElementById('ds-fee').value = ((st.deliveryFeePence ?? 300) / 100).toFixed(2);
@@ -3907,18 +3907,21 @@ async function loadShopSettings() {
   }
 }
 
-// The Trolley photos switch saves as soon as it's flipped (no Save button).
-async function saveTrolleyPhotos(el) {
-  const status = document.getElementById('ds-photos-status');
+// The Trolley switch (saves as soon as it's flipped). Off turns Trolley off
+// completely: no prices (Open Food Facts fallback, priced from the receipt)
+// and no photos from it.
+async function saveTrolley(el) {
+  const status = document.getElementById('ds-trolley-status');
   const want = el.checked;
+  if (!want && !confirm('Turn Trolley off? Customers will see "Price confirmed when we shop" instead of prices, and you will enter prices from the receipt, until you turn it back on.')) { el.checked = true; return; }
   el.disabled = true;
   status.textContent = 'Saving…'; status.style.color = 'var(--muted)';
   try {
-    const st = (await adminGraphqlRequest(ADMIN_UPDATE_SHOP_SETTINGS_MUTATION, { input: { trolleyPhotos: want } })).adminUpdateShopSettings;
-    el.checked = st.trolleyPhotos !== false;
+    const st = (await adminGraphqlRequest(ADMIN_UPDATE_SHOP_SETTINGS_MUTATION, { input: { trolleyPhotos: want, forceFallback: !want } })).adminUpdateShopSettings;
+    el.checked = st.trolleyPhotos !== false && st.forceFallback !== true;
     SHOP_SETTINGS_CACHE = st;
-    status.textContent = el.checked ? '✓ On: website shows Trolley photos' : '✓ Off: website shows Open Food Facts photos';
-    status.style.color = 'var(--green)';
+    status.textContent = el.checked ? '✓ On: live prices and photos from Trolley' : '⚠️ Off: no Trolley — Open Food Facts search, prices from the receipt';
+    status.style.color = el.checked ? 'var(--green)' : 'var(--orange)';
   } catch (err) {
     el.checked = !want;
     status.textContent = 'Save failed: ' + err.message;
@@ -3932,7 +3935,6 @@ async function saveShopSettings() {
   const status = document.getElementById('ds-status');
   const input = {
     shopOpen: document.getElementById('ds-shopOpen').checked,
-    trolleyPhotos: document.getElementById('ds-trolleyPhotos').checked,
     storePostcode: document.getElementById('ds-storePostcode').value.trim() || null,
     radiusMiles: parseFloat(document.getElementById('ds-radius').value),
     deliveryFeePence: toPence(document.getElementById('ds-fee').value || 0),

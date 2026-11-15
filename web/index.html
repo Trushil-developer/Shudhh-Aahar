@@ -1314,7 +1314,7 @@ function viewHome() {
       <div class="section-head"><h2>What would you like to buy today?</h2></div>
       <div class="cat-grid">${HOME_CATEGORIES.map(c => `
         <a class="cat" href="#/search?${new URLSearchParams({ q: c.q })}">
-          <span class="cat-img">${imgTag(`/photo/${c.photo}`, `/categories/${c.img}`)}</span>
+          <span class="cat-img">${useTrolleyPhotos() ? imgTag(`/photo/${c.photo}`, `/categories/${c.img}`) : imgTag(`/categories/${c.img}`, null)}</span>
           <span class="cat-name">${esc(c.name)}</span>
         </a>`).join('')}</div>
     </section>`;
