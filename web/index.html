@@ -682,6 +682,10 @@ function addHistory(p) {
   store('shop_history', HISTORY);
 }
 function clearHistory() { if (confirm('Clear your history?')) { HISTORY = []; store('shop_history', HISTORY); render(); } }
+// Home shows the latest 10; "Show more" adds 10 at a time (up to the 30 kept).
+const HISTORY_PAGE = 10;
+let historyShown = HISTORY_PAGE;
+function showMoreHistory() { historyShown += HISTORY_PAGE; render(); }
 
 // Ingredients and allergens (Open Food Facts) for every product we show,
 // fetched in one batch per moment rather than one request per tile.
@@ -1116,7 +1120,7 @@ function tilePrice(p) {
   const r = PRICES.get(priceKey(p));
   if (!r || r === 'loading') return '';
   if (r.storePence) {
-    return `<div class="tile-price">${gbp(r.storePence)}${r.loyaltyPence ? `<span class="tile-note">${gbp(r.loyaltyPence)} ${esc(r.loyaltyLabel || 'member price')}</span>` : ''}</div>`;
+    return `<div class="tile-price">${gbp(r.storePence)}</div>`;
   }
   return `<div class="tile-price"><span class="tile-note">Not sold at ${esc(storeName())}</span></div>`;
 }
@@ -1241,7 +1245,8 @@ function viewHome() {
   const history = HISTORY.length ? `
     <section class="section">
       <div class="section-head"><h2>History</h2><button class="link" type="button" onclick="clearHistory()">Clear</button></div>
-      <div class="grid">${HISTORY.map(tile).join('')}</div>
+      <div class="grid">${HISTORY.slice(0, historyShown).map(tile).join('')}</div>
+      ${HISTORY.length > historyShown ? `<div style="text-align:center;margin-top:14px"><button class="btn ghost" type="button" onclick="showMoreHistory()">Show more (${HISTORY.length - historyShown} more)</button></div>` : ''}
     </section>` : '';
   const categories = `
     <section class="section">
@@ -1385,8 +1390,10 @@ function viewProduct(barcode) {
   const pickedReady = picked && picked !== 'loading';
   // No size picked yet: show the size Trolley priced (may be the nearest one).
   const size = chosen || (pickedReady && picked.matchedSize) || p.quantity || '';
-  const sizes = ready ? [...(base.sizes || [])] : [];
-  if (size && pickedReady && picked.storePence && !picked.approximate && !sizes.includes(size)) sizes.unshift(size);
+  // A product from search: every pack size Trolley lists, each its own product page.
+  const sizeLinks = ready && isTrolleyId(barcode) && (base.sizeLinks || []).length > 1 ? base.sizeLinks : [];
+  const sizes = ready && !sizeLinks.length ? [...(base.sizes || [])] : [];
+  if (!sizeLinks.length && size && pickedReady && picked.storePence && !picked.approximate && !sizes.includes(size)) sizes.unshift(size);
   const q = (CART[barcode] && CART[barcode].qty) || 0;
   const priceRow = !pickedReady ? '<span class="hint" style="margin:0">Checking price…</span>'
     : picked.storePence ? priceTag(picked.storePence)
@@ -1421,18 +1428,18 @@ function viewProduct(barcode) {
       <div>
         ${cleanBrand(p.brand) ? `<div class="brand-label">${esc(cleanBrand(p.brand).toUpperCase())}</div>` : ''}
         <h1 style="margin:4px 0">${esc(cleanName(p.name))}</h1>
-        ${p.quantity && !sizes.length ? `<div style="color:var(--text2)">${esc(p.quantity)}</div>` : ''}
+        ${p.quantity && !sizes.length && !sizeLinks.length ? `<div style="color:var(--text2)">${esc(p.quantity)}</div>` : ''}
+        ${sizeLinks.length ? `<div class="section-label" style="margin-top:14px">SIZE</div>
+          <div class="chips" style="flex-wrap:wrap;margin-bottom:0">${sizeLinks.map(sl => `<button type="button" class="chip${sl.barcode === barcode ? ' active' : ''}" onclick="openSize(${esc(JSON.stringify(barcode))},${esc(JSON.stringify(sl.barcode))},${esc(JSON.stringify(sl.label))})">${esc(sl.label)}</button>`).join('')}</div>` : ''}
         ${sizes.length ? `<div class="section-label" style="margin-top:14px">SIZE</div>
           <div class="chips" style="flex-wrap:wrap;margin-bottom:0">${sizes.map(sz => `<button type="button" class="chip${sz === size ? ' active' : ''}" onclick="pickSize(${esc(JSON.stringify(barcode))},${esc(JSON.stringify(sz))})">${esc(sz)}</button>`).join('')}</div>` : ''}
         ${availability}
         <div class="card" style="margin:16px 0">
           <div class="sum-row" style="font-size:15px"><span>At ${esc(storeName())}${size ? ` · ${esc(size)}` : ''}</span><span>${priceRow}</span></div>
-          ${picked && picked.loyaltyPence ? `<div class="sum-row" style="font-size:14px;color:var(--text2)"><span>${esc(picked.loyaltyLabel)}</span><span>${gbp(picked.loyaltyPence)}</span></div>` : ''}
-          ${picked && picked.offer && !picked.loyaltyPence ? `<p class="hint" style="margin:4px 0 0">Offer: ${esc(picked.offer)}</p>` : ''}
           ${picked && picked.storePence && cheap && cheap.storeId !== STORE_ID && picked.storePence > cheap.pence
             ? `<p class="hint" style="margin:8px 0 0">💡 Add it to your basket and choose <b>Best price</b> to see if another supermarket has it cheaper.</p>` : ''}
           ${pickedReady && picked.approximate ? `<p class="hint" style="margin:6px 0 0">Closest match${picked.storePence ? ` at ${esc(storeName())}` : ''}: <b>${esc(picked.matchedName)}</b></p>` : ''}
-          ${pickedReady && (picked.storePence || cheap) && !aroundOnly ? `<p class="hint">Supermarket shelf price. This is what you pay, on delivery.</p>`
+          ${pickedReady && (picked.storePence || cheap) && !aroundOnly ? `<p class="hint">Regular shelf price, without Clubcard, Nectar or other offers. This is what you pay, on delivery.</p>`
             : aroundOnly ? `<p class="hint">${esc(storeName())} doesn't sell this, but ${esc(cheap.storeName)} does. Switch your basket to “Best price” and we'll buy it there for you.</p>`
             : st === 'failed' ? `<p class="hint">We couldn't check the price just now. <a href="javascript:retryPrices()">Try again</a></p>`
             : st === 'none' ? `<p class="hint">Sorry, we can't deliver this item — none of the supermarkets we shop at stocks it.${sizes.length > 1 ? ' Try another size.' : ''}</p>` : ''}
@@ -1450,6 +1457,14 @@ function viewProduct(barcode) {
 }
 
 // Picking a size also switches the basket line, if the product is in it.
+// Another pack size of a search product: open that size's own page, keeping
+// the name and brand (its price loads there).
+function openSize(from, to, label) {
+  if (from === to) return;
+  const p = PRODUCTS.get(from) || {};
+  if (!PRODUCTS.get(to)) PRODUCTS.set(to, { barcode: to, name: p.name, brand: p.brand, quantity: label });
+  location.hash = '#/product/' + to;
+}
 function pickSize(barcode, size) {
   SIZE_PICK.set(barcode, size);
   if (CART[barcode]) { CART[barcode].quantity = size; store('shop_cart_v2', CART); saveListsSoon(); }
@@ -1478,7 +1493,7 @@ function basketSummary() {
     <div class="sum-row"><span>Delivery</span><span>${t.delivery ? gbp(t.delivery) : 'Free'}</span></div>
     <div class="sum-row total"><span>Total</span><span>${gbp(t.total)}</span></div>
     ${t.delivery && t.toFree ? `<p class="hint">Add ${gbp(t.toFree)} more for free delivery.</p>` : ''}
-    <p class="hint">Based on ${MODE === 'SHOP_AROUND' ? 'supermarket' : esc(storeName()) + "'s"} shelf prices. This is what you pay on delivery, by cash or card. If we can't get an item, we take it off your bill.</p>
+    <p class="hint">Based on ${MODE === 'SHOP_AROUND' ? 'supermarket' : esc(storeName()) + "'s"} regular shelf prices, without Clubcard, Nectar or other offers. This is what you pay on delivery, by cash or card. If we can't get an item, we take it off your bill.</p>
     ${deliveryNotice()}`;
 }
 function viewBasket() {
