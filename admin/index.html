@@ -2816,11 +2816,98 @@ function itemBarcodeHtml(o, i, idx) {
       <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
         <input class="form-input op-ean" id="op-ean-${idx}" inputmode="numeric" placeholder="${code ? 'Correct it' : 'Scan or type the barcode'}" style="max-width:190px;padding:5px 8px;font-family:var(--mono)"
           onkeydown="if(event.key==='Enter')saveItemBarcode('${o.id}', ${idx})"/>
+        <button class="btn btn-primary" type="button" onclick="scanItemBarcode('${o.id}', ${idx})">📷 Scan</button>
         <button class="btn btn-ghost" type="button" onclick="saveItemBarcode('${o.id}', ${idx})">Save</button>
         <span id="op-ean-msg-${idx}" style="font-size:11px"></span>
       </div>` : '';
   return `<div style="margin-top:6px;font-size:12px">🔢 ${shown}</div>${box}`;
 }
+// ── Camera scanner for item barcodes ──
+// Built-in BarcodeDetector where the browser has it (Chrome, Android, Mac),
+// otherwise the open-source ZXing reader (iPhone Safari), loaded on first use.
+// Supermarket barcodes only, tried several times a second. A read barcode
+// fills the box and saves straight away.
+const ADMIN_ZXING = ['https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js',
+                     'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js'];
+let adminScanner = null; // { stream, timer, controls }
+function adminLoadScript(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const el = document.createElement('script'); el.src = src; el.onload = resolve; el.onerror = reject;
+    document.head.appendChild(el);
+  });
+}
+function closeItemScanner() {
+  if (adminScanner) {
+    clearInterval(adminScanner.timer);
+    if (adminScanner.controls) try { adminScanner.controls.stop(); } catch {}
+    if (adminScanner.stream) adminScanner.stream.getTracks().forEach(t => t.stop());
+    adminScanner = null;
+  }
+  const el = document.getElementById('item-scanner');
+  if (el) el.remove();
+}
+async function scanItemBarcode(orderId, idx) {
+  closeItemScanner();
+  const o = ORDERS.find(x => x.id === orderId);
+  const item = o && o.items[idx];
+  const wrap = document.createElement('div');
+  wrap.id = 'item-scanner';
+  wrap.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(10,20,35,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px';
+  wrap.innerHTML = `
+    <div style="color:#fff;font-weight:800;font-size:16px;margin-bottom:4px;text-align:center">Scan the barcode</div>
+    <div style="color:#cfd8e3;font-size:13px;margin-bottom:12px;text-align:center">${escapeHtml(item ? [item.brand, item.name, item.quantity].filter(Boolean).join(' ') : '')}</div>
+    <div style="position:relative;width:min(92vw,520px);aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:#000">
+      <video id="item-scan-video" playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
+      <div style="position:absolute;left:10%;right:10%;top:35%;bottom:35%;border:3px solid #fff;border-radius:10px;box-shadow:0 0 0 999px rgba(0,0,0,.25)"></div>
+    </div>
+    <div id="item-scan-status" style="color:#fff;font-size:13px;margin-top:12px;min-height:18px">Starting camera…</div>
+    <button class="btn btn-ghost" style="margin-top:12px;background:#fff" onclick="closeItemScanner()">Cancel</button>`;
+  document.body.appendChild(wrap);
+  const status = (t) => { const el = document.getElementById('item-scan-status'); if (el) el.textContent = t; };
+  const video = document.getElementById('item-scan-video');
+  const done = (raw) => {
+    const code = String(raw || '').replace(/\D/g, '');
+    if (!/^\d{8,14}$/.test(code) || !adminScanner) return false;
+    closeItemScanner();
+    if (navigator.vibrate) navigator.vibrate(60);
+    const input = document.getElementById(`op-ean-${idx}`);
+    if (input) { input.value = code; saveItemBarcode(orderId, idx); }
+    return true;
+  };
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { status('No camera available here — type the barcode instead.'); return; }
+  const videoWanted = { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } };
+  adminScanner = {};
+  try {
+    if ('BarcodeDetector' in window) {
+      const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
+      adminScanner.stream = await navigator.mediaDevices.getUserMedia({ video: videoWanted, audio: false });
+      if (!adminScanner) { return; }
+      video.srcObject = adminScanner.stream;
+      await video.play();
+      status('Point the camera at the barcode');
+      let busy = false;
+      adminScanner.timer = setInterval(async () => {
+        if (busy || !adminScanner || video.readyState < 2) return;
+        busy = true;
+        try { for (const b of await detector.detect(video)) if (done(b.rawValue)) break; } catch {}
+        busy = false;
+      }, 120);
+    } else {
+      for (const src of ADMIN_ZXING) await adminLoadScript(src);
+      if (!adminScanner) return;
+      const hints = new Map([[ZXing.DecodeHintType.POSSIBLE_FORMATS,
+        [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E]]]);
+      const reader = new ZXingBrowser.BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 100, delayBetweenScanSuccess: 300 });
+      adminScanner.controls = await reader.decodeFromConstraints({ video: videoWanted, audio: false }, video, (result) => { if (result) done(result.getText()); });
+      status('Point the camera at the barcode');
+    }
+  } catch (err) {
+    status(err && err.name === 'NotAllowedError' ? 'Camera access was blocked — allow it in the browser settings.' : 'Could not start the camera — type the barcode instead.');
+    if (adminScanner) { clearInterval(adminScanner.timer); if (adminScanner.stream) adminScanner.stream.getTracks().forEach(t => t.stop()); adminScanner.stream = null; }
+  }
+}
+
 async function saveItemBarcode(orderId, idx) {
   const o = ORDERS.find(x => x.id === orderId);
   const input = document.getElementById(`op-ean-${idx}`);

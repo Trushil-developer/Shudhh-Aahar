@@ -1789,6 +1789,29 @@ function viewSignIn(params = new URLSearchParams()) {
 const ZXING_SCRIPTS = ['https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js',
                        'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/zxing-browser.min.js'];
 let scanner = null; // { stream, timer, controls }
+// Back camera, sharp enough for thin barcode lines.
+const SCAN_VIDEO = { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } };
+// Keep the camera focusing continuously where the phone allows it.
+function sharpenFocus(stream) {
+  try {
+    const track = stream.getVideoTracks()[0];
+    const caps = track.getCapabilities ? track.getCapabilities() : {};
+    if (caps.focusMode && caps.focusMode.includes('continuous')) track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+  } catch {}
+}
+// Browsers without a built-in barcode reader (iPhone Safari) need ZXing. It's
+// fetched in the background once the page is idle, so it's ready by the time
+// someone taps Scan instead of downloading then.
+let zxingLoading = null;
+function loadZxing() {
+  if (!zxingLoading) zxingLoading = ZXING_SCRIPTS.reduce((p, src) => p.then(() => loadScript(src)), Promise.resolve())
+    .catch(err => { zxingLoading = null; throw err; });
+  return zxingLoading;
+}
+if (!('BarcodeDetector' in window)) {
+  const preload = () => loadZxing().catch(() => {});
+  if ('requestIdleCallback' in window) requestIdleCallback(preload, { timeout: 4000 }); else setTimeout(preload, 2500);
+}
 function loadScript(src) {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();
@@ -1821,7 +1844,8 @@ async function startScanner() {
   try {
     if ('BarcodeDetector' in window) {
       const detector = new BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
-      scanner.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+      scanner.stream = await navigator.mediaDevices.getUserMedia({ video: SCAN_VIDEO, audio: false });
+      sharpenFocus(scanner.stream);
       video.srcObject = scanner.stream;
       await video.play();
       setScanStatus('Point the camera at the barcode');
@@ -1831,15 +1855,20 @@ async function startScanner() {
         busy = true;
         try { const found = await detector.detect(video); for (const b of found) if (onBarcode(b.rawValue)) break; } catch {}
         busy = false;
-      }, 200);
+      }, 120);
     } else {
       setScanStatus('Starting camera…');
-      for (const src of ZXING_SCRIPTS) await loadScript(src);
+      await loadZxing();
       if (!scanner) return; // left the page while loading
-      const reader = new ZXingBrowser.BrowserMultiFormatReader();
-      scanner.controls = await reader.decodeFromConstraints({ video: { facingMode: { ideal: 'environment' } } }, video, (result) => {
+      // Only supermarket barcodes, tried every 100ms (the library's default
+      // is every 500ms, looking for every barcode type, QR codes included).
+      const hints = new Map([[ZXing.DecodeHintType.POSSIBLE_FORMATS,
+        [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E]]]);
+      const reader = new ZXingBrowser.BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 100, delayBetweenScanSuccess: 300 });
+      scanner.controls = await reader.decodeFromConstraints({ video: SCAN_VIDEO, audio: false }, video, (result) => {
         if (result) onBarcode(result.getText());
       });
+      if (video.srcObject) sharpenFocus(video.srcObject);
       setScanStatus('Point the camera at the barcode');
     }
   } catch (err) {
