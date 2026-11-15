@@ -741,7 +741,7 @@ function wantIngredients(barcode) {
   const had = INGREDIENTS.get(barcode);
   // A failed lookup waits a minute before trying again, so an Open Food Facts
   // outage doesn't turn every redraw into another request.
-  if (!barcode || (had && !(had.failed && Date.now() - had.at > 5 * 60000))) return;
+  if (!barcode || (had && !(had.failed && Date.now() - had.at > 60000))) return;
   INGREDIENTS.set(barcode, 'loading');
   ingredientQueue.add(barcode);
   clearTimeout(ingredientTimer);
@@ -1201,7 +1201,8 @@ function tileIngredients(p) {
   wantIngredients(p.barcode);
   const ing = ingredientsOf(p);
   if (!ing || ing === 'loading') return '<div class="tile-ing" aria-hidden="true"><span class="skel"></span><span class="skel"></span></div>';
-  if (ing.failed) return '<div class="tile-ing none">Couldn’t load ingredients</div>';
+  // Open Food Facts briefly busy: leave the line out (retried after a minute).
+  if (ing.failed) return '';
   if (!ing.ingredients) return '<div class="tile-ing none">Ingredients not listed</div>';
   return `<div class="tile-ing" title="${esc(ing.ingredients)}"><b>Ingredients:</b> ${esc(ing.ingredients)}</div>`;
 }
