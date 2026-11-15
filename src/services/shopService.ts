@@ -42,6 +42,24 @@ export interface DeliveryAddress {
   phone: string;
 }
 
+export const EMPTY_ADDRESS: DeliveryAddress = { fullName: '', line1: '', line2: '', city: '', postcode: '', phone: '' };
+
+// Mirrors postcodeAllowed in terraform/lambda/shop-actions.js.
+export const UK_POSTCODE = /^[A-Z]{1,2}[0-9][A-Z0-9]?[0-9][A-Z]{2}$/;
+
+// Form-complete, not necessarily deliverable — CheckoutScreen separately
+// checks postcode coverage against ShopSettings.deliveryPostcodes before
+// letting an order be placed.
+export function isAddressComplete(address: DeliveryAddress): boolean {
+  return !!(
+    address.fullName.trim() &&
+    address.line1.trim() &&
+    address.city.trim() &&
+    address.phone.trim() &&
+    UK_POSTCODE.test(address.postcode.toUpperCase().replace(/\s+/g, ''))
+  );
+}
+
 export interface OrderItem {
   barcode: string;
   name: string;

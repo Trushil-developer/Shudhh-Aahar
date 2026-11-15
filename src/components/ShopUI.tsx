@@ -1,16 +1,17 @@
 // src/components/ShopUI.tsx
 // Shared building blocks for the delivery shop screens.
 
-import React, { useEffect, useMemo } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Modal, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Colors, Shadow } from '../theme/medical';
 import { useResponsive } from '../utils/responsive';
 import { useShop } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
-import { CatalogProduct, formatPrice } from '../services/shopService';
+import { CatalogProduct, formatPrice, getSavedAddress, isAddressComplete } from '../services/shopService';
 import LoginScreen from '../screens/LoginScreen';
+import AddressScreen from '../screens/AddressScreen';
 
 function useShopStyles() {
   const { rw, rh, rf, rr, rStyles } = useResponsive();
@@ -40,6 +41,7 @@ function useShopStyles() {
 
     signInClose: { position: 'absolute', top: rh(54), right: rw(16), width: rw(36), height: rw(36), borderRadius: rw(18), backgroundColor: 'rgba(0,0,0,0.35)', alignItems: 'center', justifyContent: 'center', zIndex: 10 },
     signInCloseText: { color: '#fff', fontSize: rf(16), fontWeight: '700' },
+    checkingFill: { flex: 1, backgroundColor: Colors.bg, alignItems: 'center', justifyContent: 'center' },
   }), [rw, rh, rf, rr, rStyles]);
 }
 
@@ -117,23 +119,37 @@ export function ProductRow({ product, onPress }: { product: CatalogProduct; onPr
 }
 
 // Full-screen Google / Apple sign-in, shown only when an action needs an
-// account (checkout, order history). Closes itself once signed in.
+// account (checkout, order history). Once signed in, if the account has no
+// complete saved delivery address yet, stays open to collect one before
+// closing — otherwise closes itself straight away. Either way, closing just
+// reveals whatever screen opened it (cart, orders, profile), so the caller
+// ends up back where it was with no extra routing needed.
 export function SignInModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
   const { t } = useTranslation();
   const styles = useShopStyles();
   const { user } = useAuth();
+  const [needsAddress, setNeedsAddress] = useState(false);
 
   useEffect(() => {
-    if (visible && user) onClose();
+    if (!visible || !user) { setNeedsAddress(false); return; }
+    let cancelled = false;
+    getSavedAddress().then(saved => {
+      if (cancelled) return;
+      if (saved && isAddressComplete(saved)) onClose();
+      else setNeedsAddress(true);
+    });
+    return () => { cancelled = true; };
   }, [visible, user, onClose]);
 
   return (
-    <Modal visible={visible && !user} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
       <SafeAreaProvider>
         <TouchableOpacity style={styles.signInClose} onPress={onClose} accessibilityLabel={t('common.close')}>
           <Text style={styles.signInCloseText}>✕</Text>
         </TouchableOpacity>
-        <LoginScreen />
+        {user
+          ? (needsAddress ? <AddressScreen onDone={onClose} /> : <View style={styles.checkingFill}><ActivityIndicator color={Colors.navy} /></View>)
+          : <LoginScreen />}
       </SafeAreaProvider>
     </Modal>
   );

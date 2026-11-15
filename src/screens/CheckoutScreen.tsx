@@ -12,13 +12,11 @@ import { useNavigation } from '@react-navigation/native';
 import { useShop } from '../context/ShopContext';
 import { useAuth } from '../context/AuthContext';
 import {
-  DeliveryAddress, formatPrice, getSavedAddress, placeOrder, saveAddress,
+  DeliveryAddress, EMPTY_ADDRESS, UK_POSTCODE, formatPrice, getSavedAddress, isAddressComplete, placeOrder, saveAddress,
 } from '../services/shopService';
 import { ShopNav } from '../navigation/shopRoutes';
 import { Colors } from '../theme/medical';
 import { useResponsive, TABLET_CONTENT_MAX_WIDTH } from '../utils/responsive';
-
-const UK_POSTCODE = /^[A-Z]{1,2}[0-9][A-Z0-9]?[0-9][A-Z]{2}$/;
 
 // Mirrors postcodeAllowed in terraform/lambda/shop-actions.js.
 function postcodeCovered(raw: string, entries: string[]): boolean {
@@ -32,8 +30,6 @@ function postcodeCovered(raw: string, entries: string[]): boolean {
     return entry.length > outward.length && pc.startsWith(entry);
   });
 }
-
-const EMPTY_ADDRESS: DeliveryAddress = { fullName: '', line1: '', line2: '', city: '', postcode: '', phone: '' };
 
 export default function CheckoutScreen() {
   const { t } = useTranslation();
@@ -81,7 +77,7 @@ export default function CheckoutScreen() {
 
   const postcodeEntered = address.postcode.replace(/\s+/g, '').length >= 5;
   const postcodeOk = postcodeCovered(address.postcode, settings.deliveryPostcodes);
-  const complete = !!(address.fullName.trim() && address.line1.trim() && address.city.trim() && address.phone.trim() && postcodeOk);
+  const complete = isAddressComplete(address) && postcodeOk;
   const itemCount = orderableLines.reduce((n, l) => n + l.qty, 0);
 
   const handlePlaceOrder = async () => {
