@@ -203,6 +203,10 @@ h2{font-size:19px;font-weight:800;margin:0}
 .shop-row{display:flex;flex-wrap:wrap;gap:8px}
 .shop-pill{font:inherit;font-size:14px;font-weight:700;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
 .shop-pill.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.hero-shops{margin-top:16px}
+.hero-shops-label{display:block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:8px}
+.hero .shop-pill{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28);color:#fff;padding:8px 12px;font-size:13px}
+.hero .shop-pill.active{background:#fff;border-color:#fff;color:var(--navy)}
 .steps-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .step-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--text2);line-height:1.45}
 .step-card b{color:var(--text);font-size:15px}
@@ -1278,18 +1282,15 @@ function viewHome() {
     <section class="hero">
       <h1>Groceries delivered to your door, at supermarket prices</h1>
       <p>Tell us what you need. We shop at your supermarket and bring it round the same evening.</p>
+      <div class="hero-shops"><span class="hero-shops-label">We shop at</span>
+        <div class="shop-row">${stores().map(st => `<button type="button" class="shop-pill${st.id === STORE_ID ? ' active' : ''}" onclick="chooseStore('${esc(st.id)}');render()">${st.id === STORE_ID ? '✓ ' : ''}${esc(st.name)}</button>`).join('')}</div>
+      </div>
       <form class="hero-search" role="search" onsubmit="event.preventDefault();goSearch(this.q.value)">
         <input name="q" type="search" placeholder="Search milk, atta, Heinz beans…" aria-label="Search groceries" autocomplete="off"/>
         <button class="btn" type="submit">Search</button>
         <a class="btn hero-scan" href="#/scan" aria-label="Scan a barcode">${icon('scan')}<span>Scan</span></a>
       </form>
       <div class="hero-points"><span>🛒 Supermarket shelf prices</span><span>🚚 Delivered 5pm – 8pm</span><span>💷 Pay on delivery</span></div>
-    </section>`;
-  // 2. The supermarkets we shop at — tap one to shop there.
-  const shops = `
-    <section class="section">
-      <div class="section-head"><h2>We shop at</h2><span class="hint" style="margin:0">Tap to switch</span></div>
-      <div class="shop-row">${stores().map(st => `<button type="button" class="shop-pill${st.id === STORE_ID ? ' active' : ''}" onclick="chooseStore('${esc(st.id)}');render()">${st.id === STORE_ID ? '✓ ' : ''}${esc(st.name)}</button>`).join('')}</div>
     </section>`;
   // Only shown once there's something in them.
   const mine = MY_ITEMS.length ? `
@@ -1354,7 +1355,7 @@ function viewHome() {
       <div><b>Still have a question?</b><span>We're happy to help — just get in touch.</span></div>
       <a class="btn" href="/contact">Contact us</a>
     </section>`;
-  return hero + shops + homeDeliveryCard() + mine + categories + steps + facts + history + faqHtml + contact;
+  return hero + homeDeliveryCard() + mine + categories + steps + facts + history + faqHtml + contact;
 }
 
 // Home shortcuts: tap a category to search for it. Photos are pack shots of a
