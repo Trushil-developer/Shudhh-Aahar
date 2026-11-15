@@ -1297,12 +1297,39 @@ window.addEventListener('resize', () => {
   lastColumns = c;
 });
 const SEARCH_SHOWN = new Map(); // query → how many are shown
+const SEARCH_SIZE = new Map();  // query → chosen size label ('' = all sizes)
+// Pack size as a label shoppers recognise, for the size filter: "1 litre",
+// "2 litres", "4 pints" (UK milk), "500g", "1kg", "6 × 330ml". null if the
+// product has no readable size.
+function sizeInfo(quantity) {
+  const t = String(quantity || '').toLowerCase().replace(/,/g, '.');
+  const m = t.match(/(?:(\d+)\s*[x×]\s*)?(\d+(?:\.\d+)?)\s*(kg|g|ml|cl|l|ltr|litres?|liters?|pints?|pt)\b/);
+  if (!m) return null;
+  const mult = { kg: 1000, g: 1, ml: 1, cl: 10, l: 1000, ltr: 1000, litre: 1000, litres: 1000, liter: 1000, liters: 1000, pint: 568, pints: 568, pt: 568 }[m[3]];
+  const amount = parseFloat(m[2]) * mult, count = m[1] ? parseInt(m[1], 10) : 1;
+  const grams = /^(kg|g)$/.test(m[3]);
+  const num = (n) => String(Math.round(n * 100) / 100);
+  let one;
+  const pints = Math.round(amount / 568);
+  if (!grams && pints >= 1 && pints <= 8 && Math.abs(amount - pints * 568) <= pints * 6) one = `${pints} ${pints === 1 ? 'pint' : 'pints'}`;
+  else if (amount >= 1000) one = grams ? `${num(amount / 1000)}kg` : `${num(amount / 1000)} ${amount === 1000 ? 'litre' : 'litres'}`;
+  else one = `${num(amount)}${grams ? 'g' : 'ml'}`;
+  return { label: count > 1 ? `${count} × ${one}` : one, sort: amount * count + (count > 1 ? 0.5 : 0) };
+}
+function setSearchSize(q, label) {
+  const k = q.toLowerCase();
+  SEARCH_SIZE.set(k, label);
+  SEARCH_SHOWN.delete(k);
+  render();
+}
 function showMore(q) {
   const k = q.toLowerCase(), s = SEARCHES.get(k);
   if (!s) return;
   const n = (SEARCH_SHOWN.get(k) || searchStep()) + searchStep();
   SEARCH_SHOWN.set(k, n);
-  if (n + searchStep() > s.products.length && s.page < s.pages && !s.loading) runSearch(q, true);
+  const size = SEARCH_SIZE.get(k) || '';
+  const have = size ? s.products.filter(p => (sizeInfo(p.quantity) || {}).label === size).length : s.products.length;
+  if (n + searchStep() > have && s.page < s.pages && !s.loading) runSearch(q, true);
   render();
 }
 function viewSearch(params) {
@@ -1313,8 +1340,22 @@ function viewSearch(params) {
   if (!s || (!s.products && !s.error)) { runSearch(q); return `<h1>Results for “${esc(q)}” at ${esc(storeName())}</h1><p class="hint">Finding products ${esc(storeName())} sells…</p>${skeletonTiles(searchStep())}`; }
   if (s.error && !s.products) return `<h1>Results for “${esc(q)}” at ${esc(storeName())}</h1><div class="notice err">${esc(s.error)}</div><button class="btn" onclick="SEARCHES.delete('${esc(q.toLowerCase())}');render()">Try again</button>`;
   const cols = gridColumns();
-  let shown = Math.min(SEARCH_SHOWN.get(q.toLowerCase()) || searchStep(), s.products.length);
-  const more = shown < s.products.length || s.page < s.pages;
+  // Size filter: the sizes found so far, smallest first (only when there's a choice).
+  const sizeMap = new Map();
+  for (const p of s.products) { const si = sizeInfo(p.quantity); if (si && !sizeMap.has(si.label)) sizeMap.set(si.label, si.sort); }
+  const sizeList = [...sizeMap].sort((a, b) => a[1] - b[1]).map(([label]) => label);
+  let size = SEARCH_SIZE.get(q.toLowerCase()) || '';
+  if (size && !sizeMap.has(size)) size = '';
+  const list = size ? s.products.filter(p => (sizeInfo(p.quantity) || {}).label === size) : s.products;
+  const qs = esc(JSON.stringify(q));
+  const sizeChips = sizeList.length > 1 ? `<div class="chips size-chips" role="group" aria-label="Filter by size">
+      <button type="button" class="chip${size ? '' : ' active'}" onclick="setSearchSize(${qs}, '')">All sizes</button>
+      ${sizeList.map(l => `<button type="button" class="chip${l === size ? ' active' : ''}" onclick="setSearchSize(${qs}, ${esc(JSON.stringify(l))})">${esc(l)}</button>`).join('')}
+    </div>` : '';
+  let shown = Math.min(SEARCH_SHOWN.get(q.toLowerCase()) || searchStep(), list.length);
+  const more = shown < list.length || s.page < s.pages;
+  // Picked a size and fewer of it loaded than a page: fetch more in the background.
+  if (size && list.length < searchStep() && s.page < s.pages && !s.loading) setTimeout(() => runSearch(q, true), 0);
   // Keep rows full while there are more products to come; only the very end
   // of the results may leave a part-filled row.
   if (more && shown > cols && shown % cols) shown -= shown % cols;
@@ -1322,9 +1363,11 @@ function viewSearch(params) {
   const waiting = s.loading && shown >= s.products.length;
   return `
     <h1>Results for “${esc(q)}” at ${esc(storeName())}</h1>
+    ${sizeChips}
     ${s.products.length
-      ? `<p class="hint">Showing ${plural(shown, 'product', 'products')} · pay on delivery</p>
-         <div class="grid">${s.products.slice(0, shown).map(p => tile(p, true)).join('')}</div>
+      ? `<p class="hint">Showing ${plural(shown, 'product', 'products')}${size ? ` in ${esc(size)}` : ''} · pay on delivery</p>
+         <div class="grid">${list.slice(0, shown).map(p => tile(p, true)).join('')}</div>
+         ${size && !list.length ? `<p class="hint" style="text-align:center">${s.loading ? `Looking for more ${esc(size)}…` : `No more ${esc(size)} found.`}</p>` : ''}
          ${more ? `<div style="text-align:center;margin-top:18px"><button class="btn ghost" ${waiting ? 'disabled' : ''} onclick="showMore(${esc(JSON.stringify(q))})">${waiting ? 'Loading…' : 'Load more'}</button></div>` : ''}`
       : `<div class="empty"><div class="icon">${icon('search')}</div><p>Nothing found at ${esc(storeName())}. Try a shorter or different word, or <a href="#/store">pick another supermarket</a>.</p></div>`}`;
 }
